@@ -73,8 +73,9 @@ Alternativa al compose + immagine su ghcr: Portainer clona il repository e costr
    Compose path `docker-compose.portainer.yml`.
 3. Environment variables: `POSTGRES_PASSWORD` (obbligatoria; senza, il deploy si ferma con un messaggio).
 4. Facoltativo: *GitOps updates* (polling) per ricostruire quando il ramo cambia; altrimenti *Pull and redeploy* a mano.
-5. *Deploy the stack*. Il container dell'app esegue `node scripts/db-init.mjs && node server.js`: lo schema è creato
-   (idempotente, solo `create ... if not exists`) a ogni avvio, poi parte il server. L'app è su porta `3005` dell'host.
+5. *Deploy the stack*. Il container dell'app esegue `node scripts/db-init.mjs && node server.js`: a ogni avvio applica
+   lo schema (idempotente, solo `create ... if not exists`) e le migrazioni di `db/migrazioni/` (idempotenti: un
+   database vecchio viene convertito, uno già aggiornato resta com'è), poi parte il server. L'app è su porta `3005` dell'host.
 
 HTTPS: nel reverse proxy punta `prenota.hsdscp.duckdns.org` a `http://IP-HOMELAB:3005` con Let's Encrypt. Il proxy deve
 inoltrare l'header `Host` originale (le Server Action di Next confrontano `Origin` e `Host`) e `X-Forwarded-Proto`.
@@ -111,5 +112,23 @@ Ripristino su un database vuoto:
 
 1. sul proprio computer `npm run docker:deploy`;
 2. sull'homelab `docker compose pull && docker compose up -d`;
-3. se lo schema è cambiato, applicare la migrazione prima di riavviare l'app (nessun sistema di migrazioni: vedi
-   [Database](08-database.md)).
+3. le migrazioni dello schema partono da sole all'avvio del container (`db-init`, vedi [Database](08-database.md)).
+   Prima di un aggiornamento che cambia lo schema conviene un backup.
+
+## Copiare i dati dal computer all'homelab
+
+Per portare in produzione i dati inseriti in locale (locali, opere con tariffe, eventi, prenotazioni). **Utenti e
+sessioni non si copiano**: in produzione gli utenti si creano da `/primo-accesso` / Admin → Utenti, e le prenotazioni
+copiate perdono «creata da». Il database di arrivo deve essere già allo schema attuale (basta che l'app aggiornata
+sia partita almeno una volta).
+
+1. Sul computer: `npm run -s db:esporta > dati.sql` (legge `DATABASE_URL` da `.env.local`). Il file contiene nomi e
+   telefoni dei clienti: non metterlo nel repository e cancellarlo dopo l'uso.
+2. Copiarlo sull'homelab (es. `scp dati.sql homelab:/tmp/`).
+3. Sull'homelab, backup e poi caricamento in una transazione:
+   `docker exec prenota-db pg_dump -U prenota prenota | gzip > /percorso/prima-della-copia.sql.gz`
+   `docker exec -i prenota-db psql -U prenota -v ON_ERROR_STOP=1 prenota < /tmp/dati.sql`
+   Se qualcosa non va, la transazione si annulla e il database resta com'era.
+4. Ripetibile: le righe già presenti (stesso id) si saltano. Controllare in app che gli eventi abbiano lo stesso
+   numero di prenotazioni e persone che in locale, poi cancellare `dati.sql`.
+

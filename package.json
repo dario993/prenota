@@ -10,6 +10,7 @@
     "test": "vitest run",
     "db:init": "node --env-file=.env.local scripts/db-init.mjs",
     "crea-admin": "node --env-file=.env.local scripts/crea-admin.mjs",
+    "db:esporta": "sh scripts/esporta-dati.sh",
     "docker:build": "docker build --platform linux/amd64 -t ghcr.io/dario993/prenota:latest .",
     "docker:push": "docker push ghcr.io/dario993/prenota:latest",
     "docker:deploy": "npm run docker:build && npm run docker:push"

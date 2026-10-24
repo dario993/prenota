@@ -13,7 +13,8 @@ createdb prenota
 
 cp .env.example .env.local     # DATABASE_URL=postgres://localhost/prenota
 npm install
-npm run db:init                # applica db/schema.sql
+npm run db:init                # applica db/schema.sql e db/migrazioni/
+npm run -s db:esporta > dati.sql  # dati (senza utenti) da copiare in produzione, vedi 13
 npm run dev                    # http://localhost:3000: al primo accesso crea il primo admin dal browser
 ```
 
