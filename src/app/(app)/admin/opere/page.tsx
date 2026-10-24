@@ -32,8 +32,8 @@ export default async function Opere({ searchParams }: { searchParams: Promise<{ 
   const corrente = opere.find((o) => o.id === modifica);
   const azioni = (o: Opera) => (
     <>
-      <Link href={`/admin/opere?modifica=${o.id}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
-      <BottoneElimina azione={eliminaOpera.bind(null, o.id)} conferma={`Eliminare "${o.titolo}"?`} />
+      <Link href={`/admin/opere?modifica=${o.id}`} aria-label={`Modifica ${o.titolo}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
+      <BottoneElimina azione={eliminaOpera.bind(null, o.id)} conferma={`Eliminare "${o.titolo}"?`} nome={o.titolo} />
     </>
   );
   return (

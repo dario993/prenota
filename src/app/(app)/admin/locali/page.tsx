@@ -13,8 +13,8 @@ export default async function Locali({ searchParams }: { searchParams: Promise<{
   const corrente = locali.find((l) => l.id === modifica);
   const azioni = (l: Locale) => (
     <>
-      <Link href={`/admin/locali?modifica=${l.id}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
-      <BottoneElimina azione={eliminaLocale.bind(null, l.id)} conferma={`Eliminare "${l.nome}"?`} />
+      <Link href={`/admin/locali?modifica=${l.id}`} aria-label={`Modifica ${l.nome}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
+      <BottoneElimina azione={eliminaLocale.bind(null, l.id)} conferma={`Eliminare "${l.nome}"?`} nome={l.nome} />
     </>
   );
   return (
