@@ -1,6 +1,6 @@
 # 11. Interfaccia e stile
 
-> Stato: da implementare
+> Stato: fatto (guscio, navigazione, contatore e barra capienza; pulsante + e stampa arrivano con le relative pagine)
 
 ## Direzione
 
