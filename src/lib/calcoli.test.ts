@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, incassoRistorante, incassoTeatro,
-  persone, riepilogoEvento, testoElencoRistorante, type Prenotazione,
+  persone, prezziDi, riepilogoEvento, testoElencoRistorante, type Prenotazione,
 } from "./calcoli";
 
 const prezzi = { prezzo_adulto: 1500, prezzo_ridotto: 1200, prezzo_bambino: 800,
@@ -21,6 +21,13 @@ describe("calcoli", () => {
   test("2 pacchetti = +44 € teatro e +54 € ristorante", () => {
     const p = { ...prezzi, adulti: 0, ridotti: 0, bambini: 0, pacchetti: 2, omaggi: 0 };
     expect([incassoTeatro(p), incassoRistorante(p)]).toEqual([4400, 5400]);
+  });
+  test("prezziDi: tariffe congelate di una prenotazione con quantità nuove", () => {
+    const vecchia = pren({ pacchetti: 2, ristorante: "GIAMAICA", pasto: "PRANZO" });
+    const nuove = { adulti: 0, ridotti: 0, bambini: 0, pacchetti: 3, omaggi: 0 };
+    expect(Object.keys(prezziDi(vecchia))).toHaveLength(5);
+    const p = { ...prezziDi(vecchia), ...nuove };
+    expect([incassoTeatro(p), incassoRistorante(p)]).toEqual([6600, 8100]);
   });
   test("riepilogo: oltre capienza e posti liberi negativi", () => {
     const r = riepilogoEvento([pren({ ridotti: 35 }),

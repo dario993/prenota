@@ -28,6 +28,12 @@ export interface Riepilogo {
 
 export const persone = (q: Quantita): number => q.adulti + q.ridotti + q.bambini + q.pacchetti + q.omaggi;
 
+// Solo le tariffe: una Prenotazione intera, spalmata, sovrascriverebbe le quantità.
+export const prezziDi = (p: Prezzi): Prezzi => ({
+  prezzo_adulto: p.prezzo_adulto, prezzo_ridotto: p.prezzo_ridotto, prezzo_bambino: p.prezzo_bambino,
+  prezzo_pacchetto_teatro: p.prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante: p.prezzo_pacchetto_ristorante,
+});
+
 export const incassoTeatro = (p: Quantita & Prezzi): number =>
   p.adulti * p.prezzo_adulto + p.ridotti * p.prezzo_ridotto + p.bambini * p.prezzo_bambino +
   p.pacchetti * p.prezzo_pacchetto_teatro;
