@@ -27,3 +27,4 @@
 | 2026-10-24 | Avviso di capienza nel form che conta anche le prenotazioni salvate sul telefono in attesa di invio, come il riepilogo dell'evento | 5, 14 |
 | 2026-10-24 | Quantità della prenotazione scrivibili anche a mano (tastiera numerica), oltre ai pulsanti − / +: un gruppo da 35 non richiede 35 tocchi | 2, 11 |
 | 2026-10-24 | Service worker: con la rete lenta una pagina già salvata compare dopo 4 s invece di restare bianca; la risposta arrivata in ritardo aggiorna comunque la copia salvata | 10 |
+| 2026-10-24 | Login e primo accesso: `method="post"` sui form, la password non finisce mai nell'indirizzo neanche senza JavaScript; in sviluppo l'app è raggiungibile dalla rete locale (`allowedDevOrigins`); nota che in produzione il login richiede HTTPS | 9, 12, 13 |

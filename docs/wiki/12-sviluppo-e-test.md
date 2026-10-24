@@ -35,6 +35,13 @@ npm run docker:push    # pubblica su ghcr (docker:deploy = build + push)
 
 Prima di ogni commit: `npm test && npm run lint && npm run build`.
 
+### Dev dalla rete locale
+
+`next dev` blocca le risorse di sviluppo (HMR, chunk) per origini diverse da `localhost`: aprendo `http://192.168.178.151:3000`
+la pagina non si idrata. `allowedDevOrigins: ["192.168.178.*"]` in `next.config.ts` lo permette per la rete locale (cambiando
+sottorete va aggiornato; serve riavviare `npm run dev`). I form con password hanno `method="post"`: anche senza JavaScript le
+credenziali non finiscono mai nell'indirizzo.
+
 ## Test automatici
 
 Solo la logica pura (TDD):

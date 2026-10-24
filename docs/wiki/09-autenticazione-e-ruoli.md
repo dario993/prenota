@@ -8,6 +8,7 @@
 2. La password è verificata con **scrypt** (`node:crypto`, confronto a tempo costante).
 3. Si crea una riga in `sessioni` con un token casuale e una scadenza (30 giorni fissi dal login, nessun rinnovo: scaduti, si rifà il login).
 4. Il token va in un cookie **httpOnly**, `SameSite=Lax`, `Secure` in produzione.
+   In produzione il cookie è `Secure`: il login funziona solo via HTTPS, non con `http://IP:porta` (in sviluppo sì). I form di login e primo accesso usano `method="post"`, così senza JavaScript la password non finisce mai nell'URL.
 5. *Esci* cancella la riga e il cookie.
 
 Un utente **disattivato** non può accedere e perde subito l'accesso anche con una sessione aperta (la sessione è verificata nel database a ogni richiesta, filtrando gli utenti attivi). Email e password errate, o utente disattivato, danno lo stesso messaggio: "Email o password errati". L'email è normalizzata (spazi tolti, minuscolo).

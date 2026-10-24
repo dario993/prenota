@@ -65,6 +65,8 @@ Il db resta solo su `prenota-net`, non raggiungibile dal proxy.
 
 ## HTTPS
 
+In produzione il cookie di sessione è `Secure`: il login funziona solo via HTTPS (dominio pubblico), non con `http://IP:porta`.
+
 Obbligatorio: senza HTTPS non funzionano Condividi, copia negli appunti e service worker, e il cookie `Secure` non viene
 inviato (il login non entra). L'app sta dietro lo **stesso reverse proxy** usato per StageTrack, con certificato TLS:
 il proxy deve puntare a `prenota-app:3000` (se condivide la rete Docker) o a `127.0.0.1:3001`, e inoltrare gli header

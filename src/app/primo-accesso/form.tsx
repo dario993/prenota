@@ -25,7 +25,7 @@ export function FormPrimoAccesso() {
 
   return (
     <main className="flex flex-1 items-center justify-center p-4">
-      <form onSubmit={invia} className="w-full max-w-sm space-y-4">
+      <form method="post" onSubmit={invia} className="w-full max-w-sm space-y-4">
         <h1 className="text-center text-2xl font-bold text-accento">Crea il primo amministratore</h1>
         <label className="block text-sm">
           Nome
