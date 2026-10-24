@@ -20,6 +20,7 @@ o crearne un altro.
 ## Deploy
 
 Immagine Docker su ghcr (`npm run docker:deploy`) e `docker-compose.yml` sull'homelab, dietro HTTPS.
+In alternativa stack Portainer dal repository (`docker-compose.portainer.yml`).
 Dettagli in [docs/wiki/13-deploy-homelab.md](docs/wiki/13-deploy-homelab.md).
 
 ## Documentazione

@@ -63,6 +63,27 @@ networks:
 
 Il db resta solo su `prenota-net`, non raggiungibile dal proxy.
 
+## Portainer (da repository)
+
+Alternativa al compose + immagine su ghcr: Portainer clona il repository e costruisce l'immagine sull'homelab
+(`docker-compose.portainer.yml`, con `build: .`).
+
+1. Portainer → *Stacks* → *Add stack* → **Build method: Repository**.
+2. Repository URL `https://github.com/dario993/prenota`, reference `refs/heads/feat/app` (`refs/heads/main` dopo il merge),
+   Compose path `docker-compose.portainer.yml`.
+3. Environment variables: `POSTGRES_PASSWORD` (obbligatoria; senza, il deploy si ferma con un messaggio).
+4. Facoltativo: *GitOps updates* (polling) per ricostruire quando il ramo cambia; altrimenti *Pull and redeploy* a mano.
+5. *Deploy the stack*. Il container dell'app esegue `node scripts/db-init.mjs && node server.js`: lo schema è creato
+   (idempotente, solo `create ... if not exists`) a ogni avvio, poi parte il server. L'app è su porta `3005` dell'host.
+
+HTTPS: nel reverse proxy punta `prenota.hsdscp.duckdns.org` a `http://IP-HOMELAB:3005` con Let's Encrypt. Il proxy deve
+inoltrare l'header `Host` originale (le Server Action di Next confrontano `Origin` e `Host`) e `X-Forwarded-Proto`.
+
+La prima visita crea il primo admin da `/primo-accesso`: farla subito dopo il deploy.
+
+Backup, da cron sull'host:
+`docker exec prenota-db pg_dump -U prenota prenota | gzip > /percorso/prenota-$(date +%F).sql.gz`.
+
 ## HTTPS
 
 In produzione il cookie di sessione è `Secure`: il login funziona solo via HTTPS (dominio pubblico), non con `http://IP:porta`.

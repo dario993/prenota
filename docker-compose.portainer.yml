@@ -1,0 +1,43 @@
+# Portainer: Stacks -> Add stack -> Repository (Portainer clona il repository e costruisce l'immagine).
+# Variabile richiesta: POSTGRES_PASSWORD. HTTPS: reverse proxy verso http://IP-HOMELAB:3005.
+services:
+  app:
+    build: .
+    image: prenota-app:latest
+    container_name: prenota-app
+    restart: unless-stopped
+    command: ["sh", "-c", "node scripts/db-init.mjs && node server.js"]
+    environment:
+      - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}@db:5432/prenota
+    ports:
+      - "3005:3000"
+    networks:
+      - prenota-net
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    container_name: prenota-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=prenota
+      - POSTGRES_USER=prenota
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
+    volumes:
+      - prenota-db:/var/lib/postgresql/data
+    networks:
+      - prenota-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prenota -d prenota"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  prenota-db:
+
+networks:
+  prenota-net:
+    driver: bridge
