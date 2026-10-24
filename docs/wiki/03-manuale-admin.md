@@ -1,0 +1,40 @@
+# 3. Manuale admin
+
+> Stato: da implementare
+
+L'admin ha tutto ciò che ha l'operatore più la sezione **Admin** (barra in basso / menu laterale).
+Ordine consigliato per un nuovo spettacolo: **locale → opera → evento**.
+
+## Locali
+
+Nome e **capienza** (numero intero > 0, es. 105). Un locale può ospitare più eventi.
+Un locale con eventi collegati non si può eliminare.
+
+## Opere e tariffario
+
+Per ogni opera: **titolo** e tariffario (in euro):
+
+| Campo | Esempio | Note |
+|---|---|---|
+| Adulto | 15,00 € | |
+| Ridotto gruppi | 12,00 € | prezzo fisso, non dipende dalla grandezza del gruppo |
+| Bambino | 8,00 € | |
+| Pacchetto – quota teatro | 22,00 € | valore iniziale |
+| Pacchetto – quota ristorante | 27,00 € | valore iniziale |
+
+Il prezzo del pacchetto mostrato è la somma delle due quote (49 €). Cambiare il tariffario **non modifica** le
+prenotazioni già salvate (vedi [Tariffe e incassi](04-tariffe-e-incassi.md)).
+Un'opera con eventi collegati non si può eliminare.
+
+## Eventi
+
+Scegli **opera**, **locale**, **data e ora**. Un evento ha una sola opera.
+Un evento con prenotazioni non si può eliminare: prima vanno eliminate le prenotazioni.
+
+## Utenti
+
+- Crea un utente con nome, email, password iniziale e ruolo (**admin** o **operatore**).
+- **Disattiva** un utente per togliergli l'accesso (le sue prenotazioni restano).
+- Reimposta la password se qualcuno la dimentica.
+
+Il primo admin si crea dal terminale con `npm run crea-admin` (vedi [Sviluppo e test](12-sviluppo-e-test.md)).

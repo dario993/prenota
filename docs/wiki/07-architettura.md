@@ -1,0 +1,58 @@
+# 7. Architettura
+
+> Stato: da implementare
+
+## Stack
+
+| Ruolo | Pacchetto |
+|---|---|
+| Framework | Next.js 16.2.10 (App Router + Turbopack) |
+| UI runtime | React 19.2.3 + react-dom 19.2.3 (versioni esatte) |
+| Stile | Tailwind CSS v4 + @tailwindcss/postcss |
+| Dati / cache client | TanStack Query 5 + query-sync-storage-persister + react-query-persist-client (localStorage) |
+| Form | react-hook-form 7 + zod 4 |
+| Icone | lucide-react |
+| Toast | sonner |
+| Classi | clsx |
+| Database | PostgreSQL, driver `postgres` (nessun ORM) |
+| Test | Vitest (solo logica pura) |
+| Dev | TypeScript 5, ESLint 9 + eslint-config-next |
+
+Un solo progetto: interfaccia e server stanno entrambi in Next.js.
+
+## Cartelle
+
+```
+prenota/
+  src/app/                 pagine (App Router) e Server Actions
+    login/
+    eventi/[id]/           pagina evento, prenotazioni/, ristoranti/
+    admin/                 locali/, opere/, eventi/, utenti/
+    api/                   route JSON per TanStack Query + POST /api/prenotazioni (offline)
+  src/components/          componenti UI (nav, contatore, card…)
+  src/lib/db.ts            client Postgres – unico punto di accesso al database
+  src/lib/auth.ts          sessioni, hash password, controllo ruolo
+  src/lib/calcoli.ts       funzioni pure: persone, incassi, posti liberi, elenco e testo ristoranti
+  src/lib/schemi.ts        schemi zod condivisi tra form e server
+  src/proxy.ts             reindirizza a /login chi non ha sessione
+  public/sw.js             service worker (offline)
+  db/schema.sql            schema del database
+  scripts/                 db:init, crea-admin
+  docs/wiki/               questa wiki
+```
+
+## Flusso dei dati
+
+- **Lettura**: le pagine leggono tramite TanStack Query dalle route `GET /api/...`; la cache è salvata in localStorage,
+  così le liste restano visibili con rete debole o assente.
+- **Scrittura**: Server Actions (admin, modifica/eliminazione prenotazioni). La **creazione** di prenotazioni passa da
+  `POST /api/prenotazioni`, così può essere messa in coda offline (vedi [Offline](10-offline.md)).
+- Dopo ogni scrittura: `invalidateQueries` per aggiornare le liste.
+- Il server **valida sempre** con zod e controlla sessione e ruolo: il client non è fidato.
+- Errori di salvataggio → toast (sonner), il form resta compilato.
+
+## Regole di codice
+
+- Logica e calcoli in moduli TS puri e testati (`src/lib/`); i componenti li collegano soltanto.
+- Interfaccia, testi, nomi e commit in italiano.
+- Nessuna nuova dipendenza senza un motivo forte.
