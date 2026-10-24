@@ -1,6 +1,6 @@
 # 4. Tariffe e incassi
 
-> Stato: da implementare
+> Stato: logica di calcolo fatta; interfaccia da implementare
 
 ## Tipi di biglietto
 

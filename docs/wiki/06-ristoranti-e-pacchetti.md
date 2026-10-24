@@ -1,6 +1,6 @@
 # 6. Ristoranti e pacchetti
 
-> Stato: da implementare
+> Stato: logica di calcolo fatta; interfaccia da implementare
 
 ## Regole
 
@@ -16,15 +16,15 @@
 Pagina `/eventi/[id]/ristoranti`, per ciascun ristorante e pasto:
 
 ```
-CASALE – CENA – Sab 10 ottobre 2026
+CASALE – CENA – sab 10 ottobre 2026
 Opera: DOCUFILM
 Coperti: 12
 
-- ROSSI MARIO (2) – 333 1234567 – 1 celiaco
 - Gruppo Sicilia (10)
+- ROSSI MARIO (2) – 333 1234567 – 1 celiaco
 ```
 
-Sezioni senza coperti non vengono mostrate.
+Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Sezioni senza coperti non vengono mostrate.
 
 ## Condividi e stampa
 
