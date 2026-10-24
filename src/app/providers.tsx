@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Toaster } from "sonner";
-import { creaQueryClient, persister } from "@/lib/query";
+import { creaQueryClient, persister, registraMutazioni, riprendiCoda } from "@/lib/query";
 
 // Sul server (render del layout root) il persister non esiste: uno vuoto.
 const nessunPersister = {
@@ -12,12 +12,18 @@ const nessunPersister = {
 };
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [client] = useState(creaQueryClient);
+  // le mutation devono avere la loro funzione prima del ripristino da localStorage
+  const [client] = useState(() => {
+    const qc = creaQueryClient();
+    registraMutazioni(qc);
+    return qc;
+  });
   return (
     <PersistQueryClientProvider
       client={client}
-      persistOptions={{ persister: persister ?? nessunPersister, maxAge: 24 * 60 * 60 * 1000, buster: "1" }}
-      onSuccess={() => {}}
+      // maxAge infinito: un telefono rimasto spento giorni non deve perdere le prenotazioni in coda
+      persistOptions={{ persister: persister ?? nessunPersister, maxAge: Infinity, buster: "1" }}
+      onSuccess={() => riprendiCoda(client)}
     >
       {children}
       <Toaster position="top-center" richColors />

@@ -1,6 +1,6 @@
 # 2. Manuale operatore
 
-> Stato: accesso, navigazione, Prossimi eventi, Pagina evento, nuova prenotazione, modifica ed eliminazione fatti; il resto da implementare
+> Stato: fatto
 
 ## Accesso
 
@@ -46,7 +46,7 @@ In fondo vedi in tempo reale **totale persone** e **importo** (teatro, ristorant
 attuali dell'opera. Se l'evento supera la capienza compare un **avviso rosso** "Supera la capienza di N posti":
 puoi comunque salvare.
 
-Premi **Salva**: compare "Prenotazione salvata" e torni alla pagina evento. Il pulsante si disattiva durante l'invio;
+Premi **Salva**: compare "Prenotazione inviata: …" e torni alla pagina evento. Il pulsante si disattiva durante l'invio;
 anche toccandolo due volte la prenotazione viene registrata una sola volta. Se qualcosa non va (nome mancante, nessuna
 persona, ristorante o pasto non scelti) il messaggio compare sotto il campo e nulla viene perso.
 
@@ -67,10 +67,20 @@ negli appunti. **Stampa** apre la stampa del browser. Vedi [Ristoranti e pacchet
 
 ## Senza rete
 
-- Puoi **solo aggiungere** prenotazioni: vengono salvate sul telefono e compaiono con l'etichetta
-  **"in attesa di invio"**; un contatore nel menu indica quante sono.
-- Quando la rete torna vengono inviate da sole, anche se nel frattempo hai chiuso l'app.
-- Modifica ed eliminazione sono disattivate finché non torna la rete.
-- Se la sessione è scaduta ti viene chiesto di rifare il login; le prenotazioni in attesa partono subito dopo.
+- Puoi **solo aggiungere** prenotazioni. Premendo **Salva** torni subito alla pagina evento: la prenotazione è salvata
+  sul telefono, compare in elenco con l'etichetta gialla **"in attesa di invio"** e conta già nel riepilogo (con le
+  tariffe attuali dell'opera). In cima alla pagina un avviso ricorda "Salvate sul telefono, verranno inviate quando
+  torna la rete"; un numero sull'icona **Eventi** del menu indica quante sono in attesa.
+- Per aprire **Nuova prenotazione** senza rete devi aver aperto quell'evento almeno una volta con la rete.
+- Quando la rete torna vengono inviate da sole (compare "Prenotazione inviata: …"), anche se nel frattempo hai chiuso
+  l'app o spento il telefono: basta riaprirla. Non vengono mai inviate due volte.
+- Modifica ed eliminazione richiedono la rete: senza rete toccando una prenotazione compare "Serve la rete per
+  modificare una prenotazione"; se eri già nella pagina di modifica, i pulsanti sono disattivati con la scritta
+  "Serve la rete".
+- **Sessione scaduta**: compare "Accedi di nuovo per inviare le prenotazioni in attesa" con il pulsante **Accedi**, che
+  apre il login in una nuova scheda. Dopo il login le prenotazioni in attesa partono da sole (entro mezzo minuto).
+- **Invio rifiutato** (per esempio l'evento è stato cancellato nel frattempo): la prenotazione diventa rossa,
+  **"non inviata"**, con il motivo, e compare anche in cima alla home in **Prenotazioni non inviate**; il numero sul
+  menu diventa rosso. Non sparisce mai da sola: copia i dati se servono, poi premi **Scarta**.
 
 Dettagli tecnici: [Offline](10-offline.md).

@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { Contatore } from "@/components/Contatore";
-import { getJson, inviaPrenotazione } from "@/lib/query";
+import { getJson, useOnline, CHIAVE_NUOVA } from "@/lib/query";
 import { schemaPrenotazione, type DatiPrenotazione } from "@/lib/schemi";
 import {
   persone, prezziDi, incassoTeatro, incassoRistorante, riepilogoEvento, formattaEuro,
@@ -75,20 +75,30 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
     for (const k of [["evento", eventoId], ["eventi"], ["provenienze"]]) qc.invalidateQueries({ queryKey: k });
     router.push(`/eventi/${eventoId}`);
   };
-  const nuova = useMutation({
-    mutationKey: ["nuova-prenotazione"],
-    mutationFn: inviaPrenotazione,
-    onSuccess: () => fatto("Prenotazione salvata"),
-    onError: (e) => {
-      inCorso.current = false;
-      toast.error(e.message);
-    },
-  });
+  const online = useOnline();
+  // funzione, toast e aggiornamento dell'elenco stanno in registraMutazioni: valgono anche dopo un riavvio
+  const nuova = useMutation<{ id: string }, Error, DatiPrenotazione>({ mutationKey: CHIAVE_NUOVA });
+  const inCoda = () => {
+    toast.info("Salvata sul telefono, verrà inviata quando torna la rete");
+    router.push(`/eventi/${eventoId}`);
+  };
+  // primo invio fallito (rete che non risponde, sessione scaduta, errore del server): la prenotazione
+  // resta in coda e riprova da sola, il form non deve restare bloccato ad aspettare
+  const fallita = nuova.failureCount > 0;
+  useEffect(() => {
+    if (fallita) inCoda();
+  }, [fallita]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function salva(d: DatiPrenotazione) {
     if (inCorso.current) return;
     inCorso.current = true;
-    if (!iniziale) return void nuova.mutate(d);
+    if (!iniziale) {
+      // senza rete la mutation va in pausa e non chiama né onSuccess né onError: si torna subito all'evento
+      const senzaRete = !onlineManager.isOnline();
+      nuova.mutate(d, { onSuccess: () => router.push(`/eventi/${eventoId}`) });
+      if (senzaRete) inCoda();
+      return;
+    }
     const r = await modificaPrenotazione(d).catch(() => ({ errore: "Rete non disponibile" }));
     inCorso.current = false;
     if ("errore" in r) toast.error(r.errore);
@@ -113,6 +123,7 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
   const altre = riepilogoEvento(data.prenotazioni.filter((p) => p.id !== id), data.evento.capienza);
   const oltre = altre.persone + persone(q) - data.evento.capienza;
   const occupato = isSubmitting || nuova.isPending || eliminando;
+  const bloccata = !!iniziale && !online; // modifica ed eliminazione richiedono la rete
 
   return (
     <main className="mx-auto max-w-2xl p-4 lg:p-8">
@@ -190,11 +201,11 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
 
         <div className="flex gap-3">
           {iniziale && (
-            <button type="button" onClick={elimina} disabled={occupato}
+            <button type="button" onClick={elimina} disabled={occupato || bloccata}
               className="rounded-lg border border-red-300 px-4 py-3 font-medium text-red-700 disabled:opacity-60">Elimina</button>
           )}
-          <button type="submit" disabled={occupato}
-            className="flex-1 rounded-lg bg-accento p-3 font-medium text-white hover:bg-accento-scuro disabled:opacity-60">Salva</button>
+          <button type="submit" disabled={occupato || bloccata}
+            className="flex-1 rounded-lg bg-accento p-3 font-medium text-white hover:bg-accento-scuro disabled:opacity-60">{bloccata ? "Serve la rete" : "Salva"}</button>
         </div>
       </form>
     </main>

@@ -1,0 +1,13 @@
+{
+  "name": "Prenota",
+  "short_name": "Prenota",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "lang": "it",
+  "icons": [
+    { "src": "/icona-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icona.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

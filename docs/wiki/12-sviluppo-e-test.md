@@ -54,10 +54,17 @@ Solo la logica pura (TDD):
 
 ### Offline
 
-- [ ] DevTools → Network "Offline" → aggiungi 2 prenotazioni → compaiono "in attesa di invio".
-- [ ] Ricarica la pagina → sono ancora lì.
-- [ ] Modifica / elimina disattivati.
-- [ ] Torna online → inviate; nel database una sola riga per ciascuna.
+Solo con `npm run build && npm start` (il service worker non è attivo in sviluppo). Prima apri con la rete la home e
+l'evento.
+
+- [ ] DevTools → Network "Offline" → aggiungi 2 prenotazioni → torni subito all'evento, compaiono "in attesa di
+  invio", numero 2 sul menu.
+- [ ] Ricarica la pagina → si apre lo stesso e sono ancora lì.
+- [ ] Modifica / elimina disattivati ("Serve la rete").
+- [ ] Torna online → "Prenotazione inviata", numero sparito; nel database una sola riga per ciascuna.
+- [ ] Ripeti chiudendo la scheda mentre sei offline e riaprendola online → inviate una volta.
+- [ ] Sessione scaduta (cancella le righe in `sessioni` mentre sei offline, poi torna online) → "Accedi di nuovo…";
+  dopo il login l'invio parte da solo.
 
 ## Workflow git
 
