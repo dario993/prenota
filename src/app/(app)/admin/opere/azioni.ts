@@ -26,7 +26,8 @@ export async function salvaOpera(fd: FormData): Promise<Esito> {
       values (${d.titolo}, ${d.prezzo_adulto}, ${d.prezzo_ridotto}, ${d.prezzo_bambino},
       ${d.prezzo_pacchetto_teatro}, ${d.prezzo_pacchetto_ristorante})`;
     }
-  } catch {
+  } catch (e) {
+    console.error(e);
     return { errore: ERRORE_IMPREVISTO };
   }
   revalidatePath("/admin/opere");
@@ -42,6 +43,7 @@ export async function eliminaOpera(id: string): Promise<Esito> {
   } catch (e) {
     if ((e as { code?: string }).code === "23503")
       return { errore: "Impossibile eliminare: ci sono eventi collegati" };
+    console.error(e);
     return { errore: ERRORE_IMPREVISTO };
   }
   revalidatePath("/admin/opere");

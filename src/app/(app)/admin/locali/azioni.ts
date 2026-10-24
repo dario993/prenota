@@ -19,7 +19,8 @@ export async function salvaLocale(fd: FormData): Promise<Esito> {
     } else {
     await sql`insert into locali (nome, capienza) values (${dati.data.nome}, ${dati.data.capienza})`;
     }
-  } catch {
+  } catch (e) {
+    console.error(e);
     return { errore: ERRORE_IMPREVISTO };
   }
   revalidatePath("/admin/locali");
@@ -35,6 +36,7 @@ export async function eliminaLocale(id: string): Promise<Esito> {
   } catch (e) {
     if ((e as { code?: string }).code === "23503")
       return { errore: "Impossibile eliminare: ci sono eventi collegati" };
+    console.error(e);
     return { errore: ERRORE_IMPREVISTO };
   }
   revalidatePath("/admin/locali");

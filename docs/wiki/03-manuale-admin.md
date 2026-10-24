@@ -1,6 +1,6 @@
 # 3. Manuale admin
 
-> Stato: locali e opere fatti; eventi e utenti da implementare
+> Stato: fatto (locali, opere, eventi, utenti)
 
 L'admin ha tutto ciò che ha l'operatore più la sezione **Admin** (barra in basso / menu laterale).
 Ordine consigliato per un nuovo spettacolo: **locale → opera → evento**.
@@ -32,13 +32,17 @@ Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo
 
 ## Eventi
 
-Scegli **opera**, **locale**, **data e ora**. Un evento ha una sola opera.
-Un evento con prenotazioni non si può eliminare: prima vanno eliminate le prenotazioni.
+Da **Admin → Eventi**: scegli **opera**, **locale**, **data e ora** (ora italiana, qualunque sia il fuso del server). Un evento ha una sola opera.
+L'elenco è ordinato per data; **Modifica** ricarica il modulo con i dati dell'evento.
+Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci sono prenotazioni»): prima vanno eliminate le prenotazioni.
 
 ## Utenti
 
-- Crea un utente con nome, email, password iniziale e ruolo (**admin** o **operatore**).
-- **Disattiva** un utente per togliergli l'accesso (le sue prenotazioni restano).
-- Reimposta la password se qualcuno la dimentica.
+Da **Admin → Utenti**:
+
+- Crea un utente con nome, email, password iniziale (almeno 8 caratteri, obbligatoria) e ruolo (**admin** o **operatore**). L'email è unica («Email già in uso») e viene salvata in minuscolo.
+- **Modifica** cambia nome, email e ruolo; la password si cambia solo se compilata, altrimenti resta invariata (così si reimposta quella dimenticata).
+- **Disattiva** toglie l'accesso subito, anche a chi è già collegato (le sue prenotazioni restano); **Attiva** lo ripristina.
+- Non puoi disattivare né declassare te stesso, così c'è sempre almeno un admin.
 
 Il primo admin si crea dal terminale con `npm run crea-admin` (vedi [Sviluppo e test](12-sviluppo-e-test.md)).
