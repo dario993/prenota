@@ -6,7 +6,7 @@ eventi, prenotazioni con pacchetti ristorante (Giamaica / Casale). Multi utente 
 **Documentazione completa: [docs/wiki/README.md](docs/wiki/README.md)** – leggerla prima di modificare l'app.
 Design: `docs/superpowers/specs/2026-10-24-prenota-design.md`.
 
-Stato: wiki scritta, codice non ancora iniziato.
+Stato: scaffold Next.js fatto, funzionalità da implementare.
 
 ## Regole del progetto
 

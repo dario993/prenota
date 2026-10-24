@@ -1,8 +1,10 @@
 # 12. Sviluppo e test
 
-> Stato: da implementare (comandi definitivi dopo lo scaffold)
+> Stato: scaffold fatto (Task 1); test e comandi `db:init` / `crea-admin` attivi man mano che i task li implementano
 
 ## Setup locale (macOS, senza Docker)
+
+Richiede Node 20 (`node --env-file` per gli script `.mjs`) e npm 10. Le variabili stanno in `.env.local` (non versionato).
 
 ```bash
 brew install postgresql@17
@@ -20,9 +22,12 @@ npm run dev                    # http://localhost:3000
 
 ```bash
 npm run dev      # sviluppo (Turbopack)
-npm test         # Vitest
+npm run start    # server di produzione (output standalone)
+npm test         # Vitest (vitest run)
 npm run lint     # ESLint
 npm run build    # build di produzione
+npm run db:init  # node --env-file=.env.local scripts/db-init.mjs
+npm run crea-admin  # node --env-file=.env.local scripts/crea-admin.mjs
 ```
 
 Prima di ogni commit: `npm test && npm run lint && npm run build`.
