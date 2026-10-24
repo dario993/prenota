@@ -90,6 +90,10 @@ produzione (`npm run build && npm start`): in sviluppo servirebbe file vecchi.
 - **Rete prima**: se risponde 200 la copia va in cache; se la rete manca si usa la copia salvata, e per una pagina mai
   vista la home (`/`). Redirect (es. verso il login) e errori non vengono salvati, quindi login e logout con la rete
   funzionano sempre dal server.
+- **Rete lenta** (c'è ma non risponde): per le pagine (navigazioni) dopo **4 s** (`ATTESA_RETE` in `sw.js`) si mostra
+  la copia salvata (o la home), se esiste; se non c'è nulla in cache si continua ad aspettare la rete. La risposta
+  della rete, se arriva dopo, viene comunque salvata in cache per la volta successiva. I file statici non hanno attesa
+  massima.
 - Senza rete la navigazione interna di Next fallisce e Next ripiega su una navigazione normale, che il service worker
   serve dalla cache.
 - La pagina evento, quando c'è rete, scarica in sottofondo sé stessa (`/eventi/{id}`) e
