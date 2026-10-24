@@ -27,7 +27,7 @@ export function Nav({ admin, inAttesa, esci }: { admin: boolean; inAttesa?: numb
   return (
     <nav
       aria-label="Principale"
-      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] lg:static lg:h-screen lg:w-60 lg:flex-col lg:gap-1 lg:border-r lg:border-t-0 lg:p-3 lg:pb-3 print:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:flex-col lg:gap-1 lg:border-r lg:border-t-0 lg:p-3 lg:pb-3 print:hidden"
     >
       <span className="hidden px-3 py-4 text-lg font-bold text-accento lg:block">Prenota</span>
       {voci.map((v) => (

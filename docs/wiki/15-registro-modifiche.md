@@ -9,3 +9,4 @@
 | 2026-10-24 | Schema database, hash password scrypt e script `db:init` / `crea-admin` | 8, 12 |
 | 2026-10-24 | Login con sessione (cookie + tabella `sessioni`, 30 giorni fissi), protezione pagine con `proxy.ts`, controlli di ruolo admin/operatore | 9 |
 | 2026-10-24 | Guscio app: navigazione responsive (barra in basso / menu laterale), provider con cache locale, toast, componenti Contatore e Barra capienza | 11 |
+| 2026-10-24 | Admin: pagina indice, gestione locali (nome, capienza) e opere (titolo, tariffario) con modifica ed eliminazione protetta; menu laterale fisso anche su pagine lunghe | 3 |
