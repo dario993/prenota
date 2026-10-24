@@ -80,13 +80,14 @@ export async function ciSonoUtenti(): Promise<boolean> {
   return r.e;
 }
 
-// Crea il primo admin solo se la tabella utenti è vuota. Il lock esclusivo
-// serializza due invii simultanei: il secondo vede l'utente del primo.
+// Crea il primo admin solo se la tabella utenti è vuota. Il controllo iniziale evita hash e lock
+// quando ci sono già utenti; il lock esclusivo serializza due invii simultanei: il secondo vede l'utente del primo.
 export async function creaPrimoAdmin(d: {
   nome: string;
   email: string;
   password: string;
 }): Promise<boolean> {
+  if (await ciSonoUtenti()) return false;
   const hash = await hashPassword(d.password);
   const id = await sql.begin(async (tx) => {
     await tx`lock table utenti in exclusive mode`;

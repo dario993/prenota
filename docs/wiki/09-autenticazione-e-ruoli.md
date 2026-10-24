@@ -27,12 +27,12 @@ Un utente **disattivato** non può accedere e perde subito l'accesso anche con u
 | Locali, opere, eventi | no | sì |
 | Utenti | no | sì |
 
-Un operatore che apre `/admin/...` o chiama un'azione admin riceve "non autorizzato".
+Un operatore che apre una pagina `/admin/...` viene riportato alla home (`/`); se chiama direttamente un'azione admin, l'azione viene rifiutata con "Non autorizzato".
 
 ## Primo admin
 
 Non ci sono credenziali predefinite. Finché il database non ha nessun utente, `/` e `/login` portano a `/primo-accesso`, dove si crea il primo admin (nome, email, password di almeno 8 caratteri, conferma password) e si entra subito nell'app. Appena esiste un utente, `/primo-accesso` rimanda a `/login`.
 
-La creazione è protetta anche lato server: l'azione inserisce l'utente solo se la tabella è vuota, con un blocco della tabella, così un invio diretto a database non vuoto è rifiutato e due invii simultanei creano un solo utente.
+La creazione è protetta anche lato server: se ci sono già utenti l'azione si ferma subito (senza calcolare l'hash della password né bloccare la tabella); altrimenti inserisce l'utente solo se la tabella è vuota, con un blocco della tabella, così un invio diretto a database non vuoto è rifiutato e due invii simultanei creano un solo utente.
 
 `npm run crea-admin` (legge `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NOME` dall'ambiente) resta per il recupero: reimposta la password di un admin o ne crea un altro.

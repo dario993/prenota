@@ -21,3 +21,4 @@
 | 2026-10-24 | Backup sicuro (file temporaneo verificato, retention solo dopo successo), compose con password obbligatoria e porta solo su localhost | 13 |
 | 2026-10-24 | Primo accesso obbligatorio: con database senza utenti l'app porta a `/primo-accesso` per creare il primo admin (nessuna credenziale predefinita); `crea-admin` resta per il recupero | 3, 9, 12, 13 |
 | 2026-10-24 | Errore sugli importi delle opere che indica il campo sbagliato (es. «Importo non valido: Bambino») | 3 |
+| 2026-10-24 | Primo accesso: con utenti già presenti la richiesta è rifiutata subito, senza calcolare la password né bloccare la tabella; wiki corretta sul comportamento di un operatore sulle pagine admin (torna alla home) | 9 |
