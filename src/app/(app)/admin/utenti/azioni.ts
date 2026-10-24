@@ -8,21 +8,32 @@ import { schemaUtente } from "@/lib/schemi";
 import { z } from "zod";
 import { ERRORE_IMPREVISTO, type Esito } from "@/lib/esito";
 
+// true se `id` è un admin attivo e non ce ne sono altri.
+async function ultimoAdmin(id: string): Promise<boolean> {
+  const [r] = await sql<{ ultimo: boolean }[]>`
+    select exists(select 1 from utenti where id = ${id} and ruolo = 'admin' and attivo)
+      and not exists(select 1 from utenti where id <> ${id} and ruolo = 'admin' and attivo) as ultimo`;
+  return r.ultimo;
+}
+
 export async function salvaUtente(fd: FormData): Promise<Esito> {
   const me = await verificaAdmin();
   const dati = schemaUtente.safeParse(Object.fromEntries(fd));
   if (!dati.success) return { errore: dati.error.issues[0].message };
   const d = dati.data;
-  const id = z.uuid().safeParse(fd.get("id"));
+  const id = z.uuid().transform((v) => v.toLowerCase()).safeParse(fd.get("id"));
   if (id.success && id.data === me.id && d.ruolo !== "admin")
     return { errore: "Non puoi declassare te stesso" };
   if (!id.success && !d.password) return { errore: "Password obbligatoria (almeno 8 caratteri)" };
   try {
+    if (id.success && d.ruolo !== "admin" && (await ultimoAdmin(id.data)))
+      return { errore: "Deve restare almeno un admin attivo" };
     const hash = d.password ? await hashPassword(d.password) : null;
     if (id.success) {
       const r = await sql`update utenti set nome = ${d.nome}, email = ${d.email}, ruolo = ${d.ruolo},
         password_hash = coalesce(${hash}::text, password_hash) where id = ${id.data}`;
       if (r.count === 0) return { errore: "Utente non trovato" };
+      if (hash) await sql`delete from sessioni where utente_id = ${id.data}`;
     } else {
       await sql`insert into utenti (nome, email, password_hash, ruolo) values (${d.nome}, ${d.email}, ${hash}, ${d.ruolo})`;
     }
@@ -37,10 +48,11 @@ export async function salvaUtente(fd: FormData): Promise<Esito> {
 
 export async function attivaUtente(id: string, attivo: boolean): Promise<Esito> {
   const me = await verificaAdmin();
-  const uuid = z.uuid().safeParse(id);
+  const uuid = z.uuid().transform((v) => v.toLowerCase()).safeParse(id);
   if (!uuid.success) return { errore: "Utente non valido" };
   if (!attivo && uuid.data === me.id) return { errore: "Non puoi disattivare te stesso" };
   try {
+    if (!attivo && (await ultimoAdmin(uuid.data))) return { errore: "Deve restare almeno un admin attivo" };
     const r = await sql`update utenti set attivo = ${attivo} where id = ${uuid.data}`;
     if (r.count === 0) return { errore: "Utente non trovato" };
     if (!attivo) await sql`delete from sessioni where utente_id = ${uuid.data}`;

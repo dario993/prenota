@@ -55,24 +55,32 @@ export function FormAzione({
   );
 }
 
+// Bottone d'azione con conferma opzionale; di default è "Elimina" (rosso).
 export function BottoneElimina({
-  azione, conferma, nome,
-}: { azione: () => Promise<Esito>; conferma: string; nome: string }) {
+  azione, conferma, nome, etichetta = "Elimina", successo = "Eliminato", variante = "pericolo",
+}: {
+  azione: () => Promise<Esito>;
+  conferma?: string;
+  nome: string;
+  etichetta?: string;
+  successo?: string;
+  variante?: "pericolo" | "normale";
+}) {
   const router = useRouter();
   const [pending, avvia] = useTransition();
   return (
     <button
       type="button"
       disabled={pending}
-      aria-label={`Elimina ${nome}`}
-      className="min-h-11 px-3 text-sm text-red-600 hover:underline disabled:opacity-60"
+      aria-label={`${etichetta} ${nome}`}
+      className={`min-h-11 px-3 text-sm hover:underline disabled:opacity-60 ${variante === "pericolo" ? "text-red-600" : "text-accento"}`}
       onClick={() => {
-        if (!confirm(conferma)) return;
+        if (conferma && !confirm(conferma)) return;
         avvia(async () => {
           try {
             const r = await azione();
             if ("errore" in r) return void toast.error(r.errore);
-            toast.success("Eliminato");
+            toast.success(successo);
             router.refresh();
           } catch {
             toast.error(ERRORE_IMPREVISTO);
@@ -80,7 +88,7 @@ export function BottoneElimina({
         });
       }}
     >
-      Elimina
+      {etichetta}
     </button>
   );
 }

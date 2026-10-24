@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { classeInput, FormAzione } from "@/components/FormAzione";
+import { BottoneElimina, classeInput, FormAzione } from "@/components/FormAzione";
 import { attivaUtente, salvaUtente } from "./azioni";
-import { BottoneAttiva } from "./BottoneAttiva";
 
 type U = { id: string; nome: string; email: string; ruolo: "admin" | "operatore"; attivo: boolean };
 
@@ -15,7 +14,14 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
   const azioni = (u: U) => (
     <>
       <Link href={`/admin/utenti?modifica=${u.id}`} aria-label={`Modifica ${u.nome}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
-      {u.id !== me.id && <BottoneAttiva azione={attivaUtente.bind(null, u.id, !u.attivo)} attivo={u.attivo} nome={u.nome} />}
+      {u.id !== me.id && <BottoneElimina
+        azione={attivaUtente.bind(null, u.id, !u.attivo)}
+        conferma={u.attivo ? `Disattivare "${u.nome}"? Perderà subito l'accesso.` : undefined}
+        nome={u.nome}
+        etichetta={u.attivo ? "Disattiva" : "Attiva"}
+        successo={u.attivo ? "Disattivato" : "Attivato"}
+        variante={u.attivo ? "pericolo" : "normale"}
+      />}
     </>
   );
   return (
