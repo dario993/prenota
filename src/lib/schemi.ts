@@ -9,10 +9,10 @@ const quantita = z.coerce
   .min(0, "Non può essere negativo")
   .max(10000, "Valore troppo alto");
 const email = z.string().trim().toLowerCase().pipe(z.email("Email non valida"));
-const importo = z.string().transform((v, ctx) => {
+const importo = (campo: string) => z.string().transform((v, ctx) => {
   const c = euroInCentesimi(v);
   if (c === null || c > 10_000_000) {
-    ctx.addIssue({ code: "custom", message: "Importo non valido" });
+    ctx.addIssue({ code: "custom", message: `Importo non valido: ${campo}` });
     return 0;
   }
   return c;
@@ -57,11 +57,11 @@ export const schemaLocale = z.object({
 
 export const schemaOpera = z.object({
   titolo: testo(120),
-  prezzo_adulto: importo,
-  prezzo_ridotto: importo,
-  prezzo_bambino: importo,
-  prezzo_pacchetto_teatro: importo,
-  prezzo_pacchetto_ristorante: importo,
+  prezzo_adulto: importo("Adulto"),
+  prezzo_ridotto: importo("Ridotto gruppi"),
+  prezzo_bambino: importo("Bambino"),
+  prezzo_pacchetto_teatro: importo("Pacchetto quota teatro"),
+  prezzo_pacchetto_ristorante: importo("Pacchetto quota ristorante"),
 });
 
 export const schemaEvento = z.object({

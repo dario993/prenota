@@ -45,7 +45,9 @@ test("schemaOpera converte euro", () => {
   const p = { titolo: "Amleto", prezzo_adulto: "15", prezzo_ridotto: "10", prezzo_bambino: "5,5", prezzo_pacchetto_teatro: "22,00", prezzo_pacchetto_ristorante: "27" };
   expect(schemaOpera.parse(p)).toMatchObject({ prezzo_adulto: 1500, prezzo_bambino: 550, prezzo_pacchetto_teatro: 2200, prezzo_pacchetto_ristorante: 2700 });
   const r = schemaOpera.safeParse({ ...p, prezzo_adulto: "abc" });
-  expect(r.error!.issues[0].message).toBe("Importo non valido");
+  expect(r.error!.issues[0].message).toBe("Importo non valido: Adulto");
+  const b = schemaOpera.safeParse({ ...p, prezzo_pacchetto_ristorante: "-1" });
+  expect(b.error!.issues[0].message).toBe("Importo non valido: Pacchetto quota ristorante");
 });
 
 test("schemaLogin normalizza email", () => {
@@ -107,5 +109,5 @@ test("schemaLocale: capienza", () => {
 
 test("schemaOpera rifiuta importi enormi", () => {
   const p = { titolo: "A", prezzo_adulto: "100001", prezzo_ridotto: "1", prezzo_bambino: "1", prezzo_pacchetto_teatro: "1", prezzo_pacchetto_ristorante: "1" };
-  expect(schemaOpera.safeParse(p).error!.issues[0].message).toBe("Importo non valido");
+  expect(schemaOpera.safeParse(p).error!.issues[0].message).toBe("Importo non valido: Adulto");
 });

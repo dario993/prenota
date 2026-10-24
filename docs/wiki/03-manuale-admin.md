@@ -28,7 +28,7 @@ Il prezzo del pacchetto mostrato è la somma delle due quote (49 €). Cambiare 
 prenotazioni già salvate (vedi [Tariffe e incassi](04-tariffe-e-incassi.md)).
 Un'opera con eventi collegati non si può eliminare.
 
-Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo o valori negativi vengono rifiutati con «Importo non valido». Nel modulo di una nuova opera le quote del pacchetto sono già compilate (22,00 e 27,00). L'elenco mostra le tariffe e il pacchetto totale; le stesse pagine si usano da **Admin → Opere**.
+Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo o valori negativi vengono rifiutati con «Importo non valido» seguito dal campo sbagliato (es. «Importo non valido: Bambino»). Nel modulo di una nuova opera le quote del pacchetto sono già compilate (22,00 e 27,00). L'elenco mostra le tariffe e il pacchetto totale; le stesse pagine si usano da **Admin → Opere**.
 
 ## Eventi
 

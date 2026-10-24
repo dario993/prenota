@@ -20,3 +20,4 @@
 | 2026-10-24 | Immagine Docker (standalone su node:22-alpine), docker-compose con Postgres, script di backup, script npm docker:*; wiki rifinita (stati, decisioni) | 7, 12, 13, 14, README |
 | 2026-10-24 | Backup sicuro (file temporaneo verificato, retention solo dopo successo), compose con password obbligatoria e porta solo su localhost | 13 |
 | 2026-10-24 | Primo accesso obbligatorio: con database senza utenti l'app porta a `/primo-accesso` per creare il primo admin (nessuna credenziale predefinita); `crea-admin` resta per il recupero | 3, 9, 12, 13 |
+| 2026-10-24 | Errore sugli importi delle opere che indica il campo sbagliato (es. «Importo non valido: Bambino») | 3 |

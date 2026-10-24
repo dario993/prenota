@@ -14,10 +14,10 @@ export async function salvaLocale(fd: FormData): Promise<Esito> {
   const id = z.uuid().safeParse(fd.get("id"));
   try {
     if (id.success) {
-    const r = await sql`update locali set nome = ${dati.data.nome}, capienza = ${dati.data.capienza} where id = ${id.data}`;
+      const r = await sql`update locali set nome = ${dati.data.nome}, capienza = ${dati.data.capienza} where id = ${id.data}`;
       if (r.count === 0) return { errore: "Locale non trovato" };
     } else {
-    await sql`insert into locali (nome, capienza) values (${dati.data.nome}, ${dati.data.capienza})`;
+      await sql`insert into locali (nome, capienza) values (${dati.data.nome}, ${dati.data.capienza})`;
     }
   } catch (e) {
     console.error(e);

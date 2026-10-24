@@ -15,16 +15,16 @@ export async function salvaOpera(fd: FormData): Promise<Esito> {
   const id = z.uuid().safeParse(fd.get("id"));
   try {
     if (id.success) {
-    const r = await sql`update opere set titolo = ${d.titolo}, prezzo_adulto = ${d.prezzo_adulto},
-      prezzo_ridotto = ${d.prezzo_ridotto}, prezzo_bambino = ${d.prezzo_bambino},
-      prezzo_pacchetto_teatro = ${d.prezzo_pacchetto_teatro},
-      prezzo_pacchetto_ristorante = ${d.prezzo_pacchetto_ristorante} where id = ${id.data}`;
+      const r = await sql`update opere set titolo = ${d.titolo}, prezzo_adulto = ${d.prezzo_adulto},
+        prezzo_ridotto = ${d.prezzo_ridotto}, prezzo_bambino = ${d.prezzo_bambino},
+        prezzo_pacchetto_teatro = ${d.prezzo_pacchetto_teatro},
+        prezzo_pacchetto_ristorante = ${d.prezzo_pacchetto_ristorante} where id = ${id.data}`;
       if (r.count === 0) return { errore: "Opera non trovata" };
     } else {
-    await sql`insert into opere (titolo, prezzo_adulto, prezzo_ridotto, prezzo_bambino,
-      prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante)
-      values (${d.titolo}, ${d.prezzo_adulto}, ${d.prezzo_ridotto}, ${d.prezzo_bambino},
-      ${d.prezzo_pacchetto_teatro}, ${d.prezzo_pacchetto_ristorante})`;
+      await sql`insert into opere (titolo, prezzo_adulto, prezzo_ridotto, prezzo_bambino,
+        prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante)
+        values (${d.titolo}, ${d.prezzo_adulto}, ${d.prezzo_ridotto}, ${d.prezzo_bambino},
+        ${d.prezzo_pacchetto_teatro}, ${d.prezzo_pacchetto_ristorante})`;
     }
   } catch (e) {
     console.error(e);
