@@ -25,3 +25,4 @@
 | 2026-10-24 | Deploy: esempio compose per collegare l'app alla rete Docker del proxy esistente (senza porta pubblicata); README e note sviluppo: `crea-admin` solo per il recupero | 13, README |
 | 2026-10-24 | Eventi passati raggiungibili: sezione chiusa "Eventi passati" in home (dal più recente) e titolo cliccabile in Admin → Eventi; senza rete e senza dati salvati compare "Serve la rete per caricare i dati la prima volta" invece di un caricamento infinito | 2, 3, 7, 10 |
 | 2026-10-24 | Avviso di capienza nel form che conta anche le prenotazioni salvate sul telefono in attesa di invio, come il riepilogo dell'evento | 5, 14 |
+| 2026-10-24 | Quantità della prenotazione scrivibili anche a mano (tastiera numerica), oltre ai pulsanti − / +: un gruppo da 35 non richiede 35 tocchi | 2, 11 |

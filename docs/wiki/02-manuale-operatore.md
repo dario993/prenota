@@ -39,7 +39,9 @@ Tutto in una schermata:
 
 1. **Cognome Nome** (obbligatorio) – anche un nome di gruppo, es. "Gruppo Sicilia".
 2. **Telefono** (facoltativo).
-3. **Quantità** con pulsanti − / +: adulti, ridotti gruppi, bambini, pacchetti, omaggi. Almeno una deve essere > 0.
+3. **Quantità** con pulsanti − / + oppure scrivendo il numero nel campo (comodo per i gruppi, es. 35): adulti, ridotti
+   gruppi, bambini, pacchetti, omaggi. Toccando il campo il numero si seleziona e si sostituisce; campo vuoto = 0,
+   solo numeri interi da 0 a 10000. Almeno una deve essere > 0. I totali si aggiornano mentre scrivi.
 4. Se **pacchetti > 0** compare la sezione ristorante: scegli **Giamaica** o **Casale**, poi **pranzo** o **cena**
    (entrambi obbligatori).
 5. **Posti prenotati** – testo libero, es. `K1-4, L5`.

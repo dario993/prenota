@@ -30,7 +30,8 @@ La navigazione è **un solo componente**: cambia solo il CSS (classi responsive)
 
 ## Componenti principali
 
-- **Contatore** − / + per le quantità (bersagli grandi, almeno 44 px, adatti al pollice).
+- **Contatore** per le quantità: pulsanti − / + e in mezzo un campo numerico (`type="number"`, tastiera numerica,
+  0–10000, vuoto = 0, decimali troncati, contenuto selezionato al tocco); pulsanti e campo alti almeno 44 px.
 - **Barra capienza**: blu, rossa oltre capienza.
 - **Pulsante +** flottante (telefono) / pulsante in alto (desktop) per la nuova prenotazione.
 - **Toast** (sonner) per conferme ed errori.
