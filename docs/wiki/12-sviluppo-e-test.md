@@ -1,6 +1,6 @@
 # 12. Sviluppo e test
 
-> Stato: scaffold fatto (Task 1); test e comandi `db:init` / `crea-admin` attivi man mano che i task li implementano
+> Stato: scaffold, database e script di setup fatti; i comandi `db:init` e `crea-admin` sono attivi
 
 ## Setup locale (macOS, senza Docker)
 

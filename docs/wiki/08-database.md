@@ -1,6 +1,6 @@
 # 8. Database
 
-> Stato: da implementare
+> Stato: fatto
 
 PostgreSQL. Schema in `db/schema.sql`, applicato con `npm run db:init`. Importi in **centesimi** (`integer`).
 
