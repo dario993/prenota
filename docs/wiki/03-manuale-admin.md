@@ -1,6 +1,6 @@
 # 3. Manuale admin
 
-> Stato: fatto (locali, opere, eventi, utenti)
+> Stato: fatto
 
 L'admin ha tutto ciò che ha l'operatore più la sezione **Admin** (barra in basso / menu laterale).
 Ordine consigliato per un nuovo spettacolo: **locale → opera → evento**.

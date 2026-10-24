@@ -29,12 +29,21 @@
 | scrypt di `node:crypto` | nessuna dipendenza in più | – |
 | Eliminazione definitiva, nessuno storico | semplicità | se servono audit o annullamento |
 | Telefono aggiunto | presente nel foglio | – |
+| Sessione fissa di 30 giorni dal login, senza rinnovo | semplice e prevedibile | se serve una scadenza per inattività |
+| Data/ora evento: `::text::timestamp at time zone 'Europe/Rome'` in SQL | l'orario inserito resta lo stesso con il server in UTC | – |
+| Esci bloccato finché ci sono prenotazioni in coda; poi svuota i dati locali | niente perdita silenziosa, niente dati di un utente sul telefono di un altro | – |
+| Sessione scaduta con coda piena: login nella stessa scheda | la coda e il form restano; dopo il login l'invio riparte | – |
+| Errori 5xx riprovati ogni 30 s; errori 4xx → «non inviata» con Scarta | il server giù passa da solo, un rifiuto richiede una decisione | se servono tentativi limitati o notifiche |
+| Vitest 3 e `@hookform/resolvers` 5 | compatibili con npm 10 e con i vincoli di peer dependency di zod 4 / Node 20 | aggiornare quando si passa a Node 22 in locale |
+| Immagine su `node:22-alpine`, locale su Node 20 | l'immagine è libera dal vincolo locale; gli script sono `.mjs` e girano su entrambi | allineare le versioni |
+| Nessun sistema di migrazioni: `schema.sql` idempotente | un solo schema, pochi utenti | alla prima modifica dello schema in produzione |
 
 ## Limiti noti
 
 - Offline: niente modifica/eliminazione; l'avviso capienza offline può essere impreciso.
 - Nessun controllo di sovrapposizione dei posti.
 - Gli incassi sono previsti, non registrati.
+- Il `docker build` non è stato eseguito durante lo sviluppo (Docker assente sul computer di sviluppo): primo build da verificare sull'homelab.
 
 ## Roadmap (non pianificata)
 

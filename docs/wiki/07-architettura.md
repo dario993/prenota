@@ -1,6 +1,6 @@
 # 7. Architettura
 
-> Stato: in costruzione; route di lettura `GET /api/eventi`, `GET /api/eventi/[id]` e `GET /api/provenienze` fatte
+> Stato: fatto
 
 ## Stack
 
@@ -37,7 +37,8 @@ prenota/
   src/proxy.ts             reindirizza a /login chi non ha sessione
   public/sw.js             service worker (offline)
   db/schema.sql            schema del database
-  scripts/                 db:init, crea-admin
+  scripts/                 db-init, crea-admin, backup.sh
+  Dockerfile, docker-compose.yml   immagine e deploy (vedi [Deploy homelab](13-deploy-homelab.md))
   docs/wiki/               questa wiki
 ```
 

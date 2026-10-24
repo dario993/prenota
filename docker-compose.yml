@@ -1,0 +1,41 @@
+# Homelab: l'HTTPS lo fa il reverse proxy esistente (stesso di StageTrack), che punta a prenota-app:3000
+# (stessa rete Docker) oppure alla porta pubblicata qui sotto.
+services:
+  app:
+    image: ghcr.io/dario993/prenota:latest
+    container_name: prenota-app
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD}@db:5432/prenota
+    ports:
+      - "3001:3000"
+    networks:
+      - prenota-net
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    container_name: prenota-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=prenota
+      - POSTGRES_USER=prenota
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - prenota-db:/var/lib/postgresql/data
+    networks:
+      - prenota-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prenota -d prenota"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  prenota-db:
+
+networks:
+  prenota-net:
+    driver: bridge

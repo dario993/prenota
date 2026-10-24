@@ -1,6 +1,6 @@
 # 1. Panoramica
 
-> Stato: da implementare
+> Stato: fatto
 
 ## Cos'è
 

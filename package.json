@@ -9,7 +9,10 @@
     "lint": "eslint",
     "test": "vitest run",
     "db:init": "node --env-file=.env.local scripts/db-init.mjs",
-    "crea-admin": "node --env-file=.env.local scripts/crea-admin.mjs"
+    "crea-admin": "node --env-file=.env.local scripts/crea-admin.mjs",
+    "docker:build": "docker build --platform linux/amd64 -t ghcr.io/dario993/prenota:latest .",
+    "docker:push": "docker push ghcr.io/dario993/prenota:latest",
+    "docker:deploy": "npm run docker:build && npm run docker:push"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

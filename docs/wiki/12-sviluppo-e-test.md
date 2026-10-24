@@ -1,10 +1,10 @@
 # 12. Sviluppo e test
 
-> Stato: scaffold, database e script di setup fatti; i comandi `db:init` e `crea-admin` sono attivi
+> Stato: fatto
 
 ## Setup locale (macOS, senza Docker)
 
-Richiede Node 20 (`node --env-file` per gli script `.mjs`) e npm 10. Le variabili stanno in `.env.local` (non versionato).
+Richiede Node 20 (`node --env-file` per gli script `.mjs`) e npm 10 (per questo Vitest 3 e `@hookform/resolvers` 5). Le variabili stanno in `.env.local` (non versionato).
 
 ```bash
 brew install postgresql@17
@@ -28,6 +28,8 @@ npm run lint     # ESLint
 npm run build    # build di produzione
 npm run db:init  # node --env-file=.env.local scripts/db-init.mjs
 npm run crea-admin  # node --env-file=.env.local scripts/crea-admin.mjs
+npm run docker:build   # immagine ghcr.io/dario993/prenota:latest (linux/amd64)
+npm run docker:push    # pubblica su ghcr (docker:deploy = build + push)
 ```
 
 Prima di ogni commit: `npm test && npm run lint && npm run build`.
@@ -37,7 +39,11 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 Solo la logica pura (TDD):
 
 - `src/lib/calcoli.test.ts` – persone, incasso teatro/ristorante, posti liberi, elenco e testo ristoranti;
-- `src/lib/schemi.test.ts` – validazione (almeno una quantità, ristorante e pasto obbligatori con pacchetti).
+- `src/lib/schemi.test.ts` – validazione (almeno una quantità, ristorante e pasto obbligatori con pacchetti);
+- `src/lib/password.test.ts` – hash e verifica password;
+- altri test accanto ai moduli di `src/lib/` e dei componenti con logica.
+
+I controlli nel browser sono manuali: la checklist qui sotto.
 
 ## Checklist nel browser
 
