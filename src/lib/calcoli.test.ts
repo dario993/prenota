@@ -57,6 +57,15 @@ describe("calcoli", () => {
     expect(euroInCentesimi("abc")).toBeNull(); expect(euroInCentesimi("-1")).toBeNull();
     expect(euroInCentesimi("1,234")).toBeNull();
   });
+  test("euroInCentesimi senza errori di virgola mobile", () => {
+    expect(euroInCentesimi("1.15")).toBe(115); expect(euroInCentesimi("0,29")).toBe(29);
+  });
+  test("riepilogo evento vuoto", () => {
+    const r = riepilogoEvento([], 105);
+    expect(r.persone).toBe(0); expect(r.postiLiberi).toBe(105); expect(r.oltreCapienza).toBe(false);
+    expect(r.ristoranti.CASALE).toEqual({ PRANZO: 0, CENA: 0, incasso: 0 });
+    expect(r.ristoranti.GIAMAICA).toEqual({ PRANZO: 0, CENA: 0, incasso: 0 });
+  });
   test("formattaEuro", () => expect(formattaEuro(4900).replace(/\s/g, " ")).toBe("49,00 €"));
   test("formattaDataOra usa Europe/Rome", () =>
     expect(formattaDataOra(new Date("2026-11-07T20:00:00Z"))).toContain("21:00"));
