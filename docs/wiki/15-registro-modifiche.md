@@ -22,3 +22,4 @@
 | 2026-10-24 | Primo accesso obbligatorio: con database senza utenti l'app porta a `/primo-accesso` per creare il primo admin (nessuna credenziale predefinita); `crea-admin` resta per il recupero | 3, 9, 12, 13 |
 | 2026-10-24 | Errore sugli importi delle opere che indica il campo sbagliato (es. «Importo non valido: Bambino») | 3 |
 | 2026-10-24 | Primo accesso: con utenti già presenti la richiesta è rifiutata subito, senza calcolare la password né bloccare la tabella; wiki corretta sul comportamento di un operatore sulle pagine admin (torna alla home) | 9 |
+| 2026-10-24 | Deploy: esempio compose per collegare l'app alla rete Docker del proxy esistente (senza porta pubblicata); README e note sviluppo: `crea-admin` solo per il recupero | 13, README |

@@ -10,9 +10,12 @@ createdb prenota
 cp .env.example .env.local
 npm install
 npm run db:init
-ADMIN_EMAIL=... ADMIN_NOME=... ADMIN_PASSWORD=... npm run crea-admin
 npm run dev
 ```
+
+Con il database vuoto l'app, al primo accesso, chiede di creare il primo admin. `npm run crea-admin`
+(`ADMIN_EMAIL=... ADMIN_NOME=... ADMIN_PASSWORD=...`) serve solo per il recupero: reimpostare la password di un admin
+o crearne un altro.
 
 ## Deploy
 

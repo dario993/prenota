@@ -17,7 +17,7 @@ zod 4, Postgres con driver `postgres` (nessun ORM), Vitest. Node 20 in locale, `
 ```bash
 npm run dev | build | start | test | lint
 npm run db:init           # schema (usa .env.local)
-npm run crea-admin        # ADMIN_EMAIL, ADMIN_NOME, ADMIN_PASSWORD
+npm run crea-admin        # solo recupero (il primo admin si crea da /primo-accesso): ADMIN_EMAIL, ADMIN_NOME, ADMIN_PASSWORD
 npm run docker:deploy     # build linux/amd64 + push su ghcr.io/dario993/prenota
 ```
 

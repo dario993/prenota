@@ -41,6 +41,28 @@ Al primo accesso dal browser l'app chiede di creare il primo admin: non serve pi
 
 `db-init` si può rilanciare: lo schema usa `if not exists` (i messaggi NOTICE «already exists» sono normali).
 
+### Rete del proxy esistente
+
+Se il reverse proxy gira in Docker con una sua rete (es. `proxy`), si collega l'app a quella rete e il proxy punta a
+`prenota-app:3000`. In questo caso la porta pubblicata non serve: togliere il blocco `ports` dal servizio `app`.
+
+```yaml
+services:
+  app:
+    # ports: rimosso, ci arriva il proxy dalla rete condivisa
+    networks:
+      - prenota-net
+      - proxy
+
+networks:
+  prenota-net:
+    driver: bridge
+  proxy:
+    external: true   # rete già creata dal proxy (nome da verificare con `docker network ls`)
+```
+
+Il db resta solo su `prenota-net`, non raggiungibile dal proxy.
+
 ## HTTPS
 
 Obbligatorio: senza HTTPS non funzionano Condividi, copia negli appunti e service worker, e il cookie `Secure` non viene
@@ -51,8 +73,8 @@ il proxy deve puntare a `prenota-app:3000` (se condivide la rete Docker) o a `12
 ## Backup
 
 `scripts/backup.sh` (da lanciare sull'homelab nella cartella del compose) esegue
-`docker compose exec -T db pg_dump -U prenota prenota | gzip > backups/prenota-AAAA-MM-GG.sql.gz` scrive prima in un file temporaneo, lo
-verifica (gzip valido e non vuoto) e solo allora lo rinomina; i file più vecchi di 30 giorni si cancellano solo dopo un
+`docker compose exec -T db pg_dump -U prenota prenota | gzip` e salva il risultato in `backups/prenota-AAAA-MM-GG.sql.gz`.
+Scrive prima in un file temporaneo, lo verifica (gzip valido e non vuoto) e solo allora lo rinomina; i file più vecchi di 30 giorni si cancellano solo dopo un
 backup riuscito. Se il dump fallisce lo script esce con errore (visibile nel log di cron) e non tocca i backup esistenti. Cron d'esempio, ogni notte alle 03:00:
 
 ```
