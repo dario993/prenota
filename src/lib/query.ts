@@ -15,7 +15,9 @@ export const persister =
     : createSyncStoragePersister({ storage: window.localStorage, key: "prenota-cache" });
 
 export async function getJson<T>(url: string): Promise<T> {
-  const r = await fetch(url);
+  const r = await fetch(url).catch(() => {
+    throw new Error("Rete non disponibile");
+  });
   if (r.status === 401) {
     window.location.href = "/login";
     throw new Error("Sessione scaduta");

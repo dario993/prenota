@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ordinaPerNome, persone, NOMI_RISTORANTI, NOMI_PASTI,
   type Prenotazione,
@@ -16,6 +17,7 @@ const ristorante = (p: Prenotazione) =>
   p.pacchetti && p.ristorante && p.pasto ? `${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : "";
 
 export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: string; prenotazioni: Prenotazione[] }) {
+  const router = useRouter();
   const [cerca, setCerca] = useState("");
   const q = cerca.trim().toLowerCase();
   const lista = ordinaPerNome(prenotazioni).filter((p) => p.cognome_nome.toLowerCase().includes(q));
@@ -38,23 +40,23 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
         ))}
       </ul>
       {lista.length > 0 && (
-        <table className="hidden w-full rounded-lg border border-gray-200 bg-white text-sm lg:table">
+        <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white lg:block"><table className="w-full text-sm">
           <thead className="text-left text-gray-500">
             <tr>{["Nome", "Adulti", "Ridotti", "Bambini", "Pacchetti", "Omaggi", "Ristorante", "Posti", "Note", "Totale"].map((c) => (
-              <th key={c} className="p-2 font-medium">{c}</th>))}</tr>
+              <th key={c} scope="col" className="p-2 font-medium">{c}</th>))}</tr>
           </thead>
           <tbody>
             {lista.map((p) => (
-              <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
+              <tr key={p.id} onClick={() => router.push(href(p))} className="cursor-pointer border-t border-gray-100 hover:bg-gray-50">
                 <td className="p-2 font-semibold"><Link href={href(p)} className="hover:text-accento">{p.cognome_nome}</Link></td>
                 <td className="p-2">{p.adulti}</td><td className="p-2">{p.ridotti}</td><td className="p-2">{p.bambini}</td>
                 <td className="p-2">{p.pacchetti}</td><td className="p-2">{p.omaggi}</td>
-                <td className="p-2">{ristorante(p)}</td><td className="p-2">{p.posti}</td><td className="p-2">{p.note}</td>
+                <td className="p-2">{ristorante(p)}</td><td className="p-2">{p.posti}</td><td className="max-w-48 p-2 break-words">{p.note}</td>
                 <td className="p-2 font-semibold">{persone(p)}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
     </section>
   );

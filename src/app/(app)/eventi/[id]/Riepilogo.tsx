@@ -18,7 +18,7 @@ export function Riepilogo({ prenotazioni, capienza }: { prenotazioni: Prenotazio
       <BarraCapienza persone={r.persone} capienza={r.capienza} />
       <dl className="mt-3 grid grid-cols-5 gap-1 text-center">
         {tipi.map(([n, v]) => (
-          <div key={n}><dt className="text-xs text-gray-500">{n}</dt><dd className="font-semibold">{v}</dd></div>
+          <div key={n}><dt className="text-[11px] text-gray-500">{n}</dt><dd className="font-semibold">{v}</dd></div>
         ))}
       </dl>
       {RISTORANTI.some((k) => r.ristoranti[k].PRANZO + r.ristoranti[k].CENA > 0) && (
