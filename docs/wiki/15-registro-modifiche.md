@@ -29,3 +29,4 @@
 | 2026-10-24 | Service worker: con la rete lenta una pagina già salvata compare dopo 4 s invece di restare bianca; la risposta arrivata in ritardo aggiorna comunque la copia salvata | 10 |
 | 2026-10-24 | Login e primo accesso: `method="post"` sui form, la password non finisce mai nell'indirizzo neanche senza JavaScript; in sviluppo l'app è raggiungibile dalla rete locale (`allowedDevOrigins`); nota che in produzione il login richiede HTTPS | 9, 12, 13 |
 | 2026-10-24 | Deploy: `docker-compose.portainer.yml` per uno stack Portainer da repository Git (build sull'homelab, porta 3005, schema creato all'avvio); istruzioni nella wiki | 13, README |
+| 2026-10-24 | Elenco prenotazioni: telefono del cliente visibile (scheda su telefono, colonna cliccabile su desktop) e ricerca anche per numero | 2 |

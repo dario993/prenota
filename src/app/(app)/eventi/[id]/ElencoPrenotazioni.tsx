@@ -21,7 +21,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
   const online = useOnline();
   const [cerca, setCerca] = useState("");
   const q = cerca.trim().toLowerCase();
-  const lista = ordinaPerNome(prenotazioni).filter((p) => p.cognome_nome.toLowerCase().includes(q));
+  const lista = ordinaPerNome(prenotazioni).filter((p) => p.cognome_nome.toLowerCase().includes(q) || p.telefono.includes(q));
   const href = (p: Prenotazione) => `/eventi/${eventoId}/prenotazioni/${p.id}`;
   // senza rete la modifica non è possibile: non si apre nemmeno la pagina
   const apri = (e: React.MouseEvent) => {
@@ -34,7 +34,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
     <StatoInAttesa p={{ stato: p.stato, errore: p.errore, mutationId: p.mutationId, cognome_nome: p.cognome_nome }} />;
   return (
     <section aria-label="Prenotazioni">
-      <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca per nome" aria-label="Cerca per nome"
+      <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca per nome o telefono" aria-label="Cerca per nome o telefono"
         className="mb-3 w-full rounded-lg border border-gray-300 bg-white px-3 py-2" />
       {lista.length === 0 && <p className="text-gray-500">{prenotazioni.length ? "Nessun risultato" : "Nessuna prenotazione"}</p>}
       <ul className="grid gap-2 lg:hidden">
@@ -44,6 +44,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
               <div className="rounded-lg border border-dashed border-amber-300 bg-white p-3">
                 <div className="font-semibold">{p.cognome_nome}</div>
                 <div className="text-sm">{sigla(p)}</div>
+                {p.telefono && <div className="text-sm text-gray-600">Tel: {p.telefono}</div>}
                 {p.posti && <div className="text-sm text-gray-600">Posti: {p.posti}</div>}
                 {p.note && <div className="text-sm text-gray-600">{p.note}</div>}
                 {statoDi(p)}
@@ -52,6 +53,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
               <Link href={href(p)} onClick={apri} className="block rounded-lg border border-gray-200 bg-white p-3 hover:border-accento">
                 <div className="font-semibold">{p.cognome_nome}</div>
                 <div className="text-sm">{sigla(p)}</div>
+                {p.telefono && <div className="text-sm text-gray-600">Tel: {p.telefono}</div>}
                 {p.posti && <div className="text-sm text-gray-600">Posti: {p.posti}</div>}
                 {p.note && <div className="text-sm text-gray-600">{p.note}</div>}
               </Link>
@@ -62,7 +64,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
       {lista.length > 0 && (
         <div className="hidden overflow-x-auto rounded-lg border border-gray-200 bg-white lg:block"><table className="w-full text-sm">
           <thead className="text-left text-gray-500">
-            <tr>{["Nome", "Adulti", "Ridotti", "Bambini", "Pacchetti", "Omaggi", "Ristorante", "Posti", "Note", "Totale"].map((c) => (
+            <tr>{["Nome", "Telefono", "Adulti", "Ridotti", "Bambini", "Pacchetti", "Omaggi", "Ristorante", "Posti", "Note", "Totale"].map((c) => (
               <th key={c} scope="col" className="p-2 font-medium">{c}</th>))}</tr>
           </thead>
           <tbody>
@@ -74,6 +76,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
                 <td className="p-2 font-semibold">
                   {p.in_attesa ? <>{p.cognome_nome} {statoDi(p)}</> : <Link href={href(p)} onClick={apri} className="hover:text-accento">{p.cognome_nome}</Link>}
                 </td>
+                <td className="p-2 whitespace-nowrap">{p.telefono && <a href={`tel:${p.telefono.replace(/[^\d+]/g, "")}`} className="hover:text-accento">{p.telefono}</a>}</td>
                 <td className="p-2">{p.adulti}</td><td className="p-2">{p.ridotti}</td><td className="p-2">{p.bambini}</td>
                 <td className="p-2">{p.pacchetti}</td><td className="p-2">{p.omaggi}</td>
                 <td className="p-2">{ristorante(p)}</td><td className="p-2">{p.posti}</td><td className="max-w-48 p-2 break-words">{p.note}</td>

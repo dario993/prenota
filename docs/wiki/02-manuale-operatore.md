@@ -26,9 +26,10 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
 
 - **Riepilogo** in alto (su desktop affiancato all'elenco): persone prenotate, posti liberi, quantità per tipo,
   coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
-- **Elenco prenotazioni** in ordine alfabetico, con campo di **ricerca** per nome.
+- **Elenco prenotazioni** in ordine alfabetico, con campo di **ricerca** per nome o numero di telefono.
   Telefono: una scheda per prenotazione, con le quantità in sigla (A adulti, R ridotti, B bambini, P pacchetti con
-  ristorante e pasto, O omaggi). Desktop: tabella (nome, quantità, ristorante, posti, note, totale persone).
+  ristorante e pasto, O omaggi) e il telefono del cliente. Desktop: tabella (nome, telefono cliccabile per chiamare,
+  quantità, ristorante, posti, note, totale persone).
   Tocca una prenotazione per aprirla. I posti liberi diventano rossi se superi la capienza (la prenotazione non viene bloccata).
 - Pulsante **+** per una nuova prenotazione; link **Ristoranti** per gli elenchi da inviare.
 - Se l'evento non esiste compare "Evento non trovato".
