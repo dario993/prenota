@@ -20,6 +20,10 @@ export async function getJson<T>(url: string): Promise<T> {
     window.location.href = "/login";
     throw new Error("Sessione scaduta");
   }
-  if (!r.ok) throw new Error((await r.text()) || `Errore ${r.status}`);
+  if (!r.ok) {
+    const corpo: unknown = await r.json().catch(() => null);
+    const errore = (corpo as { errore?: unknown } | null)?.errore;
+    throw new Error(typeof errore === "string" ? errore : "Errore imprevisto, riprova");
+  }
   return r.json() as Promise<T>;
 }
