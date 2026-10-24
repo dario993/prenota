@@ -11,18 +11,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   try {
     const [evento] = await sql`
       select e.id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
-             o.prezzo_adulto, o.prezzo_ridotto, o.prezzo_bambino,
-             o.prezzo_pacchetto_teatro, o.prezzo_pacchetto_ristorante
+             o.prezzo_pacchetto_teatro, o.prezzo_pacchetto_ristorante, o.pacchetto_nascosto,
+             coalesce((select json_agg(json_build_object('id', t.id, 'nome', t.nome, 'prezzo', t.prezzo,
+                         'nascosta', t.nascosta, 'ordine', t.ordine) order by t.ordine)
+                       from tariffe t where t.opera_id = o.id), '[]') as tariffe
       from eventi e
       join opere o on o.id = e.opera_id
       join locali l on l.id = e.locale_id
       where e.id = ${id.data}`;
     if (!evento) return Response.json({ errore: "Evento non trovato" }, { status: 404 });
     const prenotazioni = await sql`
-      select id, evento_id, cognome_nome, telefono, adulti, ridotti, bambini, pacchetti, omaggi,
-             ristorante, pasto, posti, provenienza, note,
-             prezzo_adulto, prezzo_ridotto, prezzo_bambino, prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante
-      from prenotazioni where evento_id = ${id.data}`;
+      select p.id, p.evento_id, p.cognome_nome, p.telefono, p.pacchetti, p.ristorante, p.pasto, p.posti, p.provenienza,
+             p.note, p.prezzo_pacchetto_teatro, p.prezzo_pacchetto_ristorante,
+             coalesce((select json_agg(json_build_object('tariffa_id', r.tariffa_id, 'quantita', r.quantita, 'prezzo', r.prezzo))
+                       from prenotazioni_tariffe r where r.prenotazione_id = p.id), '[]') as righe
+      from prenotazioni p where p.evento_id = ${id.data}`;
     const dettaglio = {
       evento: { ...evento, data_ora: new Date(evento.data_ora).toISOString() },
       prenotazioni: prenotazioni as unknown as Prenotazione[],

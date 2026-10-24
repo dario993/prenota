@@ -68,7 +68,7 @@ l'ultima che scrive vincerebbe.
 
 Una prenotazione rifiutata **non sparisce mai da sola**, nemmeno chiudendo l'app: resta finché l'operatore non la
 scarta (`mutationCache.remove`). Siccome il suo evento potrebbe non esistere più, le rifiutate compaiono anche in
-home nel riquadro **Prenotazioni non inviate** (nome, quantità, telefono, posti, note, motivo). Non contano nel
+home nel riquadro **Prenotazioni non inviate** (nome, biglietti — o solo il numero di persone se il tariffario non è più sul telefono —, telefono, posti, note, motivo). Non contano nel
 riepilogo (sul server non ci sono).
 
 ## Logout
@@ -119,3 +119,16 @@ Limiti noti:
 ## Come provarlo
 
 Vedi la checklist in [Sviluppo e test](12-sviluppo-e-test.md#offline).
+
+## Dopo l'arrivo delle tariffe per opera
+
+- Il dettaglio evento salvato sul telefono contiene il tariffario dell'opera (anche le tariffe nascoste): il modulo
+  funziona senza rete come prima. Una prenotazione in coda porta solo `tariffa_id` e quantità; i prezzi li fissa il
+  server all'arrivo, e se una tariffa nel frattempo è stata eliminata la prenotazione viene rifiutata («Tariffa non
+  valida») e resta in rosso da scartare a mano.
+- La chiave della cache del dettaglio evento è `["evento", "tariffe", id]` (`chiaveEvento` in `src/lib/query.ts`):
+  le copie salvate nel formato vecchio non vengono più lette e scadono da sole. Prenotazioni rimaste in coda nel
+  formato vecchio arrivano senza tariffe: il server le rifiuta e restano da scartare.
+- La pagina **Modifica** aspetta la rilettura dal server prima di aprire il modulo, così non si salva partendo da una
+  copia vecchia.
+

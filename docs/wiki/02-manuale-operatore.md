@@ -25,12 +25,12 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
 
 ## Pagina evento
 
-- **Riepilogo** sempre in alto, sopra l'elenco (su desktop i blocchi sono affiancati): persone prenotate, posti liberi, quantità per tipo,
+- **Riepilogo** sempre in alto, sopra l'elenco (su desktop i blocchi sono affiancati): persone prenotate, posti liberi, quantità per tariffa (solo quelle usate, anche se nel frattempo nascoste) e pacchetti,
   coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
 - **Elenco prenotazioni** in ordine alfabetico, con campo di **ricerca** per nome o numero di telefono.
-  Telefono: una scheda per prenotazione, con le quantità in sigla (A adulti, R ridotti, B bambini, P pacchetti con
-  ristorante e pasto, O omaggi) e il telefono del cliente. Desktop: tabella (nome, telefono cliccabile per chiamare,
-  quantità, ristorante, posti, note, totale persone).
+  Telefono: una scheda per prenotazione, con i biglietti in una riga (es. «2 Adulti · 1 Associato · 2 Pacchetti Casale
+  cena») e il telefono del cliente. Desktop: tabella (nome, telefono cliccabile per chiamare, biglietti, posti, note,
+  totale persone).
   Tocca una prenotazione per aprirla. Se superi la capienza i posti liberi diventano negativi (es. `−6`), evidenziati con la scritta "oltre capienza" (la prenotazione non viene bloccata).
 - Pulsante **Nuova prenotazione** (su telefono il tondo **+** fisso in basso a destra); link **Ristoranti** per gli elenchi da inviare.
 - Se l'evento non esiste compare "Evento non trovato".
@@ -43,8 +43,10 @@ Tutto in una schermata:
 
 1. **Cognome Nome** (obbligatorio) – anche un nome di gruppo, es. "Gruppo Sicilia".
 2. **Telefono** (facoltativo).
-3. **Quantità** con pulsanti − / + oppure scrivendo il numero nel campo (comodo per i gruppi, es. 35): adulti, ridotti
-   gruppi, bambini, pacchetti, omaggi. Toccando il campo il numero si seleziona e si sostituisce; campo vuoto = 0,
+3. **Quantità** con pulsanti − / + oppure scrivendo il numero nel campo (comodo per i gruppi, es. 35): un contatore
+   per ogni tariffa **visibile** dell'opera (es. Adulti, Ridotti gruppi, Omaggi, Associato), nell'ordine del
+   tariffario, con il prezzo sotto, poi **Pacchetti** (se l'admin non l'ha nascosto). In **modifica** compaiono anche
+   le tariffe nascoste che la prenotazione usa già, con il loro prezzo salvato. Toccando il campo il numero si seleziona e si sostituisce; campo vuoto = 0,
    solo numeri interi da 0 a 10000. Almeno una deve essere > 0. I totali si aggiornano mentre scrivi.
 4. Se **pacchetti > 0** compare la sezione ristorante: scegli **Giamaica** o **Casale**, poi **pranzo** o **cena**
    (entrambi obbligatori).

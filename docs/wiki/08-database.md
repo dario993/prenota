@@ -2,7 +2,7 @@
 
 > Stato: fatto
 
-PostgreSQL. Schema in `db/schema.sql`, applicato con `npm run db:init`. Importi in **centesimi** (`integer`).
+PostgreSQL. Schema (stato finale) in `db/schema.sql` e migrazioni in `db/migrazioni/`, applicati con `npm run db:init` (anche a ogni avvio del container). Importi in **centesimi** (`integer`).
 
 ## Tabelle
 
@@ -35,9 +35,20 @@ PostgreSQL. Schema in `db/schema.sql`, applicato con `npm run db:init`. Importi 
 |---|---|---|
 | id | uuid PK | |
 | titolo | text | |
-| prezzo_adulto, prezzo_ridotto, prezzo_bambino | integer | `>= 0` |
 | prezzo_pacchetto_teatro | integer | default 2200 |
 | prezzo_pacchetto_ristorante | integer | default 2700 |
+| pacchetto_nascosto | boolean | default false: il pacchetto non compare nel modulo di prenotazione |
+
+### `tariffe`
+Tariffario libero di ogni opera (il pacchetto resta sull'opera).
+| Colonna | Tipo | Note |
+|---|---|---|
+| id | uuid PK | |
+| opera_id | uuid → opere | on delete cascade |
+| nome | text | unico per opera senza distinzione di maiuscole (`tariffe_opera_nome_idx`) |
+| prezzo | integer | centesimi, `>= 0` (0 = gratuito, es. Omaggi) |
+| nascosta | boolean | non compare tra i contatori di una nuova prenotazione |
+| ordine | integer | ordine di visualizzazione |
 
 ### `eventi`
 | Colonna | Tipo | Note |
@@ -54,26 +65,43 @@ PostgreSQL. Schema in `db/schema.sql`, applicato con `npm run db:init`. Importi 
 | evento_id | uuid → eventi | on delete restrict |
 | cognome_nome | text | obbligatorio |
 | telefono | text | |
-| adulti, ridotti, bambini, pacchetti, omaggi | integer | `>= 0`, somma `> 0` |
+| pacchetti | integer | `>= 0` |
 | ristorante | text | `GIAMAICA` \| `CASALE` \| null |
 | pasto | text | `PRANZO` \| `CENA` \| null |
 | posti, provenienza, note | text | |
-| prezzo_adulto … prezzo_pacchetto_ristorante | integer | copiati dall'opera al primo salvataggio |
+| prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante | integer | copiati dall'opera al primo salvataggio |
 | creata_da | uuid → utenti | |
 | creata_il, aggiornata_il | timestamptz | |
+
+### `prenotazioni_tariffe`
+Quantità per tariffa di ogni prenotazione. PK (`prenotazione_id`, `tariffa_id`).
+| Colonna | Tipo | Note |
+|---|---|---|
+| prenotazione_id | uuid → prenotazioni | on delete cascade |
+| tariffa_id | uuid → tariffe | on delete **restrict**: una tariffa usata non si elimina (si nasconde) |
+| quantita | integer | `> 0` (le righe a 0 non si salvano) |
+| prezzo | integer | congelato: prezzo della tariffa al primo salvataggio della riga |
 
 ## Vincoli
 
 - `check ((pacchetti > 0) = (ristorante is not null and pasto is not null))` e ristorante/pasto entrambi null se
   pacchetti = 0.
-- `check (adulti + ridotti + bambini + pacchetti + omaggi > 0)`.
+- Almeno una persona per prenotazione (somma delle quantità + pacchetti `> 0`): lo garantisce la validazione zod
+  sul server, non più un check di riga.
 - Eliminare locale, opera o evento con righe collegate fallisce (`restrict`): l'app mostra un messaggio chiaro.
 - Indice su `prenotazioni(evento_id)` ed `eventi(data_ora)`.
 
 ## Migrazioni
 
-All'inizio basta `db/schema.sql`. Dalla prima modifica a un database in produzione: file numerati
-`db/migrazioni/001-....sql`, applicati in ordine.
+`db/schema.sql` descrive lo stato finale (database nuovi). Le modifiche a database esistenti stanno in file numerati
+`db/migrazioni/NNN-....sql`: `scripts/db-init.mjs` li esegue in ordine alfabetico, ciascuno in una transazione,
+**a ogni avvio**. Per questo ogni migrazione deve essere **idempotente** (controlla lo stato e non fa nulla se già
+applicata).
+
+- `001-tariffe.sql`: dai tipi fissi (adulti, ridotti, bambini, omaggi) al tariffario per opera. Crea per ogni opera
+  Adulti, Ridotti gruppi, Bambini (prezzi dell'opera) e Omaggi (0 €), copia le quantità di ogni prenotazione in
+  `prenotazioni_tariffe` con i suoi prezzi congelati, poi elimina le colonne vecchie. Si attiva solo se esiste ancora
+  `prenotazioni.adulti`.
 
 ## Backup
 

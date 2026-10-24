@@ -14,21 +14,30 @@ Da **Admin → Locali**: la pagina mostra solo l'elenco; **Nuovo locale** in alt
 
 ## Opere e tariffario
 
-Per ogni opera: **titolo** e tariffario (in euro):
+Ogni opera ha il **suo tariffario**. Da **Admin → Opere**, **Nuova opera** o **Modifica** aprono una pagina con:
 
-| Campo | Esempio | Note |
-|---|---|---|
-| Adulto | 15,00 € | |
-| Ridotto gruppi | 12,00 € | prezzo fisso, non dipende dalla grandezza del gruppo |
-| Bambino | 8,00 € | |
-| Pacchetto – quota teatro | 22,00 € | valore iniziale |
-| Pacchetto – quota ristorante | 27,00 € | valore iniziale |
+- **Titolo**.
+- **Tariffe**: una riga per tariffa con **nome**, **prezzo** e la spunta **Nascosta**; **Aggiungi tariffa** ne
+  aggiunge una, **Elimina** la toglie. L'ordine delle righe è l'ordine dei contatori quando si prenota.
+  Una nuova opera parte con Adulti, Ridotti gruppi, Bambini (da compilare) e Omaggi (0,00).
+- **Pacchetto**: quota teatro e quota ristorante (all'inizio 22,00 e 27,00) e la spunta **Nascosto**.
+  Il pacchetto costa la somma delle due quote (49 €) e resta speciale: porta ristorante e pasto.
 
-Il prezzo del pacchetto mostrato è la somma delle due quote (49 €). Cambiare il tariffario **non modifica** le
-prenotazioni già salvate (vedi [Tariffe e incassi](04-tariffe-e-incassi.md)).
+Si salva tutto con un solo **Salva**; in caso di errore non cambia nulla e i campi restano compilati.
+
+- Una tariffa **nascosta** non compare tra i contatori di una nuova prenotazione; le prenotazioni che la usano
+  restano valide, contano nel riepilogo e la mostrano anche in modifica. Serve per le tariffe che in un certo
+  periodo non si vogliono vedere (es. «Associato»).
+- Una tariffa **già usata** da almeno una prenotazione **non si può eliminare** («Impossibile eliminare «Adulti»:
+  usata da prenotazioni. Puoi nasconderla»).
+- Nomi unici nell'opera (senza badare a maiuscole); «Pacchetti» è riservato. Deve restare visibile almeno una
+  tariffa o il pacchetto.
+- Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo o valori negativi vengono
+  rifiutati con «Importo non valido» seguito dal nome della tariffa (es. «Importo non valido: Bambini»).
+- Cambiare il tariffario **non modifica** le prenotazioni già salvate (vedi [Tariffe e incassi](04-tariffe-e-incassi.md)).
+
+L'elenco delle opere mostra le tariffe con il prezzo (le nascoste in grigio con «(nascosta)») e il pacchetto.
 Un'opera con eventi collegati non si può eliminare.
-
-Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo o valori negativi vengono rifiutati con «Importo non valido» seguito dal campo sbagliato (es. «Importo non valido: Bambino»). Nel modulo di una nuova opera le quote del pacchetto sono già compilate (22,00 e 27,00). L'elenco mostra le tariffe e il pacchetto totale; le stesse pagine si usano da **Admin → Opere**.
 
 ## Eventi
 

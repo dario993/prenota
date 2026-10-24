@@ -28,13 +28,15 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 ## Mappa del codice
 
 - `src/app/` pagine e Server Action (`login/`, `(app)/eventi/[id]/`, `(app)/admin/`), `api/` route JSON e `POST /api/prenotazioni`.
-- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `password.mjs`.
-- `src/proxy.ts` reindirizza a `/login`; `public/sw.js` service worker; `db/schema.sql`; `scripts/` (db-init, crea-admin, backup.sh).
+- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `password.mjs`.
+- `src/proxy.ts` reindirizza a `/login`; `public/sw.js` service worker; `db/schema.sql` + `db/migrazioni/`; `scripts/` (db-init, crea-admin, backup.sh).
 - `Dockerfile`, `docker-compose.yml`: deploy homelab, vedi wiki 13.
 
 ## Cose da non rompere
 
 - Importi in centesimi; data/ora sempre `Europe/Rome` (il server è in UTC).
+- Tariffe per opera (`tariffe`, `prenotazioni_tariffe`) con prezzo congelato per riga; una tariffa usata non si elimina, si nasconde. Il pacchetto resta a parte.
+- Migrazioni in `db/migrazioni/`, idempotenti: `db-init` le esegue a ogni avvio.
 - Capienza: avvisa, non blocca. Offline: si possono solo aggiungere prenotazioni, mai doppioni (id UUID + `on conflict do nothing`).
 - Ogni route API e Server Action valida con zod e controlla sessione/ruolo.
 - Cookie `Secure` in produzione: serve HTTPS.

@@ -2,57 +2,49 @@ import Link from "next/link";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formattaEuro } from "@/lib/calcoli";
-import { BottoneElimina, FormAzione } from "@/components/FormAzione";
-import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin } from "@/components/stili";
+import { BottoneElimina } from "@/components/FormAzione";
+import { azioniAdmin, btnPrimario, btnSecondario, elencoAdmin, paginaAdmin, rigaAdmin } from "@/components/stili";
+import { FormOpera, type ValoriOpera } from "./FormOpera";
 import { eliminaOpera, salvaOpera } from "./azioni";
 
-type Opera = {
-  id: string; titolo: string; prezzo_adulto: number; prezzo_ridotto: number; prezzo_bambino: number;
-  prezzo_pacchetto_teatro: number; prezzo_pacchetto_ristorante: number;
-};
+type Opera = { id: string; titolo: string; prezzo_pacchetto_teatro: number; prezzo_pacchetto_ristorante: number; pacchetto_nascosto: boolean };
+type T = { id: string; opera_id: string; nome: string; prezzo: number; nascosta: boolean };
 
-const CAMPI = [
-  ["prezzo_adulto", "Adulto"],
-  ["prezzo_ridotto", "Ridotto gruppi"],
-  ["prezzo_bambino", "Bambino"],
-  ["prezzo_pacchetto_teatro", "Pacchetto – quota teatro"],
-  ["prezzo_pacchetto_ristorante", "Pacchetto – quota ristorante"],
-] as const;
-const DEFAULT: Partial<Record<(typeof CAMPI)[number][0], string>> = {
-  prezzo_pacchetto_teatro: "22,00", prezzo_pacchetto_ristorante: "27,00",
-};
 const euro = (c: number) => (c / 100).toFixed(2).replace(".", ",");
 const pacchetto = (o: Opera) => formattaEuro(o.prezzo_pacchetto_teatro + o.prezzo_pacchetto_ristorante);
+// nuova opera: il tariffario di sempre, da completare
+const NUOVA: ValoriOpera = {
+  titolo: "",
+  tariffe: [
+    { nome: "Adulti", prezzo: "", nascosta: false }, { nome: "Ridotti gruppi", prezzo: "", nascosta: false },
+    { nome: "Bambini", prezzo: "", nascosta: false }, { nome: "Omaggi", prezzo: "0,00", nascosta: false },
+  ],
+  prezzo_pacchetto_teatro: "22,00", prezzo_pacchetto_ristorante: "27,00", pacchetto_nascosto: false,
+};
 
 export default async function Opere({ searchParams }: { searchParams: Promise<{ modifica?: string; nuovo?: string }> }) {
   await richiediAdmin();
   const { modifica, nuovo } = await searchParams;
-  const opere = await sql<Opera[]>`
-    select id, titolo, prezzo_adulto, prezzo_ridotto, prezzo_bambino, prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante
-    from opere order by titolo`;
+  const [opere, tariffe] = await Promise.all([
+    sql<Opera[]>`select id, titolo, prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante, pacchetto_nascosto
+      from opere order by titolo`,
+    sql<T[]>`select id, opera_id, nome, prezzo, nascosta from tariffe order by ordine`,
+  ]);
+  const di = (o: Opera) => tariffe.filter((t) => t.opera_id === o.id);
   const corrente = opere.find((o) => o.id === modifica);
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
       <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.titolo}` : "Nuova opera"}</h1>
-      <FormAzione
-        azione={salvaOpera}
-        dopo="/admin/opere"
-        annulla="/admin/opere"
-      >
-        {corrente && <input type="hidden" name="id" value={corrente.id} />}
-        <label className={etichetta}>Titolo
-          <input name="titolo" defaultValue={corrente?.titolo} required maxLength={120} className={campo} />
-        </label>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {CAMPI.map(([nome, testo]) => (
-            <label key={nome} className={etichetta}>{testo} (€)
-              <input name={nome} inputMode="decimal" defaultValue={corrente ? euro(corrente[nome]) : DEFAULT[nome]} className={`${campo} tabular-nums`} />
-            </label>
-          ))}
-        </div>
-        {corrente && <p className="text-label">Pacchetto attuale: <span className="text-figure-sm tabular-nums">{pacchetto(corrente)}</span></p>}
-        <p className="text-caption text-ink-muted">Il pacchetto costa la somma delle due quote. Cambiare il tariffario non modifica le prenotazioni già salvate.</p>
-      </FormAzione>
+      <FormOpera
+        salva={salvaOpera.bind(null, corrente?.id ?? null)}
+        iniziale={corrente ? {
+          titolo: corrente.titolo,
+          tariffe: di(corrente).map((t) => ({ id: t.id, nome: t.nome, prezzo: euro(t.prezzo), nascosta: t.nascosta })),
+          prezzo_pacchetto_teatro: euro(corrente.prezzo_pacchetto_teatro),
+          prezzo_pacchetto_ristorante: euro(corrente.prezzo_pacchetto_ristorante),
+          pacchetto_nascosto: corrente.pacchetto_nascosto,
+        } : NUOVA}
+      />
     </main>
   );
   return (
@@ -69,7 +61,13 @@ export default async function Opere({ searchParams }: { searchParams: Promise<{ 
               <div>
                 <div className="font-semibold">{o.titolo}</div>
                 <div className="text-caption tabular-nums text-ink-muted">
-                  Adulto {formattaEuro(o.prezzo_adulto)} · Ridotto {formattaEuro(o.prezzo_ridotto)} · Bambino {formattaEuro(o.prezzo_bambino)} · Pacchetto {pacchetto(o)}
+                  {[...di(o).map((t) => ({ k: t.id, testo: `${t.nome} ${formattaEuro(t.prezzo)}`, nascosta: t.nascosta })),
+                    { k: "pacchetto", testo: `Pacchetto ${pacchetto(o)}`, nascosta: o.pacchetto_nascosto }]
+                    .map((v, i) => (
+                      <span key={v.k} className={v.nascosta ? "opacity-60" : "text-ink"}>
+                        {i > 0 && <span className="text-ink-muted"> · </span>}{v.testo}{v.nascosta && " (nascosta)"}
+                      </span>
+                    ))}
                 </div>
               </div>
               <div className={azioniAdmin}>

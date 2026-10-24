@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { schemaEvento, schemaLocale, schemaLogin, schemaOpera, schemaPrenotazione, schemaPrimoAccesso, schemaUtente } from "./schemi";
 
+const T1 = "2c9a6a8e-6f0e-4a57-8d3e-3c1f0a2b7c33", T2 = "3c9a6a8e-6f0e-4a57-8d3e-3c1f0a2b7c44";
 const base = {
   id: "0b9a6a8e-6f0e-4a57-9d3e-3c1f0a2b7c11",
   evento_id: "1c9a6a8e-6f0e-4a57-8d3e-3c1f0a2b7c22",
@@ -8,17 +9,26 @@ const base = {
   telefono: "333",
   posti: "A1",
   provenienza: "",
-  adulti: 1, ridotti: 0, bambini: 0, pacchetti: 0, omaggi: 0,
+  righe: [{ tariffa_id: T1, quantita: 1 }], pacchetti: 0,
   ristorante: null, pasto: null,
 };
 
 describe("schemaPrenotazione", () => {
-  test("serve almeno una quantità > 0", () => {
-    const r = schemaPrenotazione.safeParse({ ...base, adulti: 0 });
+  test("serve almeno una persona", () => {
+    const r = schemaPrenotazione.safeParse({ ...base, righe: [{ tariffa_id: T1, quantita: 0 }] });
     expect(r.success).toBe(false);
-    const i = r.error!.issues.find((x) => x.path[0] === "adulti");
+    const i = r.error!.issues.find((x) => x.path[0] === "righe");
     expect(i?.message).toBe("Inserisci almeno una persona");
   });
+  test("solo pacchetti basta", () =>
+    expect(schemaPrenotazione.safeParse({ ...base, righe: [], pacchetti: 2, ristorante: "CASALE", pasto: "CENA" }).success).toBe(true));
+  test("la stessa tariffa due volte è rifiutata", () => {
+    const r = schemaPrenotazione.safeParse({ ...base, righe: [{ tariffa_id: T1, quantita: 1 }, { tariffa_id: T1, quantita: 2 }] });
+    expect(r.error!.issues[0].message).toBe("Tariffa ripetuta");
+  });
+  test("le righe a 0 non si salvano", () =>
+    expect(schemaPrenotazione.parse({ ...base, righe: [{ tariffa_id: T1, quantita: 2 }, { tariffa_id: T2, quantita: 0 }] }).righe)
+      .toEqual([{ tariffa_id: T1, quantita: 2 }]));
   test("pacchetti > 0 richiede ristorante e pasto", () => {
     const a = schemaPrenotazione.safeParse({ ...base, pacchetti: 2, pasto: "CENA" });
     expect(a.error!.issues.map((x) => x.path[0])).toEqual(["ristorante"]);
@@ -35,19 +45,41 @@ describe("schemaPrenotazione", () => {
     expect(schemaPrenotazione.safeParse({ ...base, cognome_nome: "   " }).success).toBe(false);
   });
   test("quantità come stringhe (form), note di default vuote", () => {
-    const r = schemaPrenotazione.parse({ ...base, adulti: "3" });
-    expect(r.adulti).toBe(3);
+    const r = schemaPrenotazione.parse({ ...base, righe: [{ tariffa_id: T1, quantita: "3" }] });
+    expect(r.righe[0].quantita).toBe(3);
     expect(r.note).toBe("");
   });
 });
 
-test("schemaOpera converte euro", () => {
-  const p = { titolo: "Amleto", prezzo_adulto: "15", prezzo_ridotto: "10", prezzo_bambino: "5,5", prezzo_pacchetto_teatro: "22,00", prezzo_pacchetto_ristorante: "27" };
-  expect(schemaOpera.parse(p)).toMatchObject({ prezzo_adulto: 1500, prezzo_bambino: 550, prezzo_pacchetto_teatro: 2200, prezzo_pacchetto_ristorante: 2700 });
-  const r = schemaOpera.safeParse({ ...p, prezzo_adulto: "abc" });
-  expect(r.error!.issues[0].message).toBe("Importo non valido: Adulto");
-  const b = schemaOpera.safeParse({ ...p, prezzo_pacchetto_ristorante: "-1" });
-  expect(b.error!.issues[0].message).toBe("Importo non valido: Pacchetto quota ristorante");
+describe("schemaOpera", () => {
+  const opera = {
+    titolo: "Amleto",
+    tariffe: [{ nome: "Adulti", prezzo: "15", nascosta: false }, { nome: "Bambini", prezzo: "5,5", nascosta: false }],
+    prezzo_pacchetto_teatro: "22,00", prezzo_pacchetto_ristorante: "27", pacchetto_nascosto: false,
+  };
+  const conTariffe = (tariffe: { nome: string; prezzo: string; nascosta: boolean }[]) => ({ ...opera, tariffe });
+  test("converte euro in centesimi", () =>
+    expect(schemaOpera.parse(opera)).toMatchObject({
+      tariffe: [{ nome: "Adulti", prezzo: 1500 }, { nome: "Bambini", prezzo: 550 }],
+      prezzo_pacchetto_teatro: 2200, prezzo_pacchetto_ristorante: 2700,
+    }));
+  test("importo non valido indica la tariffa", () =>
+    expect(schemaOpera.safeParse(conTariffe([{ nome: "Bambini", prezzo: "abc", nascosta: false }])).error!.issues[0].message)
+      .toBe("Importo non valido: Bambini"));
+  test("importo del pacchetto non valido", () =>
+    expect(schemaOpera.safeParse({ ...opera, prezzo_pacchetto_ristorante: "-1" }).error!.issues[0].message)
+      .toBe("Importo non valido: Pacchetto quota ristorante"));
+  test("nomi uguali a parte maiuscole e spazi sono rifiutati", () =>
+    expect(schemaOpera.safeParse(conTariffe([{ nome: "Adulti", prezzo: "1", nascosta: false },
+      { nome: " adulti ", prezzo: "2", nascosta: false }])).error!.issues[0].message).toBe("Tariffa ripetuta: adulti"));
+  test("«Pacchetti» è un nome riservato", () =>
+    expect(schemaOpera.safeParse(conTariffe([{ nome: "pacchetti", prezzo: "1", nascosta: false }])).error!.issues[0].message)
+      .toBe("Nome riservato: Pacchetti"));
+  test("tutto nascosto non si salva", () =>
+    expect(schemaOpera.safeParse({ ...conTariffe([{ nome: "Adulti", prezzo: "1", nascosta: true }]), pacchetto_nascosto: true })
+      .error!.issues[0].message).toBe("Lascia visibile almeno una tariffa"));
+  test("solo il pacchetto visibile va bene", () =>
+    expect(schemaOpera.safeParse(conTariffe([{ nome: "Adulti", prezzo: "1", nascosta: true }])).success).toBe(true));
 });
 
 test("schemaLogin normalizza email", () => {
@@ -89,11 +121,12 @@ test("schemaUtente: password vuota = undefined", () => {
 });
 
 test("quantità: non numerica, negativa, frazionaria, enorme", () => {
-  const r = schemaPrenotazione.safeParse({ ...base, adulti: "abc" });
-  expect(r.error!.issues[0].message).toBe("Numero non valido");
-  expect(schemaPrenotazione.safeParse({ ...base, adulti: -1 }).success).toBe(false);
-  expect(schemaPrenotazione.safeParse({ ...base, adulti: 1.5 }).success).toBe(false);
-  expect(schemaPrenotazione.safeParse({ ...base, adulti: 10001 }).success).toBe(false);
+  const con = (quantita: unknown) => ({ ...base, righe: [{ tariffa_id: T1, quantita }] });
+  expect(schemaPrenotazione.safeParse(con("abc")).error!.issues[0].message).toBe("Numero non valido");
+  expect(schemaPrenotazione.safeParse(con(-1)).success).toBe(false);
+  expect(schemaPrenotazione.safeParse(con(1.5)).success).toBe(false);
+  expect(schemaPrenotazione.safeParse(con(10001)).success).toBe(false);
+  expect(schemaPrenotazione.safeParse({ ...base, pacchetti: -1 }).success).toBe(false);
 });
 
 test("schemaEvento rifiuta date impossibili", () => {
@@ -108,6 +141,7 @@ test("schemaLocale: capienza", () => {
 });
 
 test("schemaOpera rifiuta importi enormi", () => {
-  const p = { titolo: "A", prezzo_adulto: "100001", prezzo_ridotto: "1", prezzo_bambino: "1", prezzo_pacchetto_teatro: "1", prezzo_pacchetto_ristorante: "1" };
-  expect(schemaOpera.safeParse(p).error!.issues[0].message).toBe("Importo non valido: Adulto");
+  const p = { titolo: "A", tariffe: [{ nome: "Adulti", prezzo: "100001", nascosta: false }],
+    prezzo_pacchetto_teatro: "1", prezzo_pacchetto_ristorante: "1", pacchetto_nascosto: false };
+  expect(schemaOpera.safeParse(p).error!.issues[0].message).toBe("Importo non valido: Adulti");
 });

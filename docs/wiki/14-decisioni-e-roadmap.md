@@ -10,7 +10,7 @@
 - Posti prenotati in testo libero.
 - Capienza: avvisa ma lascia salvare.
 - Pacchetto 49 € = 22 € teatro + 27 € ristorante, entrambe modificabili; incassi teatro e ristorante separati.
-- Quantità separate per adulti, ridotti gruppi, bambini, pacchetti, omaggi.
+- Quantità per tariffa: tariffario libero per opera (nome, prezzo, spunta «nascosta»), più i pacchetti.
 - Campo provenienza del contatto.
 - Elenco per ristorante da condividere dal telefono.
 - Offline: solo aggiunta di nuove prenotazioni.

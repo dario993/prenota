@@ -1,7 +1,7 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useInAttesa, type InAttesa } from "@/lib/query";
-import { sigla } from "@/lib/calcoli";
+import { chiaveEvento, useInAttesa, type InAttesa } from "@/lib/query";
+import { descriviBiglietti, persone, type DettaglioEvento } from "@/lib/calcoli";
 
 const etichettaStato = "whitespace-nowrap rounded-sm px-2 py-1 text-label";
 
@@ -28,7 +28,13 @@ export function StatoInAttesa({ p }: { p: Pick<InAttesa, "stato" | "errore" | "m
 
 // In home: le prenotazioni non inviate restano visibili anche se il loro evento non esiste più.
 export function NonInviate() {
+  const qc = useQueryClient();
   const errori = useInAttesa().filter((p) => p.stato === "error");
+  // nomi delle tariffe dall'evento in cache; se l'evento non c'è più, solo il numero di persone
+  const biglietti = (p: InAttesa) => {
+    const tariffe = qc.getQueryData<DettaglioEvento>(chiaveEvento(p.evento_id))?.evento.tariffe;
+    return tariffe ? descriviBiglietti(p, tariffe) : `${persone(p)} persone`;
+  };
   if (!errori.length) return null;
   return (
     <section aria-label="Prenotazioni non inviate" className="mb-6 rounded-lg border border-danger bg-danger-soft p-4">
@@ -37,7 +43,7 @@ export function NonInviate() {
         {errori.map((p) => (
           <li key={p.mutationId} className="rounded-md bg-surface p-3">
             <div className="font-semibold">{p.cognome_nome}</div>
-            <div className="font-mono text-label">{sigla(p)}</div>
+            <div className="text-label">{biglietti(p)}</div>
             <div className="text-caption text-ink-muted">
               {[p.telefono, p.posti, p.note].filter(Boolean).join(" · ")}
             </div>

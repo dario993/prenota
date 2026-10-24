@@ -2,31 +2,31 @@
 
 > Stato: fatto
 
-## Tipi di biglietto
+## Tariffe
 
-| Tipo | Prezzo | Occupa posto |
-|---|---|---|
-| Adulto | `prezzo_adulto` dell'opera | sì |
-| Ridotto gruppi | `prezzo_ridotto` | sì |
-| Bambino | `prezzo_bambino` | sì |
-| Pacchetto | `prezzo_pacchetto_teatro` + `prezzo_pacchetto_ristorante` (22 + 27 = 49 €) | sì |
-| Omaggio | 0 € | sì |
+Ogni opera ha un **tariffario libero** (Admin → Opere): tariffe con nome e prezzo, per esempio per CHIARA DI DIO
+Adulti 28 €, Ridotti gruppi 22 €, Bambini 12 €, Omaggi 0 €, Associato 5 €. Ogni persona occupa un posto,
+qualunque sia la tariffa (anche a 0 €). Una tariffa può essere **nascosta**: non compare quando si prenota ma le
+prenotazioni che la usano contano normalmente.
 
-Il pacchetto **sostituisce** il biglietto normale: una persona col pacchetto conta solo come pacchetto.
+Il **pacchetto** è a parte: `prezzo_pacchetto_teatro` + `prezzo_pacchetto_ristorante` (22 + 27 = 49 €), con
+ristorante e pasto. Il pacchetto **sostituisce** il biglietto normale: una persona col pacchetto conta solo come
+pacchetto.
 
 ## Prezzi congelati
 
-Quando una prenotazione viene salvata la prima volta, l'app **copia sulla prenotazione** i prezzi dell'opera in quel
-momento. Se poi l'admin cambia il tariffario, le prenotazioni già fatte mantengono i loro importi.
-Le modifiche successive a una prenotazione (es. cambio quantità) usano i prezzi già copiati.
+Quando una prenotazione viene salvata la prima volta, l'app **copia** il prezzo di ogni tariffa usata (e le quote del
+pacchetto) in quel momento. Se poi l'admin cambia il tariffario, le prenotazioni già fatte mantengono i loro importi.
+In modifica, le tariffe già presenti tengono il prezzo copiato; una tariffa **aggiunta** in modifica prende il prezzo
+attuale, che da lì resta congelato.
 
 ## Formule
 
 Per una prenotazione (prezzi = quelli congelati):
 
 ```
-persone            = adulti + ridotti + bambini + pacchetti + omaggi
-incasso_teatro     = adulti·p_adulto + ridotti·p_ridotto + bambini·p_bambino + pacchetti·p_pacchetto_teatro
+persone            = Σ quantità delle tariffe + pacchetti
+incasso_teatro     = Σ quantità·prezzo delle tariffe + pacchetti·p_pacchetto_teatro
 incasso_ristorante = pacchetti·p_pacchetto_ristorante
 totale             = incasso_teatro + incasso_ristorante
 ```
@@ -38,8 +38,8 @@ evitare errori di arrotondamento; a video sono in euro con virgola (`49,00 €`)
 
 ## Esempio
 
-Tariffario: adulto 15 €, ridotto 12 €, bambino 8 €, pacchetto 22 + 27 €.
-Prenotazione: 2 adulti, 1 bambino, 2 pacchetti (Casale, cena), 1 omaggio.
+Tariffario: Adulti 15 €, Ridotti gruppi 12 €, Bambini 8 €, Omaggi 0 €, pacchetto 22 + 27 €.
+Prenotazione: 2 Adulti, 1 Bambini, 2 pacchetti (Casale, cena), 1 Omaggi.
 
 | Voce | Calcolo | Importo |
 |---|---|---|

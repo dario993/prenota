@@ -5,7 +5,7 @@
 ## Capienza
 
 - Ogni **locale** ha una capienza; ogni **evento** usa la capienza del suo locale.
-- **Persone prenotate** dell'evento = somma delle persone di tutte le prenotazioni (omaggi e pacchetti inclusi).
+- **Persone prenotate** dell'evento = somma delle persone di tutte le prenotazioni (tutte le tariffe, anche quelle a 0 € o nascoste, più i pacchetti).
 - **Posti liberi** = capienza − persone prenotate (può diventare negativo).
 
 ## Oltre la capienza: avvisa, non blocca

@@ -32,11 +32,13 @@ prenota/
   src/components/          componenti UI (nav, contatore, card…)
   src/lib/db.ts            client Postgres – unico punto di accesso al database
   src/lib/auth.ts          sessioni, hash password, controllo ruolo
-  src/lib/calcoli.ts       funzioni pure: persone, incassi, posti liberi, elenco e testo ristoranti
+  src/lib/calcoli.ts       funzioni pure: persone, incassi per tariffa, posti liberi, tariffe del modulo, elenco e testo ristoranti
   src/lib/schemi.ts        schemi zod condivisi tra form e server
+  src/lib/righe.ts         righe tariffa di una prenotazione (prezzo congelato, tariffa della stessa opera)
   src/proxy.ts             reindirizza a /login chi non ha sessione
   public/sw.js             service worker (offline)
-  db/schema.sql            schema del database
+  db/schema.sql            schema del database (stato finale)
+  db/migrazioni/           modifiche ai database esistenti, idempotenti, eseguite da db-init a ogni avvio
   scripts/                 db-init, crea-admin, backup.sh
   Dockerfile, docker-compose.yml   immagine e deploy (vedi [Deploy homelab](13-deploy-homelab.md))
   docs/wiki/               questa wiki

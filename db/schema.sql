@@ -1,4 +1,4 @@
--- Schema Prenota. Idempotente: si applica con `npm run db:init`.
+-- Schema Prenota (stato finale). Idempotente: si applica con `npm run db:init`, poi db/migrazioni/*.sql in ordine.
 
 create table if not exists utenti (
   id uuid primary key default gen_random_uuid(),
@@ -24,12 +24,21 @@ create table if not exists locali (
 create table if not exists opere (
   id uuid primary key default gen_random_uuid(),
   titolo text not null,
-  prezzo_adulto integer not null check (prezzo_adulto >= 0),
-  prezzo_ridotto integer not null check (prezzo_ridotto >= 0),
-  prezzo_bambino integer not null check (prezzo_bambino >= 0),
   prezzo_pacchetto_teatro integer not null default 2200 check (prezzo_pacchetto_teatro >= 0),
-  prezzo_pacchetto_ristorante integer not null default 2700 check (prezzo_pacchetto_ristorante >= 0)
+  prezzo_pacchetto_ristorante integer not null default 2700 check (prezzo_pacchetto_ristorante >= 0),
+  pacchetto_nascosto boolean not null default false
 );
+
+-- Tariffario libero per opera (il pacchetto resta sull'opera). Nascosta = non compare nel modulo di prenotazione.
+create table if not exists tariffe (
+  id uuid primary key default gen_random_uuid(),
+  opera_id uuid not null references opere (id) on delete cascade,
+  nome text not null,
+  prezzo integer not null check (prezzo >= 0),
+  nascosta boolean not null default false,
+  ordine integer not null
+);
+create unique index if not exists tariffe_opera_nome_idx on tariffe (opera_id, lower(nome));
 
 create table if not exists eventi (
   id uuid primary key default gen_random_uuid(),
@@ -43,27 +52,28 @@ create table if not exists prenotazioni (
   evento_id uuid not null references eventi (id) on delete restrict,
   cognome_nome text not null,
   telefono text not null default '',
-  adulti integer not null default 0 check (adulti >= 0),
-  ridotti integer not null default 0 check (ridotti >= 0),
-  bambini integer not null default 0 check (bambini >= 0),
   pacchetti integer not null default 0 check (pacchetti >= 0),
-  omaggi integer not null default 0 check (omaggi >= 0),
   ristorante text check (ristorante in ('GIAMAICA', 'CASALE')),
   pasto text check (pasto in ('PRANZO', 'CENA')),
   posti text not null default '',
   provenienza text not null default '',
   note text not null default '',
-  prezzo_adulto integer not null check (prezzo_adulto >= 0),
-  prezzo_ridotto integer not null check (prezzo_ridotto >= 0),
-  prezzo_bambino integer not null check (prezzo_bambino >= 0),
   prezzo_pacchetto_teatro integer not null check (prezzo_pacchetto_teatro >= 0),
   prezzo_pacchetto_ristorante integer not null check (prezzo_pacchetto_ristorante >= 0),
   creata_da uuid references utenti (id),
   creata_il timestamptz not null default now(),
   aggiornata_il timestamptz not null default now(),
-  check (adulti + ridotti + bambini + pacchetti + omaggi > 0),
   check ((pacchetti > 0) = (ristorante is not null and pasto is not null)),
   check (pacchetti > 0 or (ristorante is null and pasto is null))
+);
+
+-- Quantità per tariffa con prezzo congelato al primo inserimento; "restrict" impedisce di eliminare una tariffa usata.
+create table if not exists prenotazioni_tariffe (
+  prenotazione_id uuid not null references prenotazioni (id) on delete cascade,
+  tariffa_id uuid not null references tariffe (id) on delete restrict,
+  quantita integer not null check (quantita > 0),
+  prezzo integer not null check (prezzo >= 0),
+  primary key (prenotazione_id, tariffa_id)
 );
 
 create index if not exists prenotazioni_evento_id_idx on prenotazioni (evento_id);

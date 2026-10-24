@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { CloudOff, Plus, UtensilsCrossed } from "lucide-react";
-import { getJson, SERVE_RETE, useInAttesa, useOnline } from "@/lib/query";
-import { formattaDataOra, prezziDi, type DettaglioEvento } from "@/lib/calcoli";
+import { getJson, SERVE_RETE, useInAttesa, useOnline, chiaveEvento } from "@/lib/query";
+import { formattaDataOra, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
 import { Stato } from "@/components/Stato";
 import { btnPrimario, btnSecondario } from "@/components/stili";
 import { Riepilogo } from "./Riepilogo";
@@ -12,7 +12,7 @@ import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
 
 export function PaginaEvento({ id }: { id: string }) {
   const { data, isPending, error, fetchStatus } = useQuery({
-    queryKey: ["evento", id],
+    queryKey: chiaveEvento(id),
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
   });
   const inAttesa = useInAttesa(id);
@@ -31,7 +31,7 @@ export function PaginaEvento({ id }: { id: string }) {
   const { evento } = data;
   // in coda sul telefono: prezzi attuali dell'opera (il server li fissa all'invio); escluse quelle già arrivate
   const arrivate = new Set(data.prenotazioni.map((p) => p.id));
-  const coda = inAttesa.filter((p) => !arrivate.has(p.id)).map((p) => ({ ...p, ...prezziDi(evento), in_attesa: true }));
+  const coda = inAttesa.filter((p) => !arrivate.has(p.id)).map((p) => ({ ...p, righe: righeConPrezzi(p.righe, evento.tariffe), ...prezziPacchettoDi(evento), in_attesa: true }));
   const prenotazioni = [...data.prenotazioni, ...coda];
   // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono
   const valide = prenotazioni.filter((p) => !("stato" in p) || p.stato === "pending");
@@ -58,8 +58,8 @@ export function PaginaEvento({ id }: { id: string }) {
         </div>
       </div>
       <div className="space-y-6">
-        <Riepilogo prenotazioni={valide} capienza={evento.capienza} />
-        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} />
+        <Riepilogo prenotazioni={valide} capienza={evento.capienza} tariffe={evento.tariffe} />
+        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} />
       </div>
       {/* telefono: azione principale in basso, sopra la navigazione, raggiungibile col pollice */}
       <Link href={nuova} aria-label="Nuova prenotazione"

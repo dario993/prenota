@@ -16,11 +16,13 @@ export async function GET(req: Request) {
   try {
     const righe = await sql`
       select e.id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
-             coalesce(sum(p.adulti + p.ridotti + p.bambini + p.pacchetti + p.omaggi), 0)::int as persone
+             coalesce(sum(p.pacchetti + coalesce(t.quantita, 0)), 0)::int as persone
       from eventi e
       join opere o on o.id = e.opera_id
       join locali l on l.id = e.locale_id
       left join prenotazioni p on p.evento_id = e.id
+      left join (select prenotazione_id, sum(quantita) as quantita from prenotazioni_tariffe group by 1) t
+        on t.prenotazione_id = p.id
       where ${passati ? sql`e.data_ora < ${oggi}` : sql`e.data_ora >= ${oggi}`}
       group by e.id, o.titolo, l.nome, l.capienza
       order by e.data_ora ${passati ? sql`desc` : sql``}`;

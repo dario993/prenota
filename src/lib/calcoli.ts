@@ -5,61 +5,104 @@ export type Pasto = (typeof PASTI)[number];
 export const NOMI_RISTORANTI: Record<Ristorante, string> = { GIAMAICA: "Giamaica", CASALE: "Casale" };
 export const NOMI_PASTI: Record<Pasto, string> = { PRANZO: "Pranzo", CENA: "Cena" };
 
-export interface Quantita { adulti: number; ridotti: number; bambini: number; pacchetti: number; omaggi: number }
-export interface Prezzi {
-  prezzo_adulto: number; prezzo_ridotto: number; prezzo_bambino: number;
-  prezzo_pacchetto_teatro: number; prezzo_pacchetto_ristorante: number;
-}
-export interface Prenotazione extends Quantita, Prezzi {
+// Tariffario libero per opera; il pacchetto resta a parte (ristorante, pasto, due quote).
+export interface Tariffa { id: string; nome: string; prezzo: number; nascosta: boolean; ordine: number }
+export interface RigaTariffa { tariffa_id: string; quantita: number; prezzo: number }
+export interface PrezziPacchetto { prezzo_pacchetto_teatro: number; prezzo_pacchetto_ristorante: number }
+export interface Prenotazione extends PrezziPacchetto {
   id: string; evento_id: string; cognome_nome: string; telefono: string;
+  righe: RigaTariffa[]; pacchetti: number;
   ristorante: Ristorante | null; pasto: Pasto | null; posti: string; provenienza: string; note: string;
   in_attesa?: boolean; // solo lato client
 }
 export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number }
 export interface DettaglioEvento {
-  evento: Omit<EventoLista, "persone"> & Prezzi;
+  evento: Omit<EventoLista, "persone"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
   prenotazioni: Prenotazione[];
 }
+export interface VoceTariffa { tariffa_id: string; nome: string; quantita: number }
 export interface Riepilogo {
   persone: number; capienza: number; postiLiberi: number; oltreCapienza: boolean;
-  perTipo: Quantita; incassoTeatro: number; incassoRistorante: number;
+  perTariffa: VoceTariffa[]; pacchetti: number; incassoTeatro: number; incassoRistorante: number;
   ristoranti: Record<Ristorante, { PRANZO: number; CENA: number; incasso: number }>;
 }
 
-export const persone = (q: Quantita): number => q.adulti + q.ridotti + q.bambini + q.pacchetti + q.omaggi;
+export const TARIFFA_ELIMINATA = "Tariffa eliminata";
 
-// Solo le tariffe: una Prenotazione intera, spalmata, sovrascriverebbe le quantità.
-export const prezziDi = (p: Prezzi): Prezzi => ({
-  prezzo_adulto: p.prezzo_adulto, prezzo_ridotto: p.prezzo_ridotto, prezzo_bambino: p.prezzo_bambino,
+export const persone = (p: { righe: { quantita: number }[]; pacchetti: number }): number =>
+  p.righe.reduce((s, r) => s + r.quantita, 0) + p.pacchetti;
+
+export const incassoTeatro = (
+  p: { righe: { quantita: number; prezzo: number }[]; pacchetti: number } & Pick<PrezziPacchetto, "prezzo_pacchetto_teatro">,
+): number => p.righe.reduce((s, r) => s + r.quantita * r.prezzo, 0) + p.pacchetti * p.prezzo_pacchetto_teatro;
+
+export const incassoRistorante = (p: { pacchetti: number } & Pick<PrezziPacchetto, "prezzo_pacchetto_ristorante">): number =>
+  p.pacchetti * p.prezzo_pacchetto_ristorante;
+
+// Solo le quote: un oggetto intero, spalmato, sovrascriverebbe le quantità.
+export const prezziPacchettoDi = (p: PrezziPacchetto): PrezziPacchetto => ({
   prezzo_pacchetto_teatro: p.prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante: p.prezzo_pacchetto_ristorante,
 });
 
-export const incassoTeatro = (p: Quantita & Prezzi): number =>
-  p.adulti * p.prezzo_adulto + p.ridotti * p.prezzo_ridotto + p.bambini * p.prezzo_bambino +
-  p.pacchetti * p.prezzo_pacchetto_teatro;
+// Prezzo di ogni riga: congelato se la prenotazione l'aveva già, altrimenti quello attuale (0 se la tariffa non c'è più).
+export function righeConPrezzi(
+  righe: { tariffa_id: string; quantita: number }[], tariffe: Tariffa[], congelate: RigaTariffa[] = [],
+): RigaTariffa[] {
+  return righe.filter((r) => r.quantita > 0).map((r) => ({
+    tariffa_id: r.tariffa_id, quantita: r.quantita,
+    prezzo: congelate.find((c) => c.tariffa_id === r.tariffa_id)?.prezzo
+      ?? tariffe.find((t) => t.id === r.tariffa_id)?.prezzo ?? 0,
+  }));
+}
 
-export const incassoRistorante = (p: Quantita & Prezzi): number => p.pacchetti * p.prezzo_pacchetto_ristorante;
+const perOrdine = (a: Tariffa, b: Tariffa) => a.ordine - b.ordine;
 
-export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number): Riepilogo {
-  const perTipo: Quantita = { adulti: 0, ridotti: 0, bambini: 0, pacchetti: 0, omaggi: 0 };
+export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, tariffe: Tariffa[]): Riepilogo {
+  const quante = new Map<string, number>();
   const ristoranti = {
     GIAMAICA: { PRANZO: 0, CENA: 0, incasso: 0 },
     CASALE: { PRANZO: 0, CENA: 0, incasso: 0 },
   };
-  let teatro = 0, ristorante = 0;
+  let teatro = 0, ristorante = 0, pacchetti = 0, tot = 0;
   for (const p of prenotazioni) {
-    for (const k of Object.keys(perTipo) as (keyof Quantita)[]) perTipo[k] += p[k];
+    for (const r of p.righe) quante.set(r.tariffa_id, (quante.get(r.tariffa_id) ?? 0) + r.quantita);
+    pacchetti += p.pacchetti;
+    tot += persone(p);
     teatro += incassoTeatro(p);
-    const r = incassoRistorante(p);
-    ristorante += r;
+    const inc = incassoRistorante(p);
+    ristorante += inc;
     if (p.pacchetti > 0 && p.ristorante && p.pasto) {
       ristoranti[p.ristorante][p.pasto] += p.pacchetti;
-      ristoranti[p.ristorante].incasso += r;
+      ristoranti[p.ristorante].incasso += inc;
     }
   }
-  const tot = persone(perTipo);
-  return { persone: tot, capienza, postiLiberi: capienza - tot, oltreCapienza: tot > capienza, perTipo,
+  const note = [...tariffe].sort(perOrdine).filter((t) => quante.has(t.id))
+    .map((t) => ({ tariffa_id: t.id, nome: t.nome, quantita: quante.get(t.id)! }));
+  const ignote = [...quante].filter(([id]) => !tariffe.some((t) => t.id === id))
+    .map(([tariffa_id, quantita]) => ({ tariffa_id, nome: TARIFFA_ELIMINATA, quantita }));
+  return { persone: tot, capienza, postiLiberi: capienza - tot, oltreCapienza: tot > capienza,
+    perTariffa: [...note, ...ignote].filter((v) => v.quantita > 0), pacchetti,
     incassoTeatro: teatro, incassoRistorante: ristorante, ristoranti };
+}
+
+// Contatori del modulo: le tariffe visibili, più (in modifica) le nascoste che la prenotazione usa già.
+export const tariffeDelModulo = (tariffe: Tariffa[], righeIniziali: { tariffa_id: string }[] = []): Tariffa[] =>
+  tariffe.filter((t) => !t.nascosta || righeIniziali.some((r) => r.tariffa_id === t.id)).sort(perOrdine);
+
+// Biglietti in una riga per elenchi e schede: "2 Adulti · 1 Associato · 2 Pacchetti Casale cena".
+export function descriviBiglietti(
+  p: { righe: { tariffa_id: string; quantita: number }[] } & Pick<Prenotazione, "pacchetti" | "ristorante" | "pasto">,
+  tariffe: Tariffa[],
+): string {
+  const parti = [...tariffe].sort(perOrdine).flatMap((t) => {
+    const q = p.righe.filter((r) => r.tariffa_id === t.id).reduce((s, r) => s + r.quantita, 0);
+    return q ? [`${q} ${t.nome}`] : [];
+  });
+  const ignote = p.righe.filter((r) => !tariffe.some((t) => t.id === r.tariffa_id)).reduce((s, r) => s + r.quantita, 0);
+  if (ignote) parti.push(`${ignote} ${TARIFFA_ELIMINATA}`);
+  if (p.pacchetti) parti.push(`${p.pacchetti} Pacchetti` +
+    (p.ristorante && p.pasto ? ` ${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : ""));
+  return parti.join(" · ");
 }
 
 export const ordinaPerNome = <T extends { cognome_nome: string }>(lista: T[]): T[] =>
@@ -94,11 +137,3 @@ const dataOra = new Intl.DateTimeFormat("it-IT", {
   timeZone: "Europe/Rome",
 });
 export const formattaDataOra = (d: Date): string => dataOra.format(d);
-
-// Quantità in sigla per le schede: "2 A · 1 B · 2 P Casale cena · 1 O".
-export const sigla = (p: Quantita & Pick<Prenotazione, "ristorante" | "pasto">): string => {
-  const parti = [p.adulti && `${p.adulti} A`, p.ridotti && `${p.ridotti} R`, p.bambini && `${p.bambini} B`];
-  if (p.pacchetti) parti.push(`${p.pacchetti} P ${NOMI_RISTORANTI[p.ristorante!]} ${NOMI_PASTI[p.pasto!].toLowerCase()}`);
-  if (p.omaggi) parti.push(`${p.omaggi} O`);
-  return parti.filter(Boolean).join(" · ");
-};

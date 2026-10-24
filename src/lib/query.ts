@@ -10,6 +10,9 @@ import type { DatiPrenotazione } from "./schemi";
 const GIORNO = 24 * 60 * 60 * 1000;
 
 export const CHIAVE_NUOVA = ["nuova-prenotazione"] as const;
+// Dettaglio evento in cache. "tariffe": formato con righe per tariffa; le copie salvate sul telefono nel formato
+// vecchio (adulti, ridotti…) restano sotto la chiave vecchia, non vengono più lette e scadono da sole.
+export const chiaveEvento = (id: string) => ["evento", "tariffe", id] as const;
 
 // Una nuova prenotazione è "in coda" finché è pending (anche in pausa) o finita in errore:
 // entrambe vanno salvate sul telefono, non solo quelle in pausa (default di TanStack).
@@ -83,7 +86,7 @@ export function registraMutazioni(qc: QueryClient): void {
       void qc.invalidateQueries({ queryKey: ["provenienze"] });
       // atteso: resta "in attesa" finché l'elenco dal server non la contiene, senza sparire per un attimo;
       // poi la mutation riuscita esce dalla cache (con gcTime infinito resterebbe in memoria per sempre)
-      return qc.invalidateQueries({ queryKey: ["evento", d.evento_id] }).then(() => {
+      return qc.invalidateQueries({ queryKey: chiaveEvento(d.evento_id) }).then(() => {
         const cache = qc.getMutationCache();
         for (const m of cache.findAll({ mutationKey: CHIAVE_NUOVA, predicate: (x) => (x.state.variables as DatiPrenotazione)?.id === d.id }))
           cache.remove(m);
@@ -112,6 +115,8 @@ export function useInAttesa(eventoId?: string): InAttesa[] {
     },
     select: (m) => ({
       ...(m.state.variables as DatiPrenotazione),
+      // in coda da prima delle tariffe (formato vecchio): niente righe; il server la rifiuterà e resterà da scartare
+      righe: (m.state.variables as DatiPrenotazione).righe ?? [],
       stato: m.state.status as "pending" | "error",
       errore: m.state.error?.message,
       mutationId: m.mutationId,

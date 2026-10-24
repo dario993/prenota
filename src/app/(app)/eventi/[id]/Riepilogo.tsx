@@ -1,5 +1,5 @@
 import {
-  riepilogoEvento, formattaEuro, NOMI_RISTORANTI, NOMI_PASTI, RISTORANTI, PASTI, type Prenotazione,
+  riepilogoEvento, formattaEuro, NOMI_RISTORANTI, NOMI_PASTI, RISTORANTI, PASTI, type Prenotazione, type Tariffa,
 } from "@/lib/calcoli";
 
 const Riga = ({ testo, valore, testId, rientro = false }: { testo: string; valore: React.ReactNode; testId?: string; rientro?: boolean }) => (
@@ -9,11 +9,12 @@ const Riga = ({ testo, valore, testId, rientro = false }: { testo: string; valor
   </div>
 );
 
-export function Riepilogo({ prenotazioni, capienza }: { prenotazioni: Prenotazione[]; capienza: number }) {
-  const r = riepilogoEvento(prenotazioni, capienza);
+export function Riepilogo({ prenotazioni, capienza, tariffe }: { prenotazioni: Prenotazione[]; capienza: number; tariffe: Tariffa[] }) {
+  const r = riepilogoEvento(prenotazioni, capienza, tariffe);
   const oltre = r.postiLiberi < 0;
-  const tipi = [["Adulti", r.perTipo.adulti], ["Ridotti", r.perTipo.ridotti], ["Bambini", r.perTipo.bambini],
-    ["Pacchetti", r.perTipo.pacchetti], ["Omaggi", r.perTipo.omaggi]] as const;
+  // tariffe usate nell'evento (anche nascoste), poi i pacchetti
+  const tipi = [...r.perTariffa.map((v) => [v.nome, v.quantita, v.tariffa_id] as const),
+    ...(r.pacchetti ? [["Pacchetti", r.pacchetti, "pacchetti"] as const] : [])];
   const coperti = RISTORANTI.flatMap((k) => PASTI.filter((p) => r.ristoranti[k][p] > 0).map((p) => ({ k, p })));
   return (
     <section aria-label="Riepilogo" className="rounded-lg bg-surface-sunken p-4 lg:flex lg:flex-wrap lg:items-start lg:gap-x-8 lg:gap-y-4">
@@ -32,7 +33,7 @@ export function Riepilogo({ prenotazioni, capienza }: { prenotazioni: Prenotazio
         </div>
       </div>
       <dl className="mt-4 space-y-1 border-t border-line pt-4 lg:grid lg:auto-cols-max lg:grid-flow-col lg:gap-x-6 lg:space-y-0 lg:mt-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
-        {tipi.map(([n, v]) => <Riga key={n} testo={n} valore={v} />)}
+        {tipi.map(([n, v, k]) => <Riga key={k} testo={n} valore={v} />)}
       </dl>
       {coperti.length > 0 && (
         <div className="mt-4 border-t border-line pt-4 lg:mt-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">

@@ -26,24 +26,27 @@ export const schemaPrenotazione = z
     posti: z.string().trim().max(200, "Massimo 200 caratteri").default(""),
     provenienza: z.string().trim().max(200, "Massimo 200 caratteri").default(""),
     note: z.string().trim().max(1000, "Massimo 1000 caratteri").default(""),
-    adulti: quantita,
-    ridotti: quantita,
-    bambini: quantita,
+    righe: z.array(z.object({ tariffa_id: z.uuid(), quantita })).max(50, "Troppe tariffe"),
     pacchetti: quantita,
-    omaggi: quantita,
     ristorante: z.enum(RISTORANTI).nullable(),
     pasto: z.enum(PASTI).nullable(),
   })
   .superRefine((d, ctx) => {
-    if (d.adulti + d.ridotti + d.bambini + d.pacchetti + d.omaggi === 0)
-      ctx.addIssue({ code: "custom", path: ["adulti"], message: "Inserisci almeno una persona" });
+    if (new Set(d.righe.map((r) => r.tariffa_id)).size !== d.righe.length)
+      ctx.addIssue({ code: "custom", path: ["righe"], message: "Tariffa ripetuta" });
+    if (d.righe.reduce((s, r) => s + r.quantita, 0) + d.pacchetti === 0)
+      ctx.addIssue({ code: "custom", path: ["righe"], message: "Inserisci almeno una persona" });
     if (d.pacchetti > 0) {
       if (!d.ristorante) ctx.addIssue({ code: "custom", path: ["ristorante"], message: "Scegli il ristorante" });
       if (!d.pasto) ctx.addIssue({ code: "custom", path: ["pasto"], message: "Scegli pranzo o cena" });
     }
   })
-  // senza pacchetti ristorante e pasto devono essere null (vincolo DB)
-  .transform((d) => (d.pacchetti > 0 ? d : { ...d, ristorante: null, pasto: null }));
+  // le righe a 0 non si salvano; senza pacchetti ristorante e pasto devono essere null (vincolo DB)
+  .transform((d) => ({
+    ...d,
+    righe: d.righe.filter((r) => r.quantita > 0),
+    ...(d.pacchetti > 0 ? {} : { ristorante: null, pasto: null }),
+  }));
 export type DatiPrenotazione = z.infer<typeof schemaPrenotazione>;
 
 export const schemaLocale = z.object({
@@ -55,14 +58,37 @@ export const schemaLocale = z.object({
     .max(10000, "Valore troppo alto"),
 });
 
-export const schemaOpera = z.object({
-  titolo: testo(120),
-  prezzo_adulto: importo("Adulto"),
-  prezzo_ridotto: importo("Ridotto gruppi"),
-  prezzo_bambino: importo("Bambino"),
-  prezzo_pacchetto_teatro: importo("Pacchetto quota teatro"),
-  prezzo_pacchetto_ristorante: importo("Pacchetto quota ristorante"),
-});
+// Prezzi come testo dal form (virgola o punto); il messaggio d'errore nomina la tariffa.
+export const schemaOpera = z
+  .object({
+    titolo: testo(120),
+    tariffe: z
+      .array(z.object({ id: z.uuid().optional(), nome: testo(40), prezzo: z.string(), nascosta: z.boolean() }))
+      .min(1, "Serve almeno una tariffa")
+      .max(30, "Massimo 30 tariffe"),
+    prezzo_pacchetto_teatro: importo("Pacchetto quota teatro"),
+    prezzo_pacchetto_ristorante: importo("Pacchetto quota ristorante"),
+    pacchetto_nascosto: z.boolean(),
+  })
+  .transform((d, ctx) => {
+    const visti = new Set<string>();
+    const tariffe = d.tariffe.map((t, i) => {
+      const chiave = t.nome.toLowerCase();
+      if (chiave === "pacchetti")
+        ctx.addIssue({ code: "custom", path: ["tariffe", i, "nome"], message: "Nome riservato: Pacchetti" });
+      else if (visti.has(chiave))
+        ctx.addIssue({ code: "custom", path: ["tariffe", i, "nome"], message: `Tariffa ripetuta: ${chiave}` });
+      visti.add(chiave);
+      const prezzo = euroInCentesimi(t.prezzo);
+      if (prezzo === null || prezzo > 10_000_000)
+        ctx.addIssue({ code: "custom", path: ["tariffe", i, "prezzo"], message: `Importo non valido: ${t.nome}` });
+      return { ...t, prezzo: prezzo ?? 0 };
+    });
+    if (d.pacchetto_nascosto && tariffe.every((t) => t.nascosta))
+      ctx.addIssue({ code: "custom", path: ["tariffe"], message: "Lascia visibile almeno una tariffa" });
+    return { ...d, tariffe };
+  });
+export type DatiOpera = z.infer<typeof schemaOpera>;
 
 export const schemaEvento = z.object({
   opera_id: z.uuid(),

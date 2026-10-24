@@ -7,22 +7,17 @@ import { Plus, Search } from "lucide-react";
 import { StatoInAttesa } from "@/components/InAttesa";
 import { btnPrimario } from "@/components/stili";
 import { useOnline, type InAttesa } from "@/lib/query";
-import {
-  ordinaPerNome, persone, sigla, NOMI_RISTORANTI, NOMI_PASTI,
-  type Prenotazione,
-} from "@/lib/calcoli";
+import { descriviBiglietti, ordinaPerNome, persone, type Prenotazione, type Tariffa } from "@/lib/calcoli";
 
-const ristorante = (p: Prenotazione) =>
-  p.pacchetti && p.ristorante && p.pasto ? `${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : "";
 const tel = (t: string) => `tel:${t.replace(/[^\d+]/g, "")}`;
 
 // Le prenotazioni in coda sul telefono (in_attesa) hanno anche stato/errore e non si aprono.
 type Voce = Prenotazione & Partial<Pick<InAttesa, "stato" | "errore" | "mutationId">>;
 
-const COLONNE = [["Nome"], ["Telefono"], ["Adulti", 1], ["Ridotti", 1], ["Bambini", 1], ["Pacchetti", 1], ["Omaggi", 1],
-  ["Ristorante"], ["Posti"], ["Note"], ["Totale", 1]] as const;
+// biglietti in una colonna sola: le tariffe cambiano da un'opera all'altra (il ristorante è nel testo del pacchetto)
+const COLONNE = [["Nome"], ["Telefono"], ["Biglietti"], ["Posti"], ["Note"], ["Totale", 1]] as const;
 
-export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: string; prenotazioni: Voce[] }) {
+export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { eventoId: string; prenotazioni: Voce[]; tariffe: Tariffa[] }) {
   const router = useRouter();
   const online = useOnline();
   const [cerca, setCerca] = useState("");
@@ -43,7 +38,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
       <div className="min-w-0 space-y-1">
         <div className="font-semibold">{p.cognome_nome}</div>
         {p.telefono && <div className="text-caption text-ink-muted">{p.telefono}</div>}
-        <div className="font-mono text-label">{sigla(p)}</div>
+        <div className="text-label">{descriviBiglietti(p, tariffe)}</div>
         {p.posti && <div className="font-mono text-label text-ink-muted">{p.posti}</div>}
         {p.note && <div className="text-caption text-ink-muted">{p.note}</div>}
         {statoDi(p)}
@@ -98,10 +93,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
                     : <Link href={href(p)} onClick={apri} className="hover:text-accent">{p.cognome_nome}</Link>}
                 </td>
                 <td className="whitespace-nowrap px-3 py-3">{p.telefono && <a href={tel(p.telefono)} className="text-accent hover:underline">{p.telefono}</a>}</td>
-                {([p.adulti, p.ridotti, p.bambini, p.pacchetti, p.omaggi] as number[]).map((n, i) => (
-                  <td key={i} className="px-3 py-3 text-right tabular-nums">{n}</td>
-                ))}
-                <td className="px-3 py-3">{ristorante(p)}</td>
+                <td className="px-3 py-3 tabular-nums">{descriviBiglietti(p, tariffe)}</td>
                 <td className="px-3 py-3 font-mono text-label">{p.posti}</td>
                 <td className="max-w-48 break-words px-3 py-3 text-ink-muted">{p.note}</td>
                 <td className="px-3 py-3 text-right font-semibold tabular-nums">{persone(p)}</td>

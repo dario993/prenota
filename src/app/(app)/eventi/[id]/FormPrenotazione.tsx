@@ -11,18 +11,16 @@ import type { z } from "zod";
 import { Contatore } from "@/components/Contatore";
 import { Stato } from "@/components/Stato";
 import { btnDistruttivo, btnPrimario, btnSecondario, campo, erroreCampo, etichetta, scelta } from "@/components/stili";
-import { getJson, useInAttesa, useOnline, CHIAVE_NUOVA, SERVE_RETE } from "@/lib/query";
+import { chiaveEvento, getJson, useInAttesa, useOnline, CHIAVE_NUOVA, SERVE_RETE } from "@/lib/query";
 import { schemaPrenotazione, type DatiPrenotazione } from "@/lib/schemi";
 import {
-  persone, prezziDi, incassoTeatro, incassoRistorante, riepilogoEvento, formattaEuro, formattaDataOra,
-  RISTORANTI, PASTI, NOMI_RISTORANTI, NOMI_PASTI,
-  type DettaglioEvento, type Prenotazione, type Quantita,
+  persone, prezziPacchettoDi, incassoTeatro, incassoRistorante, riepilogoEvento, righeConPrezzi, tariffeDelModulo,
+  formattaEuro, formattaDataOra, RISTORANTI, PASTI, NOMI_RISTORANTI, NOMI_PASTI,
+  type DettaglioEvento, type Prenotazione,
 } from "@/lib/calcoli";
 import { modificaPrenotazione, eliminaPrenotazione } from "./azioni";
 
 type Campi = z.input<typeof schemaPrenotazione>;
-const QUANTITA = [["adulti", "Adulti"], ["ridotti", "Ridotti gruppi"], ["bambini", "Bambini"],
-  ["pacchetti", "Pacchetti"], ["omaggi", "Omaggi"]] as const;
 const textarea = campo.replace("h-12", "min-h-24 py-3");
 
 const Errore = ({ id, msg }: { id: string; msg?: string }) =>
@@ -30,23 +28,38 @@ const Errore = ({ id, msg }: { id: string; msg?: string }) =>
 
 // Riletto all'apertura (prezzi attuali, persone per l'avviso di capienza); in modifica lo fa già ModificaPrenotazione.
 const useEvento = (id: string, rileggi = true) =>
-  useQuery({ queryKey: ["evento", id], queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
+  useQuery({ queryKey: chiaveEvento(id), queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
     refetchOnMount: rileggi ? "always" : true });
 
-// Pagina di modifica: cerca la prenotazione nel dettaglio evento (dalla cache o dalla rete).
+// Pagina di modifica: cerca la prenotazione nel dettaglio evento. Si aspetta la rilettura dal server: il modulo
+// nasce dai dati iniziali e, partendo da una copia vecchia, salvando cancellerebbe le righe aggiunte nel frattempo
+// (senza rete la modifica è comunque bloccata, quindi la copia in cache basta solo per mostrarla).
 export function ModificaPrenotazione({ eventoId, pid }: { eventoId: string; pid: string }) {
   const { data, isFetching, error, fetchStatus } = useEvento(eventoId);
   const p = data?.prenotazioni.find((x) => x.id === pid);
-  if (p) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
+  if (p && !isFetching) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
   if (!data && fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
   if (isFetching) return <Stato testo="Caricamento…" />;
   return <Stato testo={error?.message ?? "Prenotazione non trovata"} nonTrovato />;
 }
 
 export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; iniziale?: Prenotazione }) {
+  const { data, isPending, error, fetchStatus } = useEvento(eventoId, !iniziale);
+  if (!data) {
+    if (fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
+    if (isPending) return <Stato testo="Caricamento…" />;
+    return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
+  }
+  return <Modulo eventoId={eventoId} iniziale={iniziale} data={data} />;
+}
+
+// Il form nasce quando il tariffario è noto: un contatore per tariffa (visibili + nascoste già usate in modifica).
+function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Prenotazione; data: DettaglioEvento }) {
   const router = useRouter();
   const qc = useQueryClient();
-  const { data, isPending, error, fetchStatus } = useEvento(eventoId, !iniziale);
+  const { evento } = data;
+  const [tariffe] = useState(() => tariffeDelModulo(evento.tariffe, iniziale?.righe));
+  const conPacchetto = !evento.pacchetto_nascosto || (iniziale?.pacchetti ?? 0) > 0;
   const inAttesa = useInAttesa(eventoId);
   const { data: provenienze } = useQuery({ queryKey: ["provenienze"], queryFn: () => getJson<string[]>("/api/provenienze") });
   const [id] = useState(() => iniziale?.id ?? crypto.randomUUID());
@@ -58,8 +71,10 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
       defaultValues: {
         id, evento_id: eventoId,
         cognome_nome: iniziale?.cognome_nome ?? "", telefono: iniziale?.telefono ?? "",
-        adulti: iniziale?.adulti ?? 0, ridotti: iniziale?.ridotti ?? 0, bambini: iniziale?.bambini ?? 0,
-        pacchetti: iniziale?.pacchetti ?? 0, omaggi: iniziale?.omaggi ?? 0,
+        righe: tariffe.map((t) => ({
+          tariffa_id: t.id, quantita: iniziale?.righe.find((r) => r.tariffa_id === t.id)?.quantita ?? 0,
+        })),
+        pacchetti: iniziale?.pacchetti ?? 0,
         ristorante: iniziale?.ristorante ?? null, pasto: iniziale?.pasto ?? null,
         posti: iniziale?.posti ?? "", provenienza: iniziale?.provenienza ?? "", note: iniziale?.note ?? "",
       },
@@ -68,11 +83,15 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
   const aria = (k: keyof typeof errors) =>
     ({ "aria-invalid": !!errors[k], "aria-describedby": errors[k] ? `errore-${k}` : undefined });
   const inCorso = useRef(false); // il doppio tocco arriva prima che il pulsante si disattivi
-  const q = Object.fromEntries(QUANTITA.map(([k]) => [k, Number(valori[k]) || 0])) as unknown as Quantita;
+  // quantità scritte finora, con i prezzi: congelati per le righe già salvate, attuali per le altre
+  const righe = righeConPrezzi(
+    (valori.righe ?? []).map((r) => ({ tariffa_id: r?.tariffa_id ?? "", quantita: Number(r?.quantita) || 0 })),
+    evento.tariffe, iniziale?.righe);
+  const q = { righe, pacchetti: Number(valori.pacchetti) || 0 };
 
   const fatto = (messaggio: string) => {
     toast.success(messaggio);
-    for (const k of [["evento", eventoId], ["eventi"], ["provenienze"]]) qc.invalidateQueries({ queryKey: k });
+    for (const k of [chiaveEvento(eventoId), ["eventi"], ["provenienze"]]) qc.invalidateQueries({ queryKey: k });
     router.push(`/eventi/${eventoId}`);
   };
   const online = useOnline();
@@ -115,38 +134,31 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
     else fatto("Prenotazione eliminata");
   }
 
-  if (!data) {
-    if (fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
-    if (isPending) return <Stato testo="Caricamento…" />;
-    return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
-  }
-
-  // Modifica: prezzi congelati della prenotazione; nuova: tariffario attuale dell'opera.
-  const prezzi = prezziDi(iniziale ?? data.evento);
+  // Modifica: quote del pacchetto congelate nella prenotazione; nuova: quelle attuali dell'opera.
+  const prezzi = prezziPacchettoDi(iniziale ?? evento);
   const teatro = incassoTeatro({ ...prezzi, ...q });
   const ristorante = incassoRistorante({ ...prezzi, ...q });
   // altre prenotazioni dell'evento: dal server più quelle in coda sul telefono (come nel riepilogo dell'evento),
   // senza quella che si sta scrivendo/modificando e senza doppioni tra coda e server
   const sulServer = new Set(data.prenotazioni.map((p) => p.id));
   const inCoda = inAttesa.filter((p) => p.stato === "pending" && !sulServer.has(p.id))
-    .map((p) => ({ ...p, ...prezziDi(data.evento) }));
-  const altre = riepilogoEvento([...data.prenotazioni, ...inCoda].filter((p) => p.id !== id), data.evento.capienza);
-  const oltre = altre.persone + persone(q) - data.evento.capienza;
+    .map((p) => ({ ...p, righe: righeConPrezzi(p.righe, evento.tariffe), ...prezziPacchettoDi(evento) }));
+  const altre = riepilogoEvento([...data.prenotazioni, ...inCoda].filter((p) => p.id !== id), evento.capienza, evento.tariffe);
+  const oltre = altre.persone + persone(q) - evento.capienza;
   const occupato = isSubmitting || nuova.isPending || eliminando;
   const bloccata = !!iniziale && !online; // modifica ed eliminazione richiedono la rete
-  const unitario: Record<keyof Quantita, number> = {
-    adulti: prezzi.prezzo_adulto, ridotti: prezzi.prezzo_ridotto, bambini: prezzi.prezzo_bambino,
-    pacchetti: prezzi.prezzo_pacchetto_teatro + prezzi.prezzo_pacchetto_ristorante, omaggi: 0,
-  };
+  const prezzoDi = (tariffa_id: string) =>
+    iniziale?.righe.find((r) => r.tariffa_id === tariffa_id)?.prezzo ?? evento.tariffe.find((t) => t.id === tariffa_id)?.prezzo ?? 0;
+  const erroreQuantita = errors.righe?.message ?? errors.righe?.root?.message;
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6">
       {/* evento di riferimento sempre visibile mentre si scorre il modulo */}
       <div className="sticky top-0 z-20 -mx-4 -mt-6 mb-4 border-b border-line bg-surface px-4 py-2 shadow-sm lg:-mx-6 lg:px-6">
         <Link href={`/eventi/${eventoId}`} className="inline-flex min-h-11 items-center gap-1 text-heading text-accent hover:underline">
-          <ChevronLeft size={20} aria-hidden />{data.evento.titolo}
+          <ChevronLeft size={20} aria-hidden />{evento.titolo}
         </Link>
-        <p className="pl-6 text-label text-ink">{formattaDataOra(new Date(data.evento.data_ora))} · {data.evento.locale}</p>
+        <p className="pl-6 text-label text-ink">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
       </div>
       <div className="max-w-160">
         <h1 className="mb-6 text-title lg:text-display">{iniziale ? "Modifica prenotazione" : "Nuova prenotazione"}</h1>
@@ -162,13 +174,20 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
             <Errore id="telefono" msg={errors.telefono?.message} />
           </label>
 
-          <fieldset {...aria("adulti")} className="space-y-3 rounded-lg border border-line bg-surface p-4">
+          <fieldset aria-invalid={!!erroreQuantita} aria-describedby={erroreQuantita ? "errore-righe" : undefined}
+            className="space-y-3 rounded-lg border border-line bg-surface p-4">
             <legend className="px-1 text-label">Quantità</legend>
-            {QUANTITA.map(([k, nome]) => (
-              <Contatore key={k} etichetta={nome} valore={q[k]} prezzo={unitario[k] ? formattaEuro(unitario[k]) : "gratuito"}
-                onChange={(n) => setValue(k, n, { shouldValidate: isSubmitted })} />
+            {tariffe.map((t, i) => (
+              <Contatore key={t.id} etichetta={t.nome} valore={Number(valori.righe?.[i]?.quantita) || 0}
+                prezzo={prezzoDi(t.id) ? formattaEuro(prezzoDi(t.id)) : "gratuito"}
+                onChange={(n) => setValue(`righe.${i}.quantita`, n, { shouldValidate: isSubmitted })} />
             ))}
-            <Errore id="adulti" msg={errors.adulti?.message} />
+            {conPacchetto && (
+              <Contatore etichetta="Pacchetti" valore={q.pacchetti}
+                prezzo={formattaEuro(prezzi.prezzo_pacchetto_teatro + prezzi.prezzo_pacchetto_ristorante)}
+                onChange={(n) => setValue("pacchetti", n, { shouldValidate: isSubmitted })} />
+            )}
+            <Errore id="righe" msg={erroreQuantita} />
           </fieldset>
 
           {q.pacchetti > 0 && (

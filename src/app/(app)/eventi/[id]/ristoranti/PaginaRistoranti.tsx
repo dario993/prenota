@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronLeft, Printer, Share2 } from "lucide-react";
-import { getJson, SERVE_RETE } from "@/lib/query";
+import { getJson, SERVE_RETE, chiaveEvento } from "@/lib/query";
 import {
   elencoRistorante, formattaDataOra, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
   type DettaglioEvento, type Pasto, type Ristorante,
@@ -13,7 +13,7 @@ import { btnSecondario } from "@/components/stili";
 
 export function PaginaRistoranti({ id }: { id: string }) {
   const { data, isPending, error, fetchStatus } = useQuery({
-    queryKey: ["evento", id],
+    queryKey: chiaveEvento(id),
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
   });
   if (!data) {
