@@ -1,6 +1,6 @@
 # 6. Ristoranti e pacchetti
 
-> Stato: logica di calcolo fatta; interfaccia da implementare
+> Stato: fatto
 
 ## Regole
 
@@ -31,7 +31,10 @@ Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Sezioni 
 - **Condividi**: usa il menu di condivisione del telefono (`navigator.share`) con il testo dell'elenco di **quel**
   ristorante → WhatsApp, email, SMS…
 - Dove la condivisione non c'è (molti desktop): il testo viene **copiato negli appunti** con un messaggio di conferma.
-- **Stampa**: `window.print()` con uno stile di stampa pulito (senza menu).
+- **Stampa**: pulsante in alto (`window.print()`); la stampa esce a tutta larghezza, in nero su bianco, senza menu,
+  pulsanti e messaggi.
+- Se l'evento non ha pacchetti ristorante la pagina mostra "Nessun pacchetto ristorante per questo evento".
+- In alto un link riporta alla pagina dell'evento.
 - Entrambe richiedono **HTTPS** in produzione (vedi [Deploy homelab](13-deploy-homelab.md)).
 
 ## Incasso ristorante

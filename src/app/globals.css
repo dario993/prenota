@@ -10,3 +10,8 @@ body {
   background: #ffffff;
   color: #1f2937;
 }
+
+@media print {
+  body { background: #fff; color: #000; }
+  [data-sonner-toaster] { display: none; }
+}

@@ -14,3 +14,4 @@
 | 2026-10-24 | Route di lettura (eventi, dettaglio evento, provenienze) e home "Prossimi eventi" con cache locale | 2, 7 |
 | 2026-10-24 | Pagina evento: riepilogo (persone, posti liberi, quantità, coperti, incassi) ed elenco prenotazioni alfabetico con ricerca | 2 |
 | 2026-10-24 | Prenotazioni: inserimento in una schermata (contatori, ristorante e pasto per i pacchetti, provenienze suggerite, totali in tempo reale, avviso di capienza che non blocca), salvataggio senza doppioni anche con doppio tocco, prezzi fissati alla creazione, modifica ed eliminazione con conferma; pagine admin più strette su desktop | 2, 5 |
+| 2026-10-24 | Elenco ristoranti per evento (ristorante × pasto: nomi, telefono, coperti, note) con Condividi (menu del telefono o copia negli appunti) e Stampa a tutta larghezza senza menu | 6 |
