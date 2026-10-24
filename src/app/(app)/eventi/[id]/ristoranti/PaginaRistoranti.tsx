@@ -60,7 +60,7 @@ export function PaginaRistoranti({ id }: { id: string }) {
               <h2 className="font-semibold">
                 {NOMI_RISTORANTI[r]} – {NOMI_PASTI[p]} · {lista.reduce((s, x) => s + x.pacchetti, 0)} coperti
               </h2>
-              <button type="button" className={btn} onClick={() => condividi(r, p)}>Condividi</button>
+              <button type="button" className={btn} aria-label={`Condividi ${NOMI_RISTORANTI[r]} ${NOMI_PASTI[p]}`} onClick={() => condividi(r, p)}>Condividi</button>
             </div>
             <ul className="divide-y divide-gray-100 print:divide-gray-400">
               {lista.map((x) => (
