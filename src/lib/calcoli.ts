@@ -15,6 +15,11 @@ export interface Prenotazione extends Quantita, Prezzi {
   ristorante: Ristorante | null; pasto: Pasto | null; posti: string; provenienza: string; note: string;
   in_attesa?: boolean; // solo lato client
 }
+export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number }
+export interface DettaglioEvento {
+  evento: Omit<EventoLista, "persone"> & Prezzi;
+  prenotazioni: Prenotazione[];
+}
 export interface Riepilogo {
   persone: number; capienza: number; postiLiberi: number; oltreCapienza: boolean;
   perTipo: Quantita; incassoTeatro: number; incassoRistorante: number;

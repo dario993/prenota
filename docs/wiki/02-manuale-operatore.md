@@ -1,6 +1,6 @@
 # 2. Manuale operatore
 
-> Stato: da implementare
+> Stato: accesso, navigazione e Prossimi eventi fatti; il resto da implementare
 
 ## Accesso
 
@@ -15,7 +15,8 @@ o finché scade (vedi [Autenticazione e ruoli](09-autenticazione-e-ruoli.md)).
 ## Prossimi eventi
 
 La pagina iniziale mostra gli eventi futuri, dal più vicino. Ogni scheda indica opera, data e ora, locale e una barra
-`persone / capienza`. Tocca una scheda per aprire l'evento.
+`persone / capienza`. Tocca una scheda per aprire l'evento. Se non ci sono eventi futuri compare "Nessun evento in programma". Senza rete
+resta visibile l'ultimo elenco caricato.
 
 ## Pagina evento
 

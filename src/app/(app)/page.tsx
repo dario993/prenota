@@ -1,6 +1,12 @@
 import { richiediUtente } from "@/lib/auth";
+import { ListaEventi } from "./ListaEventi";
 
 export default async function Home() {
-  const utente = await richiediUtente();
-  return <main className="p-4">Ciao {utente.nome}</main>;
+  await richiediUtente();
+  return (
+    <main className="mx-auto max-w-5xl p-4 lg:p-8">
+      <h1 className="mb-4 text-xl font-semibold lg:text-2xl">Prossimi eventi</h1>
+      <ListaEventi />
+    </main>
+  );
 }
