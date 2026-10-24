@@ -6,9 +6,9 @@ services:
     container_name: prenota-app
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD}@db:5432/prenota
+      - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD nel file .env}@db:5432/prenota
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     networks:
       - prenota-net
     depends_on:
@@ -22,7 +22,7 @@ services:
     environment:
       - POSTGRES_DB=prenota
       - POSTGRES_USER=prenota
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD nel file .env}
     volumes:
       - prenota-db:/var/lib/postgresql/data
     networks:

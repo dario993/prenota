@@ -17,7 +17,7 @@ Come per StageTrack: immagine Docker pubblicata su **ghcr** e avviata sull'homel
 ## docker-compose (sull'homelab)
 
 Copiare sull'homelab `docker-compose.yml` e `scripts/backup.sh`, e creare accanto un file `.env`
-(vedi `.env.example`, non versionare i segreti reali):
+(vedi `.env.example`, non versionare i segreti reali; senza `POSTGRES_PASSWORD` compose si rifiuta di partire):
 
 ```
 POSTGRES_PASSWORD=una-password-lunga
@@ -26,7 +26,7 @@ POSTGRES_PASSWORD=una-password-lunga
 Servizi:
 
 - **app** – `ghcr.io/dario993/prenota:latest`, `DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD}@db:5432/prenota`,
-  porta interna 3000 (pubblicata come 3001 sull'host: cambiarla se occupata);
+  porta interna 3000, pubblicata solo su `127.0.0.1:3001` dell'host (non raggiungibile dalla rete: serve un proxy sullo stesso host; se il proxy sta su un'altra macchina o in Docker, usa la rete condivisa e `prenota-app:3000`);
 - **db** – `postgres:17`, volume persistente `prenota-db`, `POSTGRES_DB=prenota`; l'app parte quando il db è pronto.
 
 ### Primo avvio
@@ -44,14 +44,15 @@ docker compose up -d
 
 Obbligatorio: senza HTTPS non funzionano Condividi, copia negli appunti e service worker, e il cookie `Secure` non viene
 inviato (il login non entra). L'app sta dietro lo **stesso reverse proxy** usato per StageTrack, con certificato TLS:
-il proxy deve puntare a `prenota-app:3000` (se condivide la rete Docker) o a `host:3001`, e inoltrare gli header
+il proxy deve puntare a `prenota-app:3000` (se condivide la rete Docker) o a `127.0.0.1:3001`, e inoltrare gli header
 `Host` e `X-Forwarded-Proto`.
 
 ## Backup
 
 `scripts/backup.sh` (da lanciare sull'homelab nella cartella del compose) esegue
-`docker compose exec -T db pg_dump -U prenota prenota | gzip > backups/prenota-AAAA-MM-GG.sql.gz` e cancella i file
-più vecchi di 30 giorni. Cron d'esempio, ogni notte alle 03:00:
+`docker compose exec -T db pg_dump -U prenota prenota | gzip > backups/prenota-AAAA-MM-GG.sql.gz` scrive prima in un file temporaneo, lo
+verifica (gzip valido e non vuoto) e solo allora lo rinomina; i file più vecchi di 30 giorni si cancellano solo dopo un
+backup riuscito. Se il dump fallisce lo script esce con errore (visibile nel log di cron) e non tocca i backup esistenti. Cron d'esempio, ogni notte alle 03:00:
 
 ```
 0 3 * * * /srv/prenota/scripts/backup.sh >> /srv/prenota/backups/backup.log 2>&1
