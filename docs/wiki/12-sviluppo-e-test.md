@@ -14,9 +14,10 @@ createdb prenota
 cp .env.example .env.local     # DATABASE_URL=postgres://localhost/prenota
 npm install
 npm run db:init                # applica db/schema.sql
-ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_NOME=... npm run crea-admin
-npm run dev                    # http://localhost:3000
+npm run dev                    # http://localhost:3000: al primo accesso crea il primo admin dal browser
 ```
+
+`ADMIN_EMAIL=... ADMIN_PASSWORD=... ADMIN_NOME=... npm run crea-admin` serve solo per recuperare un accesso.
 
 ## Comandi
 

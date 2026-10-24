@@ -34,9 +34,10 @@ Servizi:
 ```bash
 docker compose up -d db
 docker compose run --rm app node scripts/db-init.mjs
-docker compose run --rm -e ADMIN_EMAIL=... -e ADMIN_NOME=... -e ADMIN_PASSWORD=... app node scripts/crea-admin.mjs
 docker compose up -d
 ```
+
+Al primo accesso dal browser l'app chiede di creare il primo admin: non serve più `crea-admin`, che resta come recupero (`docker compose run --rm -e ADMIN_EMAIL=... -e ADMIN_NOME=... -e ADMIN_PASSWORD=... app node scripts/crea-admin.mjs`).
 
 `db-init` si può rilanciare: lo schema usa `if not exists` (i messaggi NOTICE «already exists» sono normali).
 

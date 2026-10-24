@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sql } from "./db";
-import { verificaPassword } from "./password.mjs";
+import { hashPassword, verificaPassword } from "./password.mjs";
 
 export type Utente = {
   id: string;
@@ -45,15 +45,11 @@ export async function verificaAdmin(): Promise<Utente> {
   return u;
 }
 
-export async function accedi(email: string, password: string): Promise<boolean> {
-  const [u] = await sql<{ id: string; password_hash: string }[]>`
-    select id, password_hash from utenti where email = ${email} and attivo`;
-  if (!u || !(await verificaPassword(password, u.password_hash))) return false;
-
+async function creaSessione(utenteId: string): Promise<void> {
   const token = randomBytes(32).toString("base64url");
   await sql`
     insert into sessioni (id, utente_id, scade_il)
-    values (${token}, ${u.id}, now() + make_interval(secs => ${DURATA_SECONDI}))`;
+    values (${token}, ${utenteId}, now() + make_interval(secs => ${DURATA_SECONDI}))`;
   (await cookies()).set(COOKIE_SESSIONE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -61,6 +57,14 @@ export async function accedi(email: string, password: string): Promise<boolean> 
     maxAge: DURATA_SECONDI,
     path: "/",
   });
+}
+
+export async function accedi(email: string, password: string): Promise<boolean> {
+  const [u] = await sql<{ id: string; password_hash: string }[]>`
+    select id, password_hash from utenti where email = ${email} and attivo`;
+  if (!u || !(await verificaPassword(password, u.password_hash))) return false;
+
+  await creaSessione(u.id);
   return true;
 }
 
@@ -69,4 +73,31 @@ export async function esci(): Promise<void> {
   const token = c.get(COOKIE_SESSIONE)?.value;
   if (token) await sql`delete from sessioni where id = ${token}`;
   c.delete(COOKIE_SESSIONE);
+}
+
+export async function ciSonoUtenti(): Promise<boolean> {
+  const [r] = await sql<{ e: boolean }[]>`select exists(select 1 from utenti) as e`;
+  return r.e;
+}
+
+// Crea il primo admin solo se la tabella utenti è vuota. Il lock esclusivo
+// serializza due invii simultanei: il secondo vede l'utente del primo.
+export async function creaPrimoAdmin(d: {
+  nome: string;
+  email: string;
+  password: string;
+}): Promise<boolean> {
+  const hash = await hashPassword(d.password);
+  const id = await sql.begin(async (tx) => {
+    await tx`lock table utenti in exclusive mode`;
+    const [r] = await tx<{ id: string }[]>`
+      insert into utenti (nome, email, password_hash, ruolo, attivo)
+      select ${d.nome}, ${d.email}, ${hash}, 'admin', true
+      where not exists (select 1 from utenti)
+      returning id`;
+    return r?.id;
+  });
+  if (!id) return false;
+  await creaSessione(id);
+  return true;
 }

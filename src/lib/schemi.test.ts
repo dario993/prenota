@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { schemaEvento, schemaLocale, schemaLogin, schemaOpera, schemaPrenotazione, schemaUtente } from "./schemi";
+import { schemaEvento, schemaLocale, schemaLogin, schemaOpera, schemaPrenotazione, schemaPrimoAccesso, schemaUtente } from "./schemi";
 
 const base = {
   id: "0b9a6a8e-6f0e-4a57-9d3e-3c1f0a2b7c11",
@@ -50,6 +50,20 @@ test("schemaOpera converte euro", () => {
 
 test("schemaLogin normalizza email", () => {
   expect(schemaLogin.parse({ email: "  Mario@X.it ", password: "x" }).email).toBe("mario@x.it");
+});
+
+describe("schemaPrimoAccesso", () => {
+  const ok = { nome: "Mario", email: "  Mario@X.it ", password: "password1", conferma: "password1" };
+  test("normalizza email", () => {
+    expect(schemaPrimoAccesso.parse(ok).email).toBe("mario@x.it");
+  });
+  test("password diverse: errore su conferma", () => {
+    const r = schemaPrimoAccesso.safeParse({ ...ok, conferma: "altra1234" });
+    expect(r.success ? [] : r.error.issues[0].path).toEqual(["conferma"]);
+  });
+  test("password corta rifiutata", () => {
+    expect(schemaPrimoAccesso.safeParse({ ...ok, password: "corta", conferma: "corta" }).success).toBe(false);
+  });
 });
 
 test("schemaEvento accetta datetime-local", () => {

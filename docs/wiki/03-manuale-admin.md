@@ -45,4 +45,6 @@ Da **Admin → Utenti**:
 - **Disattiva** toglie l'accesso subito, anche a chi è già collegato (le sue prenotazioni restano); **Attiva** lo ripristina.
 - Non puoi disattivare né declassare te stesso, così c'è sempre almeno un admin.
 
-Il primo admin si crea dal terminale con `npm run crea-admin` (vedi [Sviluppo e test](12-sviluppo-e-test.md)).
+## Il primo admin
+
+Alla prima apertura, con il database vuoto, l'app chiede di creare il primo amministratore (nome, email, password e conferma). Non servono comandi da terminale. `npm run crea-admin` resta per il recupero di un accesso perso (vedi [Sviluppo e test](12-sviluppo-e-test.md)).

@@ -19,3 +19,4 @@
 | 2026-10-24 | Offline: si torna all'evento e si aggiungono più prenotazioni di seguito anche partendo dalla home; Esci bloccato con prenotazioni non inviate e poi svuota i dati del telefono; login per sessione scaduta nella stessa scheda; errori 5xx riprovati da soli; motivo del rifiuto e quantità conservati anche dopo un riavvio | 2, 10 |
 | 2026-10-24 | Immagine Docker (standalone su node:22-alpine), docker-compose con Postgres, script di backup, script npm docker:*; wiki rifinita (stati, decisioni) | 7, 12, 13, 14, README |
 | 2026-10-24 | Backup sicuro (file temporaneo verificato, retention solo dopo successo), compose con password obbligatoria e porta solo su localhost | 13 |
+| 2026-10-24 | Primo accesso obbligatorio: con database senza utenti l'app porta a `/primo-accesso` per creare il primo admin (nessuna credenziale predefinita); `crea-admin` resta per il recupero | 3, 9, 12, 13 |

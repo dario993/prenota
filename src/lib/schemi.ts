@@ -93,3 +93,15 @@ export const schemaLogin = z.object({
   email: z.string().trim().toLowerCase(),
   password: z.string().min(1, "Inserisci la password"),
 });
+
+export const schemaPrimoAccesso = z
+  .object({
+    nome: testo(80),
+    email,
+    password: z.string().min(8, "Almeno 8 caratteri"),
+    conferma: z.string(),
+  })
+  .refine((d) => d.password === d.conferma, {
+    message: "Le password non coincidono",
+    path: ["conferma"],
+  });
