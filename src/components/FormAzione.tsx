@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { ERRORE_IMPREVISTO, type Esito } from "@/lib/esito";
-
+import { btnDistruttivo, btnPrimario, btnSecondario, scheda } from "./stili";
 
 // Form admin: onSubmit (non <form action>: React svuoterebbe i campi anche in caso di errore) + Server Action che ritorna Esito; l'esito va in un toast.
 // `dopo`: percorso a cui tornare dopo un salvataggio riuscito (es. uscire dalla modifica).
@@ -38,24 +38,19 @@ export function FormAzione({
     });
   }
   return (
-    <form onSubmit={invia} className={className}>
+    <form onSubmit={invia} className={className ?? `${scheda} max-w-160 space-y-4`}>
       {children}
-      <div className="flex items-center gap-3">
-        <button
-          disabled={pending}
-          className="min-h-11 rounded bg-accento px-5 font-medium text-white hover:bg-accento-scuro disabled:opacity-60"
-        >
-          {testo}
+      <div className="flex flex-wrap items-center gap-2 pt-2">
+        <button disabled={pending} className={`${btnPrimario} min-w-28`}>
+          {pending ? "Invio…" : testo}
         </button>
-        {annulla && (
-          <Link href={annulla} className="text-sm text-gray-600 hover:text-accento">Annulla</Link>
-        )}
+        {annulla && <Link href={annulla} className={btnSecondario}>Annulla</Link>}
       </div>
     </form>
   );
 }
 
-// Bottone d'azione con conferma opzionale; di default è "Elimina" (rosso).
+// Bottone d'azione con conferma opzionale; di default è "Elimina" (distruttivo).
 export function BottoneElimina({
   azione, conferma, nome, etichetta = "Elimina", successo = "Eliminato", variante = "pericolo",
 }: {
@@ -73,7 +68,7 @@ export function BottoneElimina({
       type="button"
       disabled={pending}
       aria-label={`${etichetta} ${nome}`}
-      className={`min-h-11 px-3 text-sm hover:underline disabled:opacity-60 ${variante === "pericolo" ? "text-red-600" : "text-accento"}`}
+      className={variante === "pericolo" ? btnDistruttivo : btnSecondario}
       onClick={() => {
         if (conferma && !confirm(conferma)) return;
         avvia(async () => {
@@ -93,4 +88,3 @@ export function BottoneElimina({
   );
 }
 
-export const classeInput = "mt-1 w-full rounded border border-gray-300 p-3";

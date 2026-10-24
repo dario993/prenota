@@ -2,14 +2,15 @@ import Link from "next/link";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formattaDataOra } from "@/lib/calcoli";
-import { BottoneElimina, classeInput, FormAzione } from "@/components/FormAzione";
+import { BottoneElimina, FormAzione } from "@/components/FormAzione";
+import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin } from "@/components/stili";
 import { eliminaEvento, salvaEvento } from "./azioni";
 
 type Evento = { id: string; opera_id: string; locale_id: string; titolo: string; locale: string; data_ora: Date; locale_input: string };
 
-export default async function Eventi({ searchParams }: { searchParams: Promise<{ modifica?: string }> }) {
+export default async function Eventi({ searchParams }: { searchParams: Promise<{ modifica?: string; nuovo?: string }> }) {
   await richiediAdmin();
-  const { modifica } = await searchParams;
+  const { modifica, nuovo } = await searchParams;
   const [eventi, opere, locali] = await Promise.all([
     sql<Evento[]>`select e.id, e.opera_id, e.locale_id, o.titolo, l.nome as locale, e.data_ora,
       to_char(e.data_ora at time zone 'Europe/Rome', 'YYYY-MM-DD"T"HH24:MI') as locale_input
@@ -20,62 +21,63 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
   ]);
   const corrente = eventi.find((e) => e.id === modifica);
   const nome = (e: Evento) => `${e.titolo} ${formattaDataOra(e.data_ora)}`;
-  const azioni = (e: Evento) => (
-    <>
-      <Link href={`/admin/eventi?modifica=${e.id}`} aria-label={`Modifica ${nome(e)}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
-      <BottoneElimina azione={eliminaEvento.bind(null, e.id)} conferma={`Eliminare "${nome(e)}"?`} nome={nome(e)} />
-    </>
-  );
-  return (
-    <main className="mx-auto max-w-4xl space-y-6 p-4">
-      <h1 className="text-xl font-bold">Eventi</h1>
+  const adesso = new Date();
+  if (corrente || nuovo !== undefined) return (
+    <main className={paginaAdmin}>
+      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${nome(corrente)}` : "Nuovo evento"}</h1>
       <FormAzione
-        key={corrente?.id ?? "nuovo"}
         azione={salvaEvento}
         dopo="/admin/eventi"
-        annulla={corrente ? "/admin/eventi" : undefined}
-        className="space-y-3 rounded border border-gray-200 p-4"
+        annulla="/admin/eventi"
       >
-        <h2 className="font-semibold">{corrente ? "Modifica evento" : "Nuovo evento"}</h2>
         {corrente && <input type="hidden" name="id" value={corrente.id} />}
-        <label className="block text-sm">Opera
-          <select name="opera_id" defaultValue={corrente?.opera_id ?? ""} required className={classeInput}>
+        <label className={etichetta}>Opera
+          <select name="opera_id" defaultValue={corrente?.opera_id ?? ""} required className={campo}>
             <option value="" disabled>Scegli…</option>
             {opere.map((o) => <option key={o.id} value={o.id}>{o.titolo}</option>)}
           </select>
         </label>
-        <label className="block text-sm">Locale
-          <select name="locale_id" defaultValue={corrente?.locale_id ?? ""} required className={classeInput}>
+        <label className={etichetta}>Locale
+          <select name="locale_id" defaultValue={corrente?.locale_id ?? ""} required className={campo}>
             <option value="" disabled>Scegli…</option>
             {locali.map((l) => <option key={l.id} value={l.id}>{l.nome}</option>)}
           </select>
         </label>
-        <label className="block text-sm">Data e ora
-          <input type="datetime-local" name="data_ora" defaultValue={corrente?.locale_input} required className={classeInput} />
+        <label className={etichetta}>Data e ora
+          <input type="datetime-local" name="data_ora" defaultValue={corrente?.locale_input} required className={campo} />
         </label>
       </FormAzione>
+    </main>
+  );
+  return (
+    <main className={paginaAdmin}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-title lg:text-display">Eventi</h1>
+        <Link href="/admin/eventi?nuovo" className={btnPrimario}>Nuovo evento</Link>
+      </div>
 
-      <ul className="space-y-2 lg:hidden">
-        {eventi.map((e) => (
-          <li key={e.id} className="rounded border border-gray-200 p-3">
-            <Link href={`/eventi/${e.id}`} className="font-medium text-accento hover:underline">{e.titolo}</Link>
-            <div className="text-sm text-gray-600">{formattaDataOra(e.data_ora)} · {e.locale}</div>
-            <div className="-mb-1 flex">{azioni(e)}</div>
-          </li>
-        ))}
-      </ul>
-      <table className="hidden w-full text-left text-sm lg:table">
-        <thead><tr className="border-b border-gray-200"><th className="py-2">Data e ora</th><th>Opera</th><th>Locale</th><th /></tr></thead>
-        <tbody>
-          {eventi.map((e) => (
-            <tr key={e.id} className="border-b border-gray-100">
-              <td className="py-1">{formattaDataOra(e.data_ora)}</td><td><Link href={`/eventi/${e.id}`} className="text-accento hover:underline">{e.titolo}</Link></td><td>{e.locale}</td>
-              <td className="flex justify-end">{azioni(e)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {eventi.length === 0 && <p className="text-sm text-gray-600">Nessun evento.</p>}
+      {eventi.length === 0 ? <p className="py-6 text-center text-ink-muted">Nessun evento</p> : (
+        <ul className={elencoAdmin}>
+          {eventi.map((e) => {
+            const passato = e.data_ora < adesso;
+            return (
+              <li key={e.id} className={rigaAdmin}>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link href={`/eventi/${e.id}`} className={`font-semibold hover:underline ${passato ? "text-ink-muted" : "text-accent"}`}>{e.titolo}</Link>
+                    {passato && <span className="rounded-sm bg-surface-sunken px-2 py-1 text-label text-ink-muted">passato</span>}
+                  </div>
+                  <div className="text-caption text-ink-muted">{formattaDataOra(e.data_ora)} · {e.locale}</div>
+                </div>
+                <div className={azioniAdmin}>
+                  <Link href={`/admin/eventi?modifica=${e.id}`} aria-label={`Modifica ${nome(e)}`} className={btnSecondario}>Modifica</Link>
+                  <BottoneElimina azione={eliminaEvento.bind(null, e.id)} conferma={`Eliminare l'evento ${nome(e)}?`} nome={nome(e)} />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </main>
   );
 }

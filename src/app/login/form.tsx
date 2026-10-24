@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schemaLogin } from "@/lib/schemi";
+import { btnPrimario, campo, erroreCampo, etichetta, scheda } from "@/components/stili";
 import { azioneAccedi } from "./azioni";
 
 type Campi = { email: string; password: string };
@@ -21,38 +22,35 @@ export function FormLogin() {
   });
 
   return (
-    <main className="flex flex-1 items-center justify-center p-4">
-      <form method="post" onSubmit={invia} className="w-full max-w-sm space-y-4">
-        <h1 className="text-center text-3xl font-bold text-accento">Prenota</h1>
-        <label className="block text-sm">
+    <main className="flex flex-1 items-center justify-center px-4 py-12">
+      <form method="post" onSubmit={invia} className={`${scheda} w-full max-w-sm space-y-4 p-6`}>
+        <h1 className="text-title">Prenota</h1>
+        <label className={etichetta}>
           Email
           <input
             type="text"
             inputMode="email"
             autoComplete="username"
-            className="mt-1 w-full rounded border border-gray-300 p-3"
+            className={campo}
             {...register("email")}
           />
         </label>
-        <label className="block text-sm">
+        <label className={etichetta}>
           Password
           <input
             type="password"
             autoComplete="current-password"
-            className="mt-1 w-full rounded border border-gray-300 p-3"
+            aria-invalid={!!formState.errors.password}
+            className={campo}
             {...register("password")}
           />
           {formState.errors.password && (
-            <span className="text-red-600">{formState.errors.password.message}</span>
+            <span className={erroreCampo}>{formState.errors.password.message}</span>
           )}
         </label>
-        {errore && <p role="alert" className="text-sm text-red-600">{errore}</p>}
-        <button
-          type="submit"
-          disabled={formState.isSubmitting}
-          className="w-full rounded bg-accento p-3 font-medium text-white hover:bg-accento-scuro disabled:opacity-60"
-        >
-          Accedi
+        {errore && <p role="alert" className="text-caption text-danger">{errore}</p>}
+        <button type="submit" disabled={formState.isSubmitting} className={`${btnPrimario} w-full`}>
+          {formState.isSubmitting ? "Invio…" : "Accedi"}
         </button>
       </form>
     </main>

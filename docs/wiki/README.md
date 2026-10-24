@@ -33,7 +33,7 @@ Documentazione della web app per le prenotazioni degli spettacoli teatrali.
 | 8 | [Database](08-database.md) | fatto | Tabelle, vincoli, migrazioni |
 | 9 | [Autenticazione e ruoli](09-autenticazione-e-ruoli.md) | fatto | Login, sessioni, permessi admin / operatore |
 | 10 | [Offline](10-offline.md) | fatto | Coda delle nuove prenotazioni, invio automatico, service worker |
-| 11 | [Interfaccia e stile](11-interfaccia-e-stile.md) | fatto | Palette bianco / blu, layout mobile e desktop, componenti |
+| 11 | [Interfaccia e stile](11-interfaccia-e-stile.md) | fatto | Design system applicato: token, tipografia, layout, componenti |
 
 ### 5. Operatività
 | # | Pagina | Stato | Contenuto |

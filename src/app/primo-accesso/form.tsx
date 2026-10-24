@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schemaPrimoAccesso } from "@/lib/schemi";
+import { btnPrimario, campo, erroreCampo, etichetta, scheda } from "@/components/stili";
 import { azioneCreaPrimoAdmin } from "./azioni";
 
 type Campi = { nome: string; email: string; password: string; conferma: string };
-
-const classeCampo = "mt-1 w-full rounded border border-gray-300 p-3";
 
 export function FormPrimoAccesso() {
   const [errore, setErrore] = useState("");
@@ -24,36 +23,35 @@ export function FormPrimoAccesso() {
   });
 
   return (
-    <main className="flex flex-1 items-center justify-center p-4">
-      <form method="post" onSubmit={invia} className="w-full max-w-sm space-y-4">
-        <h1 className="text-center text-2xl font-bold text-accento">Crea il primo amministratore</h1>
-        <label className="block text-sm">
+    <main className="flex flex-1 items-center justify-center px-4 py-12">
+      <form method="post" onSubmit={invia} className={`${scheda} w-full max-w-sm space-y-4 p-6`}>
+        <div>
+          <h1 className="text-title">Crea il primo amministratore</h1>
+          <p className="mt-1 text-caption text-ink-muted">Con questo accesso potrai aggiungere locali, opere, eventi e altri utenti.</p>
+        </div>
+        <label className={etichetta}>
           Nome
-          <input type="text" autoComplete="name" className={classeCampo} {...register("nome")} />
-          {err.nome && <span className="text-red-600">{err.nome.message}</span>}
+          <input type="text" autoComplete="name" aria-invalid={!!err.nome} className={campo} {...register("nome")} />
+          {err.nome && <span className={erroreCampo}>{err.nome.message}</span>}
         </label>
-        <label className="block text-sm">
+        <label className={etichetta}>
           Email
-          <input type="text" inputMode="email" autoComplete="username" className={classeCampo} {...register("email")} />
-          {err.email && <span className="text-red-600">{err.email.message}</span>}
+          <input type="text" inputMode="email" autoComplete="username" aria-invalid={!!err.email} className={campo} {...register("email")} />
+          {err.email && <span className={erroreCampo}>{err.email.message}</span>}
         </label>
-        <label className="block text-sm">
+        <label className={etichetta}>
           Password
-          <input type="password" autoComplete="new-password" className={classeCampo} {...register("password")} />
-          {err.password && <span className="text-red-600">{err.password.message}</span>}
+          <input type="password" autoComplete="new-password" aria-invalid={!!err.password} className={campo} {...register("password")} />
+          {err.password && <span className={erroreCampo}>{err.password.message}</span>}
         </label>
-        <label className="block text-sm">
+        <label className={etichetta}>
           Conferma password
-          <input type="password" autoComplete="new-password" className={classeCampo} {...register("conferma")} />
-          {err.conferma && <span className="text-red-600">{err.conferma.message}</span>}
+          <input type="password" autoComplete="new-password" aria-invalid={!!err.conferma} className={campo} {...register("conferma")} />
+          {err.conferma && <span className={erroreCampo}>{err.conferma.message}</span>}
         </label>
-        {errore && <p role="alert" className="text-sm text-red-600">{errore}</p>}
-        <button
-          type="submit"
-          disabled={formState.isSubmitting}
-          className="w-full rounded bg-accento p-3 font-medium text-white hover:bg-accento-scuro disabled:opacity-60"
-        >
-          Crea amministratore
+        {errore && <p role="alert" className="text-caption text-danger">{errore}</p>}
+        <button type="submit" disabled={formState.isSubmitting} className={`${btnPrimario} w-full`}>
+          {formState.isSubmitting ? "Invio…" : "Crea e accedi"}
         </button>
       </form>
     </main>

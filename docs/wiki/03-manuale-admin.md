@@ -10,7 +10,7 @@ Ordine consigliato per un nuovo spettacolo: **locale → opera → evento**.
 Nome e **capienza** (numero intero > 0, es. 105). Un locale può ospitare più eventi.
 Un locale con eventi collegati non si può eliminare (messaggio: «Impossibile eliminare: ci sono eventi collegati»).
 
-Da **Admin → Locali**: il modulo in alto crea un nuovo locale; **Modifica** nell'elenco ricarica il modulo con i dati del locale. L'esito (salvato / errore) compare in un messaggio a comparsa; in caso di errore i campi restano compilati.
+Da **Admin → Locali**: la pagina mostra solo l'elenco; **Nuovo locale** in alto e **Modifica** su ogni riga aprono il modulo in una pagina a parte (**Annulla** o il tasto indietro tornano all'elenco, dopo il salvataggio si torna all'elenco). Opere, eventi e utenti funzionano allo stesso modo. L'esito (salvato / errore) compare in un messaggio a comparsa; in caso di errore i campi restano compilati.
 
 ## Opere e tariffario
 
@@ -34,7 +34,7 @@ Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo
 
 Da **Admin → Eventi**: scegli **opera**, **locale**, **data e ora** (ora italiana, qualunque sia il fuso del server). Un evento ha una sola opera.
 L'elenco è ordinato per data e comprende anche gli eventi passati; il titolo apre la pagina dell'evento (riepilogo e
-prenotazioni), **Modifica** ricarica il modulo con i dati dell'evento.
+prenotazioni), **Modifica** apre il modulo con i dati dell'evento.
 Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci sono prenotazioni»): prima vanno eliminate le prenotazioni.
 
 ## Utenti

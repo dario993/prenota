@@ -2,8 +2,11 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { CloudOff, Plus, UtensilsCrossed } from "lucide-react";
 import { getJson, SERVE_RETE, useInAttesa, useOnline } from "@/lib/query";
 import { formattaDataOra, prezziDi, type DettaglioEvento } from "@/lib/calcoli";
+import { Stato } from "@/components/Stato";
+import { btnPrimario, btnSecondario } from "@/components/stili";
 import { Riepilogo } from "./Riepilogo";
 import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
 
@@ -21,11 +24,9 @@ export function PaginaEvento({ id }: { id: string }) {
     if (navigator.onLine) for (const u of [`/eventi/${id}`, nuova]) fetch(u).catch(() => {});
   }, [id, nuova]);
   if (!data) {
-    return (
-      <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <p className="text-gray-500">{fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
-      </main>
-    );
+    if (fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
+    if (isPending) return <Stato testo="Caricamento…" />;
+    return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
   }
   const { evento } = data;
   // in coda sul telefono: prezzi attuali dell'opera (il server li fissa all'invio); escluse quelle già arrivate
@@ -35,28 +36,36 @@ export function PaginaEvento({ id }: { id: string }) {
   // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono
   const valide = prenotazioni.filter((p) => !("stato" in p) || p.stato === "pending");
   return (
-    <main className="mx-auto max-w-7xl p-4 lg:p-8">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold lg:text-2xl">{evento.titolo}</h1>
-          <p className="text-sm text-gray-600">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href={`/eventi/${id}/ristoranti`} className="text-accento hover:underline">Ristoranti</Link>
-          <Link href={nuova} className="hidden rounded-lg bg-accento px-4 py-2 font-medium text-white lg:block">+ Nuova prenotazione</Link>
-        </div>
-      </div>
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6">
       {coda.some((p) => p.stato === "pending") && (
-        <p role="status" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-          {online ? "Invio delle prenotazioni in attesa…" : "Salvate sul telefono, verranno inviate quando torna la rete."}
+        <p role="status" className="sticky top-0 z-20 mb-4 flex items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
+          <CloudOff size={20} aria-hidden className="shrink-0 text-warning" />
+          {online ? "Invio delle prenotazioni in attesa…" : "Salvate sul telefono, verranno inviate quando torna la rete"}
         </p>
       )}
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
-        <div className="xl:order-2 xl:sticky xl:top-4"><Riepilogo prenotazioni={valide} capienza={evento.capienza} /></div>
-        <div className="min-w-0 xl:order-1"><ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} /></div>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-title lg:text-display">{evento.titolo}</h1>
+          <p className="mt-1 text-caption text-ink-muted">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href={`/eventi/${id}/ristoranti`} className={btnSecondario}>
+            <UtensilsCrossed size={20} aria-hidden />Ristoranti
+          </Link>
+          <Link href={nuova} className={`${btnPrimario} hidden lg:inline-flex`}>
+            <Plus size={20} aria-hidden />Nuova prenotazione
+          </Link>
+        </div>
       </div>
+      <div className="space-y-6">
+        <Riepilogo prenotazioni={valide} capienza={evento.capienza} />
+        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} />
+      </div>
+      {/* telefono: azione principale in basso, sopra la navigazione, raggiungibile col pollice */}
       <Link href={nuova} aria-label="Nuova prenotazione"
-        className="fixed bottom-20 right-4 flex h-14 w-14 items-center justify-center rounded-full bg-accento text-3xl text-white shadow-lg lg:hidden"><span aria-hidden="true">+</span></Link>
+        className="fixed bottom-[calc(64px+env(safe-area-inset-bottom)+16px)] right-4 z-10 inline-flex size-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-overlay transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover lg:hidden">
+        <Plus size={28} aria-hidden />
+      </Link>
     </main>
   );
 }

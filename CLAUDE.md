@@ -3,8 +3,10 @@
 Web app (mobile-first, ottimizzata anche desktop) per le prenotazioni degli spettacoli teatrali: locali, opere,
 eventi, prenotazioni con pacchetti ristorante (Giamaica / Casale). Multi utente (admin / operatore).
 
+**A ogni avvio leggere la skill [skill/guidelines/skill.md](skill/guidelines/skill.md)** e seguirne le indicazioni.
+
 **Documentazione completa: [docs/wiki/README.md](docs/wiki/README.md)** – leggerla prima di modificare l'app.
-Design: `docs/superpowers/specs/2026-10-24-prenota-design.md`.
+Design: `docs/superpowers/specs/2026-10-24-prenota-design.md`. Design system UI: `docs/design-system/` (token in `src/app/globals.css`, classi in `src/components/stili.ts`).
 
 Stato: app completa (login, admin, eventi, prenotazioni, elenco ristoranti, offline); immagine Docker e compose pronti,
 primo `docker build` da provare sull'homelab.

@@ -11,6 +11,7 @@ o finché scade (vedi [Autenticazione e ruoli](09-autenticazione-e-ruoli.md)).
 
 - **Telefono**: barra in basso con *Eventi* (e *Admin* se sei admin).
 - **Desktop**: le stesse voci in un menu laterale fisso a sinistra.
+- **Tema scuro / Tema chiaro** (nel menu laterale su desktop, nella pagina **Admin** su telefono) cambia i colori con un tocco; la scelta resta sul dispositivo.
 
 ## Prossimi eventi
 
@@ -24,17 +25,19 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
 
 ## Pagina evento
 
-- **Riepilogo** in alto (su desktop affiancato all'elenco): persone prenotate, posti liberi, quantità per tipo,
+- **Riepilogo** sempre in alto, sopra l'elenco (su desktop i blocchi sono affiancati): persone prenotate, posti liberi, quantità per tipo,
   coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
 - **Elenco prenotazioni** in ordine alfabetico, con campo di **ricerca** per nome o numero di telefono.
   Telefono: una scheda per prenotazione, con le quantità in sigla (A adulti, R ridotti, B bambini, P pacchetti con
   ristorante e pasto, O omaggi) e il telefono del cliente. Desktop: tabella (nome, telefono cliccabile per chiamare,
   quantità, ristorante, posti, note, totale persone).
-  Tocca una prenotazione per aprirla. I posti liberi diventano rossi se superi la capienza (la prenotazione non viene bloccata).
-- Pulsante **+** per una nuova prenotazione; link **Ristoranti** per gli elenchi da inviare.
+  Tocca una prenotazione per aprirla. Se superi la capienza i posti liberi diventano negativi (es. `−6`), evidenziati con la scritta "oltre capienza" (la prenotazione non viene bloccata).
+- Pulsante **Nuova prenotazione** (su telefono il tondo **+** fisso in basso a destra); link **Ristoranti** per gli elenchi da inviare.
 - Se l'evento non esiste compare "Evento non trovato".
 
 ## Nuova prenotazione
+
+In testa resta sempre visibile, anche scorrendo, l'evento che stai prenotando (titolo, giorno e ora, locale); vale anche per la modifica.
 
 Tutto in una schermata:
 
@@ -49,8 +52,8 @@ Tutto in una schermata:
 6. **Provenienza** – scrivi o scegli tra i valori già usati (clienti, Facebook, manifesti…).
 7. **Note** – es. "1 carrozzina", "sedere vicino al sindaco".
 
-In fondo vedi in tempo reale **totale persone** e **importo** (teatro, ristorante e totale), calcolato con le tariffe
-attuali dell'opera. Se l'evento supera la capienza compare un **avviso rosso** "Supera la capienza di N posti":
+In una barra fissa in basso (sopra il menu; su desktop in fondo al modulo), accanto a **Salva**, vedi in tempo reale **totale persone** e **importo** (teatro, ristorante e totale), calcolato con le tariffe
+attuali dell'opera. Se l'evento supera la capienza compare un **avviso** "Supera la capienza di N posti":
 puoi comunque salvare.
 
 Premi **Salva**: compare "Prenotazione inviata: …" e torni alla pagina evento. Il pulsante si disattiva durante l'invio;
@@ -75,7 +78,7 @@ negli appunti. **Stampa** apre la stampa del browser. Vedi [Ristoranti e pacchet
 ## Senza rete
 
 - Puoi **solo aggiungere** prenotazioni. Premendo **Salva** torni subito alla pagina evento: la prenotazione è salvata
-  sul telefono, compare in elenco con l'etichetta gialla **"in attesa di invio"** e conta già nel riepilogo (con le
+  sul telefono, compare in elenco con l'etichetta **"in attesa di invio"** e conta già nel riepilogo (con le
   tariffe attuali dell'opera). In cima alla pagina un avviso ricorda "Salvate sul telefono, verranno inviate quando
   torna la rete"; un numero sull'icona **Eventi** del menu indica quante sono in attesa.
 - Per aprire **Nuova prenotazione** senza rete devi aver aperto quell'evento almeno una volta con la rete.
@@ -92,7 +95,7 @@ negli appunti. **Stampa** apre la stampa del browser. Vedi [Ristoranti e pacchet
   torna online e attendi l'invio prima di uscire". Uscendo, l'app cancella dal telefono tutti i dati salvati.
 - **Invio rifiutato** (per esempio l'evento è stato cancellato nel frattempo): la prenotazione diventa rossa,
   **"non inviata"**, con il motivo, e compare anche in cima alla home in **Prenotazioni non inviate**; il numero sul
-  menu diventa rosso. Non sparisce mai da sola, nemmeno chiudendo l'app: copia i dati se servono (nome, quantità,
+  menu cambia colore (rosso). Non sparisce mai da sola, nemmeno chiudendo l'app: copia i dati se servono (nome, quantità,
   telefono, posti, note), poi premi **Scarta**.
 
 Dettagli tecnici: [Offline](10-offline.md).

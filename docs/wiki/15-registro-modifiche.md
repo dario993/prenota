@@ -30,3 +30,10 @@
 | 2026-10-24 | Login e primo accesso: `method="post"` sui form, la password non finisce mai nell'indirizzo neanche senza JavaScript; in sviluppo l'app è raggiungibile dalla rete locale (`allowedDevOrigins`); nota che in produzione il login richiede HTTPS | 9, 12, 13 |
 | 2026-10-24 | Deploy: `docker-compose.portainer.yml` per uno stack Portainer da repository Git (build sull'homelab, porta 3005, schema creato all'avvio); istruzioni nella wiki | 13, README |
 | 2026-10-24 | Elenco prenotazioni: telefono del cliente visibile (scheda su telefono, colonna cliccabile su desktop) e ricerca anche per numero | 2 |
+| 2026-10-24 | Nuovo design system (`docs/design-system/`): token chiaro/scuro, IBM Plex, barra totali fissa nel modulo, riepilogo con cifre grandi, elenchi admin unici per telefono e desktop | 11, 2 |
+| 2026-10-24 | Pulsante nel menu per passare da tema chiaro a scuro e viceversa, ricordato sul dispositivo | 11, 2 |
+| 2026-10-24 | Admin locali, opere, eventi e utenti: modulo di nuovo / modifica in una pagina a parte, aperto solo dai pulsanti «Nuovo …» e «Modifica»; l'elenco resta pulito | 3 |
+| 2026-10-24 | Pagina evento: riepilogo sempre in alto sopra l'elenco prenotazioni anche su desktop (blocchi affiancati in orizzontale, voci di ogni blocco in colonne con etichetta sopra e cifra sotto) | 2, 11 |
+| 2026-10-24 | Nuova / modifica prenotazione: titolo, giorno e locale dell'evento sempre visibili in testa anche scorrendo il modulo | 2 |
+| 2026-10-24 | Intestazione del modulo prenotazione come barra fissa su sfondo superficie, a tutta larghezza; su telefono il pulsante del tema passa dalla barra in basso alla pagina Admin | 2, 11 |
+| 2026-10-24 | Pagina evento su telefono: pulsante Nuova prenotazione tondo con il solo simbolo + | 2, 11 |

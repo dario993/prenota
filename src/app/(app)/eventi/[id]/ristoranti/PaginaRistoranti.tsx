@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ChevronLeft, Printer, Share2 } from "lucide-react";
 import { getJson, SERVE_RETE } from "@/lib/query";
 import {
   elencoRistorante, formattaDataOra, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
   type DettaglioEvento, type Pasto, type Ristorante,
 } from "@/lib/calcoli";
-
-const btn = "rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50 print:hidden";
+import { Stato } from "@/components/Stato";
+import { btnSecondario } from "@/components/stili";
 
 export function PaginaRistoranti({ id }: { id: string }) {
   const { data, isPending, error, fetchStatus } = useQuery({
@@ -16,11 +17,9 @@ export function PaginaRistoranti({ id }: { id: string }) {
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
   });
   if (!data) {
-    return (
-      <main className="mx-auto max-w-3xl p-4 lg:p-8">
-        <p className="text-gray-500">{fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
-      </main>
-    );
+    if (fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
+    if (isPending) return <Stato testo="Caricamento…" />;
+    return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
   }
   const { evento, prenotazioni } = data;
   const dataOra = new Date(evento.data_ora);
@@ -34,7 +33,7 @@ export function PaginaRistoranti({ id }: { id: string }) {
       if (typeof navigator.share === "function") await navigator.share({ title, text });
       else {
         await navigator.clipboard.writeText(text);
-        toast.success("Elenco copiato");
+        toast.success("Copiato");
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
@@ -43,39 +42,52 @@ export function PaginaRistoranti({ id }: { id: string }) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-4 lg:p-8 print:max-w-none print:p-0 print:text-black">
-      <Link href={`/eventi/${id}`} className="text-sm text-accento hover:underline print:hidden">← {evento.titolo}</Link>
-      <div className="mb-4 mt-2 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold lg:text-2xl">Ristoranti</h1>
-          <p className="text-sm text-gray-600 print:text-black">{evento.titolo} · {formattaDataOra(dataOra)}</p>
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0 print:text-black">
+      <div className="max-w-160 print:max-w-none">
+        <Link href={`/eventi/${id}`} className="inline-flex min-h-11 items-center gap-1 text-accent hover:underline print:hidden">
+          <ChevronLeft size={20} aria-hidden />{evento.titolo}
+        </Link>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-title lg:text-display">Ristoranti</h1>
+            <p className="mt-1 text-caption text-ink-muted print:text-black">{evento.titolo} · {formattaDataOra(dataOra)}</p>
+          </div>
+          {sezioni.length > 0 && (
+            <button type="button" className={`${btnSecondario} print:hidden`} onClick={() => window.print()}>
+              <Printer size={20} aria-hidden />Stampa
+            </button>
+          )}
         </div>
-        {sezioni.length > 0 && <button type="button" className={btn} onClick={() => window.print()}>Stampa</button>}
-      </div>
-      {sezioni.length === 0 && <p className="text-gray-500">Nessun pacchetto ristorante per questo evento</p>}
-      <div className="space-y-4">
-        {sezioni.map(({ r, p, lista }) => (
-          <section key={r + p} className="rounded-lg border border-gray-200 p-4 print:break-inside-avoid print:border-black">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="font-semibold">
-                {NOMI_RISTORANTI[r]} – {NOMI_PASTI[p]} · {lista.reduce((s, x) => s + x.pacchetti, 0)} coperti
-              </h2>
-              <button type="button" className={btn} aria-label={`Condividi ${NOMI_RISTORANTI[r]} ${NOMI_PASTI[p]}`} onClick={() => condividi(r, p)}>Condividi</button>
-            </div>
-            <ul className="divide-y divide-gray-100 print:divide-gray-400">
-              {lista.map((x) => (
-                <li key={x.id} className="flex justify-between gap-3 py-2">
-                  <div className="min-w-0">
-                    <p className="font-medium">{x.cognome_nome}</p>
-                    {x.telefono && <p className="text-sm text-gray-600 print:text-black">{x.telefono}</p>}
-                    {x.note && <p className="text-sm text-gray-600 print:text-black">{x.note}</p>}
-                  </div>
-                  <span className="font-semibold">{x.pacchetti}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+        {sezioni.length === 0 && <p className="py-8 text-center text-ink-muted">Nessun pacchetto ristorante per questo evento</p>}
+        <div className="space-y-4">
+          {sezioni.map(({ r, p, lista }) => (
+            <section key={r + p}
+              className="rounded-lg border border-line bg-surface p-4 print:break-inside-avoid print:border-black print:bg-transparent">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-heading">{NOMI_RISTORANTI[r]} – {NOMI_PASTI[p]}</h2>
+                  <p className="text-caption text-ink-muted print:text-black">{formattaDataOra(dataOra)} · {evento.titolo}</p>
+                  <p className="mt-1 text-figure-sm tabular-nums">{lista.reduce((s, x) => s + x.pacchetti, 0)} coperti</p>
+                </div>
+                <button type="button" className={`${btnSecondario} print:hidden`} aria-label={`Condividi ${NOMI_RISTORANTI[r]} ${NOMI_PASTI[p]}`} onClick={() => condividi(r, p)}>
+                  <Share2 size={20} aria-hidden />Condividi
+                </button>
+              </div>
+              <ul className="divide-y divide-line print:divide-black">
+                {lista.map((x) => (
+                  <li key={x.id} className="flex justify-between gap-3 py-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold">{x.cognome_nome}</p>
+                      {x.telefono && <p className="text-caption text-ink-muted print:text-black">{x.telefono}</p>}
+                      {x.note && <p className="text-caption text-ink-muted print:text-black">{x.note}</p>}
+                    </div>
+                    <span className="font-semibold tabular-nums">{x.pacchetti}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
       </div>
     </main>
   );

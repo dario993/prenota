@@ -1,78 +1,85 @@
 import Link from "next/link";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { BottoneElimina, classeInput, FormAzione } from "@/components/FormAzione";
+import { BottoneElimina, FormAzione } from "@/components/FormAzione";
+import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin, scelta } from "@/components/stili";
 import { attivaUtente, salvaUtente } from "./azioni";
 
 type U = { id: string; nome: string; email: string; ruolo: "admin" | "operatore"; attivo: boolean };
 
-export default async function Utenti({ searchParams }: { searchParams: Promise<{ modifica?: string }> }) {
+const RUOLI = [["operatore", "Operatore"], ["admin", "Admin"]] as const;
+
+export default async function Utenti({ searchParams }: { searchParams: Promise<{ modifica?: string; nuovo?: string }> }) {
   const me = await richiediAdmin();
-  const { modifica } = await searchParams;
+  const { modifica, nuovo } = await searchParams;
   const utenti = await sql<U[]>`select id, nome, email, ruolo, attivo from utenti order by nome`;
   const corrente = utenti.find((u) => u.id === modifica);
-  const azioni = (u: U) => (
-    <>
-      <Link href={`/admin/utenti?modifica=${u.id}`} aria-label={`Modifica ${u.nome}`} className="inline-flex min-h-11 items-center px-3 text-sm text-accento hover:underline">Modifica</Link>
-      {u.id !== me.id && <BottoneElimina
-        azione={attivaUtente.bind(null, u.id, !u.attivo)}
-        conferma={u.attivo ? `Disattivare "${u.nome}"? Perderà subito l'accesso.` : undefined}
-        nome={u.nome}
-        etichetta={u.attivo ? "Disattiva" : "Attiva"}
-        successo={u.attivo ? "Disattivato" : "Attivato"}
-        variante={u.attivo ? "pericolo" : "normale"}
-      />}
-    </>
-  );
-  return (
-    <main className="mx-auto max-w-4xl space-y-6 p-4">
-      <h1 className="text-xl font-bold">Utenti</h1>
+  const sonoIo = corrente?.id === me.id; // il proprio ruolo non si cambia
+  if (corrente || nuovo !== undefined) return (
+    <main className={paginaAdmin}>
+      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.nome}` : "Nuovo utente"}</h1>
       <FormAzione
-        key={corrente?.id ?? "nuovo"}
         azione={salvaUtente}
         dopo="/admin/utenti"
-        annulla={corrente ? "/admin/utenti" : undefined}
-        className="space-y-3 rounded border border-gray-200 p-4"
+        annulla="/admin/utenti"
       >
-        <h2 className="font-semibold">{corrente ? "Modifica utente" : "Nuovo utente"}</h2>
         {corrente && <input type="hidden" name="id" value={corrente.id} />}
-        <label className="block text-sm">Nome
-          <input name="nome" defaultValue={corrente?.nome} required maxLength={80} className={classeInput} />
+        <label className={etichetta}>Nome
+          <input name="nome" defaultValue={corrente?.nome} required maxLength={80} className={campo} />
         </label>
-        <label className="block text-sm">Email
-          <input name="email" type="email" defaultValue={corrente?.email} required autoComplete="off" className={classeInput} />
+        <label className={etichetta}>Email
+          <input name="email" type="email" defaultValue={corrente?.email} required autoComplete="off" className={campo} />
         </label>
-        <label className="block text-sm">Password{corrente && " (vuota = invariata)"}
-          <input name="password" type="password" minLength={8} required={!corrente} autoComplete="new-password" className={classeInput} />
+        <label className={etichetta}>Password
+          <input name="password" type="password" minLength={8} required={!corrente} autoComplete="new-password" className={campo} />
+          <span className="text-caption font-normal text-ink-muted">{corrente ? "Lascia vuoto per non cambiarla." : "Almeno 8 caratteri."}</span>
         </label>
-        <label className="block text-sm">Ruolo
-          <select name="ruolo" defaultValue={corrente?.ruolo ?? "operatore"} className={classeInput}>
-            <option value="operatore">Operatore</option>
-            <option value="admin">Admin</option>
-          </select>
-        </label>
+        {sonoIo ? <input type="hidden" name="ruolo" value={corrente.ruolo} /> : (
+          <fieldset className="space-y-2">
+            <legend className="mb-2 text-label">Ruolo</legend>
+            <div className="flex gap-2">
+              {RUOLI.map(([valore, testo]) => (
+                <label key={valore} className={scelta}>
+                  <input type="radio" name="ruolo" value={valore} defaultChecked={(corrente?.ruolo ?? "operatore") === valore} className="sr-only" />{testo}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
       </FormAzione>
+    </main>
+  );
+  return (
+    <main className={paginaAdmin}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-title lg:text-display">Utenti</h1>
+        <Link href="/admin/utenti?nuovo" className={btnPrimario}>Nuovo utente</Link>
+      </div>
 
-      <ul className="space-y-2 lg:hidden">
+      <ul className={elencoAdmin}>
         {utenti.map((u) => (
-          <li key={u.id} className="rounded border border-gray-200 p-3">
-            <div className="font-medium">{u.nome}{!u.attivo && " (disattivato)"}</div>
-            <div className="text-sm text-gray-600">{u.email} · {u.ruolo}</div>
-            <div className="-mb-1 flex">{azioni(u)}</div>
+          <li key={u.id} className={rigaAdmin}>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`font-semibold ${u.attivo ? "" : "text-ink-muted"}`}>{u.nome}</span>
+                {!u.attivo && <span className="rounded-sm bg-surface-sunken px-2 py-1 text-label text-ink-muted">disattivato</span>}
+              </div>
+              <div className="text-caption text-ink-muted">{u.email} · {u.ruolo === "admin" ? "Admin" : "Operatore"}</div>
+            </div>
+            <div className={azioniAdmin}>
+              <Link href={`/admin/utenti?modifica=${u.id}`} aria-label={`Modifica ${u.nome}`} className={btnSecondario}>Modifica</Link>
+              {u.id !== me.id && <BottoneElimina
+                azione={attivaUtente.bind(null, u.id, !u.attivo)}
+                conferma={u.attivo ? `Disattivare ${u.nome}? Perderà subito l'accesso.` : undefined}
+                nome={u.nome}
+                etichetta={u.attivo ? "Disattiva" : "Attiva"}
+                successo={u.attivo ? "Disattivato" : "Attivato"}
+                variante={u.attivo ? "pericolo" : "normale"}
+              />}
+            </div>
           </li>
         ))}
       </ul>
-      <table className="hidden w-full text-left text-sm lg:table">
-        <thead><tr className="border-b border-gray-200"><th className="py-2">Nome</th><th>Email</th><th>Ruolo</th><th>Stato</th><th /></tr></thead>
-        <tbody>
-          {utenti.map((u) => (
-            <tr key={u.id} className="border-b border-gray-100">
-              <td className="py-1">{u.nome}</td><td>{u.email}</td><td>{u.ruolo}</td><td>{u.attivo ? "Attivo" : "Disattivato"}</td>
-              <td className="flex justify-end">{azioni(u)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </main>
   );
 }
