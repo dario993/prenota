@@ -5,6 +5,8 @@ services:
     image: ghcr.io/dario993/prenota:latest
     container_name: prenota-app
     restart: unless-stopped
+    # a ogni avvio schema e migrazioni (idempotenti), poi il server: un aggiornamento converte da solo il database
+    command: ["sh", "-c", "node scripts/db-init.mjs && node server.js"]
     environment:
       - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD nel file .env}@db:5432/prenota
     ports:

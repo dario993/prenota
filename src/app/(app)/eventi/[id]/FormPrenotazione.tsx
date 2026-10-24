@@ -31,13 +31,14 @@ const useEvento = (id: string, rileggi = true) =>
   useQuery({ queryKey: chiaveEvento(id), queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
     refetchOnMount: rileggi ? "always" : true });
 
-// Pagina di modifica: cerca la prenotazione nel dettaglio evento. Si aspetta la rilettura dal server: il modulo
+// Pagina di modifica: cerca la prenotazione nel dettaglio evento. Si aspetta la prima rilettura dal server: il modulo
 // nasce dai dati iniziali e, partendo da una copia vecchia, salvando cancellerebbe le righe aggiunte nel frattempo
-// (senza rete la modifica è comunque bloccata, quindi la copia in cache basta solo per mostrarla).
+// (senza rete la modifica è comunque bloccata, quindi la copia in cache basta solo per mostrarla). Le riletture
+// successive (ritorno sull'app, rete che torna) non smontano il modulo: si perderebbe quanto scritto.
 export function ModificaPrenotazione({ eventoId, pid }: { eventoId: string; pid: string }) {
-  const { data, isFetching, error, fetchStatus } = useEvento(eventoId);
+  const { data, isFetching, isFetchedAfterMount, error, fetchStatus } = useEvento(eventoId);
   const p = data?.prenotazioni.find((x) => x.id === pid);
-  if (p && !isFetching) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
+  if (p && (isFetchedAfterMount || fetchStatus === "paused")) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
   if (!data && fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
   if (isFetching) return <Stato testo="Caricamento…" />;
   return <Stato testo={error?.message ?? "Prenotazione non trovata"} nonTrovato />;

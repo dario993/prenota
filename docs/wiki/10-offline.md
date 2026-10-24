@@ -129,6 +129,6 @@ Vedi la checklist in [Sviluppo e test](12-sviluppo-e-test.md#offline).
 - La chiave della cache del dettaglio evento è `["evento", "tariffe", id]` (`chiaveEvento` in `src/lib/query.ts`):
   le copie salvate nel formato vecchio non vengono più lette e scadono da sole. Prenotazioni rimaste in coda nel
   formato vecchio arrivano senza tariffe: il server le rifiuta e restano da scartare.
-- La pagina **Modifica** aspetta la rilettura dal server prima di aprire il modulo, così non si salva partendo da una
-  copia vecchia.
+- La pagina **Modifica** aspetta la prima rilettura dal server prima di aprire il modulo, così non si salva partendo da
+  una copia vecchia; le riletture successive (ritorno sull'app, rete che torna) non toccano quanto si sta scrivendo.
 

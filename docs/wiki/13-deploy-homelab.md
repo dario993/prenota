@@ -32,14 +32,16 @@ Servizi:
 ### Primo avvio
 
 ```bash
-docker compose up -d db
-docker compose run --rm app node scripts/db-init.mjs
 docker compose up -d
 ```
 
+Il servizio `app` esegue `node scripts/db-init.mjs && node server.js`: a ogni avvio crea lo schema e applica le
+migrazioni (entrambi idempotenti), poi parte il server. Se `db-init` fallisce il server non parte.
+
 Al primo accesso dal browser l'app chiede di creare il primo admin: non serve più `crea-admin`, che resta come recupero (`docker compose run --rm -e ADMIN_EMAIL=... -e ADMIN_NOME=... -e ADMIN_PASSWORD=... app node scripts/crea-admin.mjs`).
 
-`db-init` si può rilanciare: lo schema usa `if not exists` (i messaggi NOTICE «already exists» sono normali).
+`db-init` si può rilanciare a mano (`docker compose run --rm app node scripts/db-init.mjs`): schema con `if not exists`,
+migrazioni che non fanno nulla se già applicate.
 
 ### Rete del proxy esistente
 
