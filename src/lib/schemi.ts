@@ -3,23 +3,29 @@ import { euroInCentesimi, PASTI, RISTORANTI } from "./calcoli";
 
 const testo = (max: number) =>
   z.string().trim().min(1, "Campo obbligatorio").max(max, `Massimo ${max} caratteri`);
-const quantita = z.coerce.number().int("Numero intero").min(0, "Non può essere negativo");
+const quantita = z.coerce
+  .number({ error: "Numero non valido" })
+  .int("Numero intero")
+  .min(0, "Non può essere negativo")
+  .max(10000, "Valore troppo alto");
 const email = z.string().trim().toLowerCase().pipe(z.email("Email non valida"));
 const importo = z.string().transform((v, ctx) => {
   const c = euroInCentesimi(v);
-  if (c === null) ctx.addIssue({ code: "custom", message: "Importo non valido" });
-  return c ?? 0;
+  if (c === null || c > 10_000_000) {
+    ctx.addIssue({ code: "custom", message: "Importo non valido" });
+    return 0;
+  }
+  return c;
 });
-
 export const schemaPrenotazione = z
   .object({
     id: z.uuid(),
     evento_id: z.uuid(),
     cognome_nome: testo(120),
-    telefono: z.string().trim().default(""),
-    posti: z.string().trim().default(""),
-    provenienza: z.string().trim().default(""),
-    note: z.string().trim().default(""),
+    telefono: z.string().trim().max(40, "Massimo 40 caratteri").default(""),
+    posti: z.string().trim().max(200, "Massimo 200 caratteri").default(""),
+    provenienza: z.string().trim().max(200, "Massimo 200 caratteri").default(""),
+    note: z.string().trim().max(1000, "Massimo 1000 caratteri").default(""),
     adulti: quantita,
     ridotti: quantita,
     bambini: quantita,
@@ -42,7 +48,11 @@ export type DatiPrenotazione = z.infer<typeof schemaPrenotazione>;
 
 export const schemaLocale = z.object({
   nome: testo(80),
-  capienza: z.coerce.number().int("Numero intero").positive("Deve essere maggiore di 0"),
+  capienza: z.coerce
+    .number({ error: "Numero non valido" })
+    .int("Numero intero")
+    .positive("Deve essere maggiore di 0")
+    .max(10000, "Valore troppo alto"),
 });
 
 export const schemaOpera = z.object({
@@ -57,13 +67,25 @@ export const schemaOpera = z.object({
 export const schemaEvento = z.object({
   opera_id: z.uuid(),
   locale_id: z.uuid(),
-  data_ora: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Data e ora non valide"),
+  data_ora: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, "Data e ora non valide")
+    .refine((v) => {
+      const [a, m, g, h, mi] = v.split(/[-T:]/).map(Number);
+      const d = new Date(Date.UTC(a, m - 1, g));
+      return d.getUTCMonth() === m - 1 && d.getUTCDate() === g && h <= 23 && mi <= 59;
+    }, "Data e ora non valide"),
 });
 
 export const schemaUtente = z.object({
   nome: testo(80),
   email,
-  password: z.string().min(8, "Almeno 8 caratteri").optional(), // assente in modifica = non cambia
+  // "" o assente in modifica = password invariata (undefined)
+  password: z
+    .string()
+    .transform((v) => (v === "" ? undefined : v))
+    .pipe(z.string().min(8, "Almeno 8 caratteri").optional())
+    .optional(),
   ruolo: z.enum(["admin", "operatore"]),
 });
 
