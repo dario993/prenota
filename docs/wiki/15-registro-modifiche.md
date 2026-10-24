@@ -13,3 +13,4 @@
 | 2026-10-24 | Admin: gestione eventi (opera, locale, data e ora italiana) e utenti (crea, modifica, attiva/disattiva con perdita immediata dell'accesso) | 3 |
 | 2026-10-24 | Route di lettura (eventi, dettaglio evento, provenienze) e home "Prossimi eventi" con cache locale | 2, 7 |
 | 2026-10-24 | Pagina evento: riepilogo (persone, posti liberi, quantità, coperti, incassi) ed elenco prenotazioni alfabetico con ricerca | 2 |
+| 2026-10-24 | Prenotazioni: inserimento in una schermata (contatori, ristorante e pasto per i pacchetti, provenienze suggerite, totali in tempo reale, avviso di capienza che non blocca), salvataggio senza doppioni anche con doppio tocco, prezzi fissati alla creazione, modifica ed eliminazione con conferma; pagine admin più strette su desktop | 2, 5 |

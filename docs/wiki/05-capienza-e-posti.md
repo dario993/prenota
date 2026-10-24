@@ -1,6 +1,6 @@
 # 5. Capienza e posti
 
-> Stato: da implementare
+> Stato: fatto
 
 ## Capienza
 
@@ -12,7 +12,8 @@
 
 Se salvando una prenotazione l'evento supererebbe la capienza:
 
-- il form mostra un **avviso rosso** con di quanto si sfora;
+- il form mostra un **avviso rosso** "Supera la capienza di N posti" (in modifica la prenotazione stessa non viene
+  contata due volte);
 - si può **salvare comunque** (sedie aggiunte, liste d'attesa, ecc.);
 - la scheda evento e il riepilogo mostrano la barra in rosso e i posti liberi negativi.
 

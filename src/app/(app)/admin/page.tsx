@@ -11,7 +11,7 @@ const LINK = [
 export default async function Admin() {
   await richiediAdmin();
   return (
-    <main className="space-y-3 p-4">
+    <main className="mx-auto max-w-4xl space-y-3 p-4">
       <h1 className="text-xl font-bold">Admin</h1>
       {LINK.map(([href, testo]) => (
         <Link key={href} href={href} className="block min-h-11 rounded border border-gray-200 p-4 font-medium hover:text-accento">

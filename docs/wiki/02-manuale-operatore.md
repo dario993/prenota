@@ -1,6 +1,6 @@
 # 2. Manuale operatore
 
-> Stato: accesso, navigazione, Prossimi eventi e Pagina evento fatti; il resto da implementare
+> Stato: accesso, navigazione, Prossimi eventi, Pagina evento, nuova prenotazione, modifica ed eliminazione fatti; il resto da implementare
 
 ## Accesso
 
@@ -42,15 +42,22 @@ Tutto in una schermata:
 6. **Provenienza** – scrivi o scegli tra i valori già usati (clienti, Facebook, manifesti…).
 7. **Note** – es. "1 carrozzina", "sedere vicino al sindaco".
 
-In fondo vedi in tempo reale **totale persone** e **importo** (teatro + ristorante). Se l'evento supera la capienza
-compare un **avviso rosso**: puoi comunque salvare.
+In fondo vedi in tempo reale **totale persone** e **importo** (teatro, ristorante e totale), calcolato con le tariffe
+attuali dell'opera. Se l'evento supera la capienza compare un **avviso rosso** "Supera la capienza di N posti":
+puoi comunque salvare.
+
+Premi **Salva**: compare "Prenotazione salvata" e torni alla pagina evento. Il pulsante si disattiva durante l'invio;
+anche toccandolo due volte la prenotazione viene registrata una sola volta. Se qualcosa non va (nome mancante, nessuna
+persona, ristorante o pasto non scelti) il messaggio compare sotto il campo e nulla viene perso.
 
 Un gruppo che va in due ristoranti diversi, o in parte a pranzo e in parte a cena, si inserisce come **due prenotazioni**.
 
 ## Modificare o eliminare
 
-Tocca una prenotazione per aprirla, cambia i campi e salva. **Elimina** chiede conferma ed è definitivo.
-Modifica ed eliminazione richiedono la rete.
+Tocca una prenotazione per aprirla, cambia i campi e salva. Gli importi restano quelli delle tariffe in vigore quando
+la prenotazione è stata creata, anche se nel frattempo l'admin ha cambiato il tariffario. Se porti i pacchetti a 0,
+ristorante e pasto vengono tolti. **Elimina** chiede conferma ("Eliminare la prenotazione di …?") ed è definitivo.
+Modifica ed eliminazione richiedono la rete. Se la prenotazione non esiste più compare "Prenotazione non trovata".
 
 ## Elenco ristoranti
 

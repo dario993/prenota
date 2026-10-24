@@ -27,7 +27,7 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
     </>
   );
   return (
-    <main className="space-y-6 p-4">
+    <main className="mx-auto max-w-4xl space-y-6 p-4">
       <h1 className="text-xl font-bold">Eventi</h1>
       <FormAzione
         key={corrente?.id ?? "nuovo"}

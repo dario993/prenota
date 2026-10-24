@@ -47,7 +47,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni }: { eventoId: strin
           </thead>
           <tbody>
             {lista.map((p) => (
-              <tr key={p.id} onClick={() => router.push(href(p))} className="cursor-pointer border-t border-gray-100 hover:bg-gray-50">
+              <tr key={p.id} onClick={(e) => { if ((e.target as HTMLElement).closest("a")) return; router.push(href(p)); }} className="cursor-pointer border-t border-gray-100 hover:bg-gray-50">
                 <td className="p-2 font-semibold"><Link href={href(p)} className="hover:text-accento">{p.cognome_nome}</Link></td>
                 <td className="p-2">{p.adulti}</td><td className="p-2">{p.ridotti}</td><td className="p-2">{p.bambini}</td>
                 <td className="p-2">{p.pacchetti}</td><td className="p-2">{p.omaggi}</td>
