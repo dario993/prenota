@@ -78,15 +78,16 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
   const online = useOnline();
   // funzione, toast e aggiornamento dell'elenco stanno in registraMutazioni: valgono anche dopo un riavvio
   const nuova = useMutation<{ id: string }, Error, DatiPrenotazione>({ mutationKey: CHIAVE_NUOVA });
-  const inCoda = () => {
-    toast.info("Salvata sul telefono, verrà inviata quando torna la rete");
+  const torna = (avviso?: string) => {
+    if (avviso) toast.info(avviso);
     router.push(`/eventi/${eventoId}`);
   };
-  // primo invio fallito (rete che non risponde, sessione scaduta, errore del server): la prenotazione
-  // resta in coda e riprova da sola, il form non deve restare bloccato ad aspettare
+  // primo invio fallito con la rete accesa: un errore temporaneo (rete che non risponde, sessione scaduta, 5xx)
+  // resta in coda e riprova da solo; un rifiuto (4xx) ha già il suo toast e resta in elenco come "non inviata".
+  // In entrambi i casi il form non resta bloccato ad aspettare.
   const fallita = nuova.failureCount > 0;
   useEffect(() => {
-    if (fallita) inCoda();
+    if (fallita) torna(nuova.isError ? undefined : "Invio non riuscito, riprovo automaticamente");
   }, [fallita]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function salva(d: DatiPrenotazione) {
@@ -96,7 +97,7 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
       // senza rete la mutation va in pausa e non chiama né onSuccess né onError: si torna subito all'evento
       const senzaRete = !onlineManager.isOnline();
       nuova.mutate(d, { onSuccess: () => router.push(`/eventi/${eventoId}`) });
-      if (senzaRete) inCoda();
+      if (senzaRete) torna("Salvata sul telefono, verrà inviata quando torna la rete");
       return;
     }
     const r = await modificaPrenotazione(d).catch(() => ({ errore: "Rete non disponibile" }));

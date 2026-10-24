@@ -27,25 +27,39 @@ export function creaQueryClient(): QueryClient {
 // Solo nel browser: il layout root viene reso anche sul server.
 // throttleTime 0: una prenotazione messa in coda finisce su localStorage subito, prima che una
 // navigazione completa (senza rete Next ricarica la pagina dalla cache) possa interrompere la scrittura.
+// serialize: un Error diventa {} in JSON; così il motivo di una prenotazione rifiutata sopravvive al riavvio.
+const CHIAVE_CACHE = "prenota-cache";
 export const persister =
   typeof window === "undefined"
     ? undefined
-    : createSyncStoragePersister({ storage: window.localStorage, key: "prenota-cache", throttleTime: 0 });
+    : createSyncStoragePersister({
+      storage: window.localStorage, key: CHIAVE_CACHE, throttleTime: 0,
+      serialize: (c) => JSON.stringify(c, (_k, v: unknown) => (v instanceof Error ? { message: v.message } : v)),
+    });
+
+// Al logout: nessun dato del vecchio utente resta sul telefono (cache, pagine salvate dal service worker).
+export async function svuotaDatiLocali(qc: QueryClient): Promise<void> {
+  qc.clear();
+  await globalThis.caches?.delete("prenota-v1").catch(() => {});
+  localStorage.removeItem(CHIAVE_CACHE);
+}
 
 // TanStack parte sempre "online" e ascolta solo gli eventi: se l'app si apre già senza rete deve saperlo.
 if (typeof window !== "undefined") onlineManager.setOnline(navigator.onLine);
 
 export class ErroreSessione extends Error {}
+// problema temporaneo: rete assente o che non risponde, errore 5xx del server
 export class ErroreRete extends Error {}
+const temporaneo = (e: unknown) => e instanceof ErroreSessione || e instanceof ErroreRete;
 
 let avvisoSessione = false;
 function chiediLogin() {
   if (avvisoSessione) return;
   avvisoSessione = true;
-  // login in una nuova scheda: questa resta aperta e continua a riprovare l'invio
+  // login nella stessa scheda: la coda è su localStorage e riparte quando l'app torna aperta dopo il login
   toast.error("Accedi di nuovo per inviare le prenotazioni in attesa", {
     id: "sessione", duration: Infinity,
-    action: { label: "Accedi", onClick: () => window.open("/login", "_blank") },
+    action: { label: "Accedi", onClick: () => { window.location.href = "/login"; } },
   });
 }
 
@@ -54,23 +68,30 @@ export function registraMutazioni(qc: QueryClient): void {
   qc.setMutationDefaults(CHIAVE_NUOVA, {
     mutationFn: inviaPrenotazione,
     gcTime: Infinity, // una prenotazione non inviata non deve sparire da sola
-    // sessione scaduta o rete che "c'è ma non va": si riprova senza fine, ogni 30 s
-    retry: (n, err) => err instanceof ErroreSessione || err instanceof ErroreRete || n < 3,
-    retryDelay: (n, err) => (err instanceof ErroreSessione || err instanceof ErroreRete ? 30_000 : 2 ** n * 1000),
+    // sessione scaduta, rete che "c'è ma non va", 5xx: si riprova senza fine, ogni 30 s;
+    // gli altri 4xx (dati rifiutati, evento cancellato) non migliorano riprovando: subito "non inviata"
+    retry: (_n, err) => temporaneo(err),
+    retryDelay: 30_000,
     onSuccess: (_r, d: DatiPrenotazione) => {
       if (avvisoSessione) toast.dismiss("sessione");
       avvisoSessione = false;
       toast.success(`Prenotazione inviata: ${d.cognome_nome}`);
       void qc.invalidateQueries({ queryKey: ["eventi"] });
       void qc.invalidateQueries({ queryKey: ["provenienze"] });
-      // atteso: resta "in attesa" finché l'elenco dal server non la contiene, senza sparire per un attimo
-      return qc.invalidateQueries({ queryKey: ["evento", d.evento_id] });
+      // atteso: resta "in attesa" finché l'elenco dal server non la contiene, senza sparire per un attimo;
+      // poi la mutation riuscita esce dalla cache (con gcTime infinito resterebbe in memoria per sempre)
+      return qc.invalidateQueries({ queryKey: ["evento", d.evento_id] }).then(() => {
+        const cache = qc.getMutationCache();
+        for (const m of cache.findAll({ mutationKey: CHIAVE_NUOVA, predicate: (x) => (x.state.variables as DatiPrenotazione)?.id === d.id }))
+          cache.remove(m);
+      });
     },
     onError: (e, d: DatiPrenotazione) => toast.error(`Prenotazione di ${d.cognome_nome} non inviata: ${e.message}`),
   });
 }
 
-// Alla riapertura: riparte tutto ciò che era in coda, anche un invio interrotto a metà (non in pausa).
+// Alla riapertura (chiamata dal menu, cioè solo con una sessione): riparte tutto ciò che era in coda,
+// anche un invio interrotto a metà (non in pausa).
 export function riprendiCoda(qc: QueryClient): void {
   for (const m of qc.getMutationCache().findAll({ mutationKey: CHIAVE_NUOVA, status: "pending" }))
     void m.continue().catch(() => {});
@@ -134,6 +155,7 @@ export async function inviaPrenotazione(d: DatiPrenotazione): Promise<{ id: stri
     chiediLogin();
     throw new ErroreSessione("Sessione scaduta");
   }
+  if (r.status >= 500) throw new ErroreRete(await messaggioErrore(r));
   if (!r.ok) throw new Error(await messaggioErrore(r));
   return r.json() as Promise<{ id: string }>;
 }

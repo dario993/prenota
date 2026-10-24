@@ -1,6 +1,7 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useInAttesa, type InAttesa } from "@/lib/query";
+import { sigla } from "@/lib/calcoli";
 
 // Etichetta di una prenotazione non ancora sul server; se l'invio è fallito, messaggio e pulsante Scarta.
 export function StatoInAttesa({ p }: { p: Pick<InAttesa, "stato" | "errore" | "mutationId" | "cognome_nome"> }) {
@@ -33,6 +34,7 @@ export function NonInviate() {
         {errori.map((p) => (
           <li key={p.mutationId} className="rounded-lg bg-white p-3 text-sm">
             <div className="font-semibold">{p.cognome_nome}</div>
+            <div>{sigla(p)}</div>
             <div className="text-gray-600">
               {[p.telefono, p.posti, p.note].filter(Boolean).join(" · ")}
             </div>

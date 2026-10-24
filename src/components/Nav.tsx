@@ -2,7 +2,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { useInAttesa } from "@/lib/query";
+import { useEffect } from "react";
+import { useIsRestoring, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useInAttesa, riprendiCoda, svuotaDatiLocali } from "@/lib/query";
 import { CalendarDays, Building2, Clapperboard, Ticket, Users, Settings, LogOut } from "lucide-react";
 
 type Voce = { href: string; testo: string; Icona: typeof CalendarDays; solo?: "desktop" | "mobile" };
@@ -20,6 +23,22 @@ export function Nav({ admin, esci }: { admin: boolean; esci?: () => Promise<void
   const coda = useInAttesa();
   const inAttesa = coda.length;
   const conErrori = coda.some((p) => p.stato === "error");
+  const qc = useQueryClient();
+  const ripristino = useIsRestoring();
+  // il menu esiste solo con una sessione valida: qui (e non sul login) riparte la coda salvata sul telefono
+  useEffect(() => {
+    if (!ripristino) riprendiCoda(qc);
+  }, [ripristino, qc]);
+  // Uscire con prenotazioni non inviate le farebbe partire con il prossimo utente: si blocca.
+  // Altrimenti si svuota tutto ciò che è salvato sul telefono prima del logout sul server.
+  const esciPulito = esci && (async () => {
+    if (inAttesa) {
+      toast.error(`Ci sono ${inAttesa} prenotazioni non ancora inviate: torna online e attendi l'invio prima di uscire`);
+      return;
+    }
+    await svuotaDatiLocali(qc);
+    await esci();
+  });
   const voci: Voce[] = [{ href: "/", testo: "Eventi", Icona: CalendarDays }, ...(admin ? VOCI_ADMIN : [])];
   const attiva = (v: Voce) => {
     if (v.href === "/") return pathname === "/" || pathname.startsWith("/eventi");
@@ -56,8 +75,8 @@ export function Nav({ admin, esci }: { admin: boolean; esci?: () => Promise<void
           {v.testo}
         </Link>
       ))}
-      {esci && (
-        <form action={esci} className="flex flex-1 lg:mt-auto lg:flex-none">
+      {esciPulito && (
+        <form action={esciPulito} className="flex flex-1 lg:mt-auto lg:flex-none">
           <button className={clsx(base, "w-full text-gray-600 hover:text-accento")}>
             <LogOut size={22} aria-hidden />
             Esci

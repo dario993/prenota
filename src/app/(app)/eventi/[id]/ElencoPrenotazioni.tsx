@@ -6,16 +6,10 @@ import { toast } from "sonner";
 import { StatoInAttesa } from "@/components/InAttesa";
 import { useOnline, type InAttesa } from "@/lib/query";
 import {
-  ordinaPerNome, persone, NOMI_RISTORANTI, NOMI_PASTI,
+  ordinaPerNome, persone, sigla, NOMI_RISTORANTI, NOMI_PASTI,
   type Prenotazione,
 } from "@/lib/calcoli";
 
-const sigla = (p: Prenotazione): string => {
-  const parti = [p.adulti && `${p.adulti} A`, p.ridotti && `${p.ridotti} R`, p.bambini && `${p.bambini} B`];
-  if (p.pacchetti) parti.push(`${p.pacchetti} P ${NOMI_RISTORANTI[p.ristorante!]} ${NOMI_PASTI[p.pasto!].toLowerCase()}`);
-  if (p.omaggi) parti.push(`${p.omaggi} O`);
-  return parti.filter(Boolean).join(" · ");
-};
 const ristorante = (p: Prenotazione) =>
   p.pacchetti && p.ristorante && p.pasto ? `${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : "";
 

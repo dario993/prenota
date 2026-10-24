@@ -15,11 +15,11 @@ export function PaginaEvento({ id }: { id: string }) {
   const inAttesa = useInAttesa(id);
   const online = useOnline();
   const nuova = `/eventi/${id}/prenotazioni/nuova`;
-  // mette in cache (service worker) la pagina "nuova prenotazione": così si apre anche senza rete
-  // (senza rete Next ripiega su una navigazione normale, servita dalla cache)
+  // mette in cache (service worker) questa pagina e "nuova prenotazione": aperte con la navigazione interna di
+  // Next non passano come pagine intere, ma senza rete Next ripiega su una navigazione normale servita dalla cache
   useEffect(() => {
-    if (navigator.onLine) fetch(nuova).catch(() => {});
-  }, [nuova]);
+    if (navigator.onLine) for (const u of [`/eventi/${id}`, nuova]) fetch(u).catch(() => {});
+  }, [id, nuova]);
   if (!data) {
     return (
       <main className="mx-auto max-w-7xl p-4 lg:p-8">

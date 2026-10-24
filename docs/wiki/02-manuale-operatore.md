@@ -77,10 +77,15 @@ negli appunti. **Stampa** apre la stampa del browser. Vedi [Ristoranti e pacchet
 - Modifica ed eliminazione richiedono la rete: senza rete toccando una prenotazione compare "Serve la rete per
   modificare una prenotazione"; se eri già nella pagina di modifica, i pulsanti sono disattivati con la scritta
   "Serve la rete".
+- Se la rete c'è ma l'invio non riesce (rete debole, server momentaneamente in errore) compare "Invio non riuscito,
+  riprovo automaticamente": la prenotazione resta "in attesa di invio" e l'app riprova ogni 30 secondi.
 - **Sessione scaduta**: compare "Accedi di nuovo per inviare le prenotazioni in attesa" con il pulsante **Accedi**, che
-  apre il login in una nuova scheda. Dopo il login le prenotazioni in attesa partono da sole (entro mezzo minuto).
+  porta al login. Dopo il login le prenotazioni in attesa partono da sole.
+- **Esci** non funziona finché ci sono prenotazioni non inviate: compare "Ci sono N prenotazioni non ancora inviate:
+  torna online e attendi l'invio prima di uscire". Uscendo, l'app cancella dal telefono tutti i dati salvati.
 - **Invio rifiutato** (per esempio l'evento è stato cancellato nel frattempo): la prenotazione diventa rossa,
   **"non inviata"**, con il motivo, e compare anche in cima alla home in **Prenotazioni non inviate**; il numero sul
-  menu diventa rosso. Non sparisce mai da sola: copia i dati se servono, poi premi **Scarta**.
+  menu diventa rosso. Non sparisce mai da sola, nemmeno chiudendo l'app: copia i dati se servono (nome, quantità,
+  telefono, posti, note), poi premi **Scarta**.
 
 Dettagli tecnici: [Offline](10-offline.md).

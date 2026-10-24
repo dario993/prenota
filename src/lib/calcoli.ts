@@ -94,3 +94,11 @@ const dataOra = new Intl.DateTimeFormat("it-IT", {
   timeZone: "Europe/Rome",
 });
 export const formattaDataOra = (d: Date): string => dataOra.format(d);
+
+// Quantità in sigla per le schede: "2 A · 1 B · 2 P Casale cena · 1 O".
+export const sigla = (p: Quantita & Pick<Prenotazione, "ristorante" | "pasto">): string => {
+  const parti = [p.adulti && `${p.adulti} A`, p.ridotti && `${p.ridotti} R`, p.bambini && `${p.bambini} B`];
+  if (p.pacchetti) parti.push(`${p.pacchetti} P ${NOMI_RISTORANTI[p.ristorante!]} ${NOMI_PASTI[p.pasto!].toLowerCase()}`);
+  if (p.omaggi) parti.push(`${p.omaggi} O`);
+  return parti.filter(Boolean).join(" · ");
+};

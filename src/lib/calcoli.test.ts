@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, incassoRistorante, incassoTeatro,
-  persone, prezziDi, riepilogoEvento, testoElencoRistorante, type Prenotazione,
+  persone, prezziDi, riepilogoEvento, sigla, testoElencoRistorante, type Prenotazione,
 } from "./calcoli";
 
 const prezzi = { prezzo_adulto: 1500, prezzo_ridotto: 1200, prezzo_bambino: 800,
@@ -76,4 +76,9 @@ describe("calcoli", () => {
   test("formattaEuro", () => expect(formattaEuro(4900).replace(/\s/g, " ")).toBe("49,00 €"));
   test("formattaDataOra usa Europe/Rome", () =>
     expect(formattaDataOra(new Date("2026-11-07T20:00:00Z"))).toContain("21:00"));
+});
+
+test("sigla delle quantità", () => {
+  expect(sigla({ ...q, ristorante: "CASALE", pasto: "CENA" })).toBe("2 A · 1 B · 2 P Casale cena · 1 O");
+  expect(sigla({ ...q, pacchetti: 0, omaggi: 0, ristorante: null, pasto: null })).toBe("2 A · 1 B");
 });
