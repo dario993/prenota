@@ -8,7 +8,9 @@ Nulla deve andare perso in silenzio e nulla deve arrivare due volte.
 ## Lettura senza rete
 
 TanStack Query salva la cache in localStorage (persister, chiave `prenota-cache`): eventi e prenotazioni già visti
-restano consultabili. Il ripristino non scade mai (`maxAge: Infinity`): un telefono rimasto spento per giorni non
+restano consultabili. Se una pagina non ha nulla in cache e manca la rete, la query resta in pausa
+(`fetchStatus === "paused"`) e la pagina mostra "Serve la rete per caricare i dati la prima volta" (`SERVE_RETE` in
+`src/lib/query.ts`) invece di "Caricamento…". Il ripristino non scade mai (`maxAge: Infinity`): un telefono rimasto spento per giorni non
 perde le prenotazioni in coda. Cambiare il `buster` in `src/app/providers.tsx` cancella tutta la cache, **coda
 compresa**: non va cambiato con prenotazioni in attesa.
 

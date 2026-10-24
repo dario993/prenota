@@ -1,5 +1,5 @@
 import { richiediUtente } from "@/lib/auth";
-import { ListaEventi } from "./ListaEventi";
+import { EventiPassati, ListaEventi } from "./ListaEventi";
 import { NonInviate } from "@/components/InAttesa";
 
 export default async function Home() {
@@ -9,6 +9,7 @@ export default async function Home() {
       <h1 className="mb-4 text-xl font-semibold lg:text-2xl">Prossimi eventi</h1>
       <NonInviate />
       <ListaEventi />
+      <EventiPassati />
     </main>
   );
 }

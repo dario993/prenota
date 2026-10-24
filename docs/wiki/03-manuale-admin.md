@@ -33,7 +33,8 @@ Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo
 ## Eventi
 
 Da **Admin → Eventi**: scegli **opera**, **locale**, **data e ora** (ora italiana, qualunque sia il fuso del server). Un evento ha una sola opera.
-L'elenco è ordinato per data; **Modifica** ricarica il modulo con i dati dell'evento.
+L'elenco è ordinato per data e comprende anche gli eventi passati; il titolo apre la pagina dell'evento (riepilogo e
+prenotazioni), **Modifica** ricarica il modulo con i dati dell'evento.
 Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci sono prenotazioni»): prima vanno eliminate le prenotazioni.
 
 ## Utenti

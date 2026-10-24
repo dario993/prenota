@@ -2,13 +2,13 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { getJson, useInAttesa, useOnline } from "@/lib/query";
+import { getJson, SERVE_RETE, useInAttesa, useOnline } from "@/lib/query";
 import { formattaDataOra, prezziDi, type DettaglioEvento } from "@/lib/calcoli";
 import { Riepilogo } from "./Riepilogo";
 import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
 
 export function PaginaEvento({ id }: { id: string }) {
-  const { data, isPending, error } = useQuery({
+  const { data, isPending, error, fetchStatus } = useQuery({
     queryKey: ["evento", id],
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
   });
@@ -23,7 +23,7 @@ export function PaginaEvento({ id }: { id: string }) {
   if (!data) {
     return (
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <p className="text-gray-500">{isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
+        <p className="text-gray-500">{fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
       </main>
     );
   }

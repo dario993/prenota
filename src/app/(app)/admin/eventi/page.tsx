@@ -58,7 +58,7 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
       <ul className="space-y-2 lg:hidden">
         {eventi.map((e) => (
           <li key={e.id} className="rounded border border-gray-200 p-3">
-            <div className="font-medium">{e.titolo}</div>
+            <Link href={`/eventi/${e.id}`} className="font-medium text-accento hover:underline">{e.titolo}</Link>
             <div className="text-sm text-gray-600">{formattaDataOra(e.data_ora)} · {e.locale}</div>
             <div className="-mb-1 flex">{azioni(e)}</div>
           </li>
@@ -69,7 +69,7 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
         <tbody>
           {eventi.map((e) => (
             <tr key={e.id} className="border-b border-gray-100">
-              <td className="py-1">{formattaDataOra(e.data_ora)}</td><td>{e.titolo}</td><td>{e.locale}</td>
+              <td className="py-1">{formattaDataOra(e.data_ora)}</td><td><Link href={`/eventi/${e.id}`} className="text-accento hover:underline">{e.titolo}</Link></td><td>{e.locale}</td>
               <td className="flex justify-end">{azioni(e)}</td>
             </tr>
           ))}

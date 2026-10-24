@@ -47,6 +47,9 @@ export async function svuotaDatiLocali(qc: QueryClient): Promise<void> {
 // TanStack parte sempre "online" e ascolta solo gli eventi: se l'app si apre già senza rete deve saperlo.
 if (typeof window !== "undefined") onlineManager.setOnline(navigator.onLine);
 
+// Query senza dati e senza rete: TanStack la mette in pausa (fetchStatus "paused") e aspetterebbe per sempre.
+export const SERVE_RETE = "Serve la rete per caricare i dati la prima volta";
+
 export class ErroreSessione extends Error {}
 // problema temporaneo: rete assente o che non risponde, errore 5xx del server
 export class ErroreRete extends Error {}

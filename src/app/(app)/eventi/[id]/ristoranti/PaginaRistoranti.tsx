@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { getJson } from "@/lib/query";
+import { getJson, SERVE_RETE } from "@/lib/query";
 import {
   elencoRistorante, formattaDataOra, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
   type DettaglioEvento, type Pasto, type Ristorante,
@@ -11,14 +11,14 @@ import {
 const btn = "rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50 print:hidden";
 
 export function PaginaRistoranti({ id }: { id: string }) {
-  const { data, isPending, error } = useQuery({
+  const { data, isPending, error, fetchStatus } = useQuery({
     queryKey: ["evento", id],
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
   });
   if (!data) {
     return (
       <main className="mx-auto max-w-3xl p-4 lg:p-8">
-        <p className="text-gray-500">{isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
+        <p className="text-gray-500">{fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")}</p>
       </main>
     );
   }

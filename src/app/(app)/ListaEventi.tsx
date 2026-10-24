@@ -1,16 +1,21 @@
 "use client";
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getJson } from "@/lib/query";
+import { getJson, SERVE_RETE } from "@/lib/query";
 import { formattaDataOra, type EventoLista } from "@/lib/calcoli";
 import { BarraCapienza } from "@/components/BarraCapienza";
 
-export function ListaEventi() {
-  const { data, isPending, isError } = useQuery({ queryKey: ["eventi"], queryFn: () => getJson<EventoLista[]>("/api/eventi") });
+export function ListaEventi({ passati = false }: { passati?: boolean }) {
+  const { data, isPending, isError, fetchStatus } = useQuery({
+    queryKey: passati ? ["eventi", "passati"] : ["eventi"],
+    queryFn: () => getJson<EventoLista[]>(passati ? "/api/eventi?passati=1" : "/api/eventi"),
+  });
   if (!data) {
-    return <p className="text-gray-500">{isPending ? "Caricamento…" : isError ? "Impossibile caricare gli eventi" : ""}</p>;
+    const testo = fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : isError ? "Impossibile caricare gli eventi" : "";
+    return <p className="text-gray-500">{testo}</p>;
   }
-  if (data.length === 0) return <p className="text-gray-500">Nessun evento in programma</p>;
+  if (data.length === 0) return <p className="text-gray-500">{passati ? "Nessun evento passato" : "Nessun evento in programma"}</p>;
   return (
     <ul className="grid gap-3 lg:grid-cols-2 lg:gap-4">
       {data.map((e) => (
@@ -25,5 +30,16 @@ export function ListaEventi() {
         </li>
       ))}
     </ul>
+  );
+}
+
+// Chiusa all'inizio: gli eventi passati si caricano solo quando la si apre.
+export function EventiPassati() {
+  const [aperta, setAperta] = useState(false);
+  return (
+    <details className="mt-8" onToggle={(e) => setAperta(e.currentTarget.open)}>
+      <summary className="mb-4 cursor-pointer py-2 text-lg font-semibold">Eventi passati</summary>
+      {aperta && <ListaEventi passati />}
+    </details>
   );
 }

@@ -14,9 +14,13 @@ o finché scade (vedi [Autenticazione e ruoli](09-autenticazione-e-ruoli.md)).
 
 ## Prossimi eventi
 
-La pagina iniziale mostra gli eventi futuri, dal più vicino. Ogni scheda indica opera, data e ora, locale e una barra
+La pagina iniziale mostra gli eventi da oggi in poi, dal più vicino. Ogni scheda indica opera, data e ora, locale e una barra
 `persone / capienza`. Tocca una scheda per aprire l'evento. Se non ci sono eventi futuri compare "Nessun evento in programma". Senza rete
-resta visibile l'ultimo elenco caricato.
+resta visibile l'ultimo elenco caricato; se il telefono non ha mai caricato i dati compare "Serve la rete per caricare
+i dati la prima volta" (lo stesso nella pagina evento).
+
+In fondo, la sezione chiusa **Eventi passati**: aprendola si caricano gli eventi prima di oggi, dal più recente, con
+le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un evento già fatto.
 
 ## Pagina evento
 
