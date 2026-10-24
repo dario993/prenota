@@ -8,7 +8,7 @@ import { onlineManager, useMutation, useQuery, useQueryClient } from "@tanstack/
 import { toast } from "sonner";
 import type { z } from "zod";
 import { Contatore } from "@/components/Contatore";
-import { getJson, useOnline, CHIAVE_NUOVA } from "@/lib/query";
+import { getJson, useInAttesa, useOnline, CHIAVE_NUOVA, SERVE_RETE } from "@/lib/query";
 import { schemaPrenotazione, type DatiPrenotazione } from "@/lib/schemi";
 import {
   persone, prezziDi, incassoTeatro, incassoRistorante, riepilogoEvento, formattaEuro,
@@ -37,9 +37,10 @@ function Messaggio({ testo }: { testo: string }) {
 
 // Pagina di modifica: cerca la prenotazione nel dettaglio evento (dalla cache o dalla rete).
 export function ModificaPrenotazione({ eventoId, pid }: { eventoId: string; pid: string }) {
-  const { data, isFetching, error } = useEvento(eventoId);
+  const { data, isFetching, error, fetchStatus } = useEvento(eventoId);
   const p = data?.prenotazioni.find((x) => x.id === pid);
   if (p) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
+  if (!data && fetchStatus === "paused") return <Messaggio testo={SERVE_RETE} />;
   if (isFetching) return <Messaggio testo="Caricamento…" />;
   return <Messaggio testo={error?.message ?? "Prenotazione non trovata"} />;
 }
@@ -47,7 +48,8 @@ export function ModificaPrenotazione({ eventoId, pid }: { eventoId: string; pid:
 export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; iniziale?: Prenotazione }) {
   const router = useRouter();
   const qc = useQueryClient();
-  const { data, isPending, error } = useEvento(eventoId, !iniziale);
+  const { data, isPending, error, fetchStatus } = useEvento(eventoId, !iniziale);
+  const inAttesa = useInAttesa(eventoId);
   const { data: provenienze } = useQuery({ queryKey: ["provenienze"], queryFn: () => getJson<string[]>("/api/provenienze") });
   const [id] = useState(() => iniziale?.id ?? crypto.randomUUID());
   const [eliminando, setEliminando] = useState(false);
@@ -115,13 +117,18 @@ export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; ini
     else fatto("Prenotazione eliminata");
   }
 
-  if (!data) return <Messaggio testo={isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")} />;
+  if (!data) return <Messaggio testo={fetchStatus === "paused" ? SERVE_RETE : isPending ? "Caricamento…" : (error?.message ?? "Errore imprevisto, riprova")} />;
 
   // Modifica: prezzi congelati della prenotazione; nuova: tariffario attuale dell'opera.
   const prezzi = prezziDi(iniziale ?? data.evento);
   const teatro = incassoTeatro({ ...prezzi, ...q });
   const ristorante = incassoRistorante({ ...prezzi, ...q });
-  const altre = riepilogoEvento(data.prenotazioni.filter((p) => p.id !== id), data.evento.capienza);
+  // altre prenotazioni dell'evento: dal server più quelle in coda sul telefono (come nel riepilogo dell'evento),
+  // senza quella che si sta scrivendo/modificando e senza doppioni tra coda e server
+  const sulServer = new Set(data.prenotazioni.map((p) => p.id));
+  const inCoda = inAttesa.filter((p) => p.stato === "pending" && !sulServer.has(p.id))
+    .map((p) => ({ ...p, ...prezziDi(data.evento) }));
+  const altre = riepilogoEvento([...data.prenotazioni, ...inCoda].filter((p) => p.id !== id), data.evento.capienza);
   const oltre = altre.persone + persone(q) - data.evento.capienza;
   const occupato = isSubmitting || nuova.isPending || eliminando;
   const bloccata = !!iniziale && !online; // modifica ed eliminazione richiedono la rete

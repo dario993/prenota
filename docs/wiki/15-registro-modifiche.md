@@ -24,3 +24,4 @@
 | 2026-10-24 | Primo accesso: con utenti già presenti la richiesta è rifiutata subito, senza calcolare la password né bloccare la tabella; wiki corretta sul comportamento di un operatore sulle pagine admin (torna alla home) | 9 |
 | 2026-10-24 | Deploy: esempio compose per collegare l'app alla rete Docker del proxy esistente (senza porta pubblicata); README e note sviluppo: `crea-admin` solo per il recupero | 13, README |
 | 2026-10-24 | Eventi passati raggiungibili: sezione chiusa "Eventi passati" in home (dal più recente) e titolo cliccabile in Admin → Eventi; senza rete e senza dati salvati compare "Serve la rete per caricare i dati la prima volta" invece di un caricamento infinito | 2, 3, 7, 10 |
+| 2026-10-24 | Avviso di capienza nel form che conta anche le prenotazioni salvate sul telefono in attesa di invio, come il riepilogo dell'evento | 5, 14 |

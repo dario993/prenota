@@ -40,7 +40,7 @@
 
 ## Limiti noti
 
-- Offline: niente modifica/eliminazione; l'avviso capienza offline può essere impreciso.
+- Offline: niente modifica/eliminazione; l'avviso capienza offline conta la coda del telefono ma non le prenotazioni fatte nel frattempo da altri.
 - Nessun controllo di sovrapposizione dei posti.
 - Gli incassi sono previsti, non registrati.
 - Il `docker build` non è stato eseguito durante lo sviluppo (Docker assente sul computer di sviluppo): primo build da verificare sull'homelab.
