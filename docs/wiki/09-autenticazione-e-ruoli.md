@@ -1,16 +1,16 @@
 # 9. Autenticazione e ruoli
 
-> Stato: da implementare
+> Stato: fatto
 
 ## Login e sessione
 
 1. L'utente invia email e password a una Server Action.
 2. La password è verificata con **scrypt** (`node:crypto`, confronto a tempo costante).
-3. Si crea una riga in `sessioni` con un token casuale e una scadenza (30 giorni, rinnovata con l'uso).
+3. Si crea una riga in `sessioni` con un token casuale e una scadenza (30 giorni fissi dal login, nessun rinnovo: scaduti, si rifà il login).
 4. Il token va in un cookie **httpOnly**, `SameSite=Lax`, `Secure` in produzione.
 5. *Esci* cancella la riga e il cookie.
 
-Un utente **disattivato** non può accedere e le sue sessioni vengono cancellate.
+Un utente **disattivato** non può accedere e perde subito l'accesso anche con una sessione aperta (la sessione è verificata nel database a ogni richiesta, filtrando gli utenti attivi). Email e password errate, o utente disattivato, danno lo stesso messaggio: "Email o password errati". L'email è normalizzata (spazi tolti, minuscolo).
 
 ## Protezione delle pagine
 

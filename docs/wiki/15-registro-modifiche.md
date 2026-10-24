@@ -7,3 +7,4 @@
 | 2026-10-24 | Logica di calcolo (persone, incassi, elenchi ristoranti, formati euro e data) con test | 4, 6 |
 | 2026-10-24 | Schemi di validazione zod condivisi (prenotazione, locale, opera, evento, utente, login) con test | — |
 | 2026-10-24 | Schema database, hash password scrypt e script `db:init` / `crea-admin` | 8, 12 |
+| 2026-10-24 | Login con sessione (cookie + tabella `sessioni`, 30 giorni fissi), protezione pagine con `proxy.ts`, controlli di ruolo admin/operatore | 9 |
