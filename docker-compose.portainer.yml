@@ -1,5 +1,6 @@
 # Portainer: Stacks -> Add stack -> Repository (Portainer clona il repository e costruisce l'immagine).
-# Variabile richiesta: POSTGRES_PASSWORD. HTTPS: reverse proxy verso http://IP-HOMELAB:3005.
+# Variabile richiesta: POSTGRES_PASSWORD; facoltativa PORTA (porta sull'host, predefinita 3005).
+# HTTPS: reverse proxy verso http://IP-HOMELAB:<PORTA>.
 services:
   app:
     build: .
@@ -10,7 +11,7 @@ services:
     environment:
       - DATABASE_URL=postgres://prenota:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}@db:5432/prenota
     ports:
-      - "3005:3000"
+      - "${PORTA:-3005}:3000"
     networks:
       - prenota-net
     depends_on:

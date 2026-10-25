@@ -77,9 +77,9 @@ Alternativa al compose + immagine su ghcr: Portainer clona il repository e costr
 4. Facoltativo: *GitOps updates* (polling) per ricostruire quando il ramo cambia; altrimenti *Pull and redeploy* a mano.
 5. *Deploy the stack*. Il container dell'app esegue `node scripts/db-init.mjs && node server.js`: a ogni avvio applica
    lo schema (idempotente, solo `create ... if not exists`) e le migrazioni di `db/migrazioni/` (idempotenti: un
-   database vecchio viene convertito, uno già aggiornato resta com'è), poi parte il server. L'app è su porta `3005` dell'host.
+   database vecchio viene convertito, uno già aggiornato resta com'è), poi parte il server. L'app è sulla porta `3005` dell'host; per cambiarla aggiungi la variabile `PORTA` (es. `PORTA=8080`) nelle variabili d'ambiente dello stack e ridistribuisci.
 
-HTTPS: nel reverse proxy punta `prenota.hsdscp.duckdns.org` a `http://IP-HOMELAB:3005` con Let's Encrypt. Il proxy deve
+HTTPS: nel reverse proxy punta `prenota.hsdscp.duckdns.org` a `http://IP-HOMELAB:3005` (o la `PORTA` scelta) con Let's Encrypt. Il proxy deve
 inoltrare l'header `Host` originale (le Server Action di Next confrontano `Origin` e `Host`) e `X-Forwarded-Proto`.
 
 La prima visita crea il primo admin da `/primo-accesso`: farla subito dopo il deploy.

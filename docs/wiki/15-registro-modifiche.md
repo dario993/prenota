@@ -41,3 +41,4 @@
 | 2026-10-25 | Copia dei dati dal computer all'homelab: `npm run db:esporta` produce un SQL ripetibile (senza utenti) da caricare nel container `prenota-db`; migrazioni automatiche all'avvio anche nella guida al deploy | 12, 13 |
 | 2026-10-25 | Modifica prenotazione: le riletture in background (ritorno sull'app, rete che torna) non cancellano più quanto scritto e non salvato; `docker-compose.yml` esegue `db-init` a ogni avvio come lo stack Portainer | 10, 13 |
 | 2026-10-25 | Admin → API key: chiavi create dall'admin (mostrate una volta, salvato solo l'hash, revocabili) per la gestione remota con `Authorization: Bearer`; `POST /api/sql` esegue query arbitrarie per un admin; tabella `chiavi_api` | 3, 8, 9 |
+| 2026-10-25 | Stack Portainer: porta sull'host configurabile con la variabile `PORTA` (predefinita 3005) | 13 |
