@@ -5,6 +5,7 @@ services:
   app:
     build: .
     image: prenota-app:latest
+    pull_policy: build # immagine solo locale: mai scaricata, ricostruita a ogni deploy
     container_name: prenota-app
     restart: unless-stopped
     command: ["sh", "-c", "node scripts/db-init.mjs && node server.js"]

@@ -74,7 +74,8 @@ Alternativa al compose + immagine su ghcr: Portainer clona il repository e costr
 2. Repository URL `https://github.com/dario993/prenota`, reference `refs/heads/feat/app` (`refs/heads/main` dopo il merge),
    Compose path `docker-compose.portainer.yml`.
 3. Environment variables: `POSTGRES_PASSWORD` (obbligatoria; senza, il deploy si ferma con un messaggio).
-4. Facoltativo: *GitOps updates* (polling) per ricostruire quando il ramo cambia; altrimenti *Pull and redeploy* a mano.
+4. Facoltativo: *GitOps updates* (polling) per ricostruire quando il ramo cambia; altrimenti *Pull and redeploy* a mano. L'app ha `pull_policy: build`: l'immagine `prenota-app` esiste solo sull'homelab, non si scarica
+   mai e viene ricostruita a ogni deploy (senza, «Pull and redeploy» fallisce con «pull access denied for prenota-app»).
 5. *Deploy the stack*. Il container dell'app esegue `node scripts/db-init.mjs && node server.js`: a ogni avvio applica
    lo schema (idempotente, solo `create ... if not exists`) e le migrazioni di `db/migrazioni/` (idempotenti: un
    database vecchio viene convertito, uno già aggiornato resta com'è), poi parte il server. L'app è sulla porta `3005` dell'host; per cambiarla aggiungi la variabile `PORTA` (es. `PORTA=8080`) nelle variabili d'ambiente dello stack e ridistribuisci.
