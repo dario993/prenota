@@ -28,7 +28,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 ## Mappa del codice
 
 - `src/app/` pagine e Server Action (`login/`, `(app)/eventi/[id]/`, `(app)/admin/`), `api/` route JSON, `POST /api/prenotazioni` e `POST /api/sql` (gestione remota: utente con ruolo «API key» da Admin → Utenti, `Authorization: Bearer`).
-- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `password.mjs`.
+- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `storico.ts` (cronologia con copia della prenotazione), `password.mjs`.
 - `src/proxy.ts` reindirizza a `/login`; `public/sw.js` service worker; `db/schema.sql` + `db/migrazioni/`; `scripts/` (db-init, crea-admin, esporta-dati.sh, backup.sh).
 - `Dockerfile`, `docker-compose.yml`: deploy homelab, vedi wiki 13.
 
@@ -39,6 +39,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 - Migrazioni in `db/migrazioni/`, idempotenti: `db-init` le esegue a ogni avvio.
 - Capienza: avvisa, non blocca. Offline: si possono solo aggiungere prenotazioni, mai doppioni (id UUID + `on conflict do nothing`).
 - Ogni route API e Server Action valida con zod e controlla sessione/ruolo.
+- Ogni creazione, modifica o cambio di stato di una prenotazione chiama `registraStorico` nella stessa transazione.
 - Cookie `Secure` in produzione: serve HTTPS.
 
 ## Regole del progetto
@@ -46,5 +47,6 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 - Interfaccia, testi, nomi di variabili e commit in **italiano** (`feat: …`, `fix: …`, `docs: …`).
 - Logica in moduli TS puri e testati (`src/lib/`); i componenti li collegano soltanto.
 - Nessuna nuova dipendenza senza motivo forte.
+- **Prima di ogni modifica leggere la sezione della wiki che la riguarda** (`docs/wiki/`, indice in `README.md`).
 - **Ogni modifica all'app aggiorna la wiki nello stesso commit** (pagina interessata + `docs/wiki/15-registro-modifiche.md`)
   e, se cambia qualcosa di essenziale, anche questo file.

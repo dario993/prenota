@@ -168,6 +168,10 @@ body {
 }
 
 @media print {
+  @page { size: A4; margin: 12mm; }
+  /* stampa sempre in chiaro, testo nero; i colori dei contrassegni restano */
+  :root, [data-theme] { --surface: #fff; --surface-sunken: #fff; --ink: #000; --ink-muted: #000; --line: #999; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   body { background: #fff; color: #000; }
   [data-sonner-toaster] { display: none; }
 }

@@ -27,11 +27,28 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
 
 - **Riepilogo** sempre in alto, sopra l'elenco (su desktop i blocchi sono affiancati): persone prenotate, posti liberi, quantità per tariffa (solo quelle usate, anche se nel frattempo nascoste) e pacchetti,
   coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
-- **Elenco prenotazioni** in ordine alfabetico, con campo di **ricerca** per nome o numero di telefono.
+- **Elenco prenotazioni** nell'ordine in cui sono state inserite (le nuove in fondo), con campo di **ricerca** per nome o numero di telefono.
+  Ogni riga ha un **numero progressivo** (resta lo stesso anche filtrando con la ricerca).
+  **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮: tienila premuta (dito o mouse) e trascina la riga dove
+  vuoi, le altre si scostano per farle posto; vicino al bordo dello schermo l'elenco scorre da solo. Ci sono anche le
+  frecce ↑ ↓ per spostare di un posto (utili da tastiera). L'ordine è salvato per tutti (serve la rete, e la ricerca
+  vuota). Le prenotazioni aggiunte dopo vanno in fondo.
+  **Stato** colorato di ogni prenotazione, scelto dal menu sulla riga: appena inserita non ha stato (barra grigia);
+  poi **Stampato** (verde), **Prenotato** (giallo), **Modificato** (arancio), **Annullato** (rosso, non conta più nel
+  riepilogo né negli elenchi per i ristoranti) oppure di nuovo «Nessuno stato». Il colore è la barra a sinistra della
+  scheda o della riga.
+  **Stampa / PDF**: apre la stampa del browser con la sola tabella (numero, nome, telefono, biglietti, posti, note,
+  stato, totale), impaginata A4 con l'intestazione ripetuta su ogni pagina; per il PDF scegli «Salva come PDF». Stampa
+  ciò che è in elenco: svuota la ricerca per averlo tutto.
   Telefono: una scheda per prenotazione, con i biglietti in una riga (es. «2 Adulti · 1 Associato · 2 Pacchetti Casale
-  cena») e il telefono del cliente. Desktop: tabella (nome, telefono cliccabile per chiamare, biglietti, posti, note,
-  totale persone).
+  cena») e il telefono del cliente. Desktop: tabella (numero, nome, telefono cliccabile per chiamare, biglietti, posti, note,
+  stato, totale persone).
   Tocca una prenotazione per aprirla. Se superi la capienza i posti liberi diventano negativi (es. `−6`), evidenziati con la scritta "oltre capienza" (la prenotazione non viene bloccata).
+- Aprendo una prenotazione, sotto il modulo c'è la **Cronologia**: ogni creazione, modifica e cambio di stato con
+  data e ora, utente, stato e campi cambiati, dalla più recente. Toccando una voce si vede la prenotazione com'era
+  dopo quell'azione (nome, telefono, biglietti, persone, totale, posti, provenienza, note, stato), con il valore
+  precedente barrato accanto ai campi cambiati. Le prenotazioni inserite prima della cronologia hanno solo la voce
+  «Creata», senza dati.
 - Pulsante **Nuova prenotazione** (su telefono il tondo **+** fisso in basso a destra); link **Ristoranti** per gli elenchi da inviare.
 - Se l'evento non esiste compare "Evento non trovato".
 

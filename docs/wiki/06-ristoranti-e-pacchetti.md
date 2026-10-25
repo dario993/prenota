@@ -24,7 +24,7 @@ Coperti: 12
 - ROSSI MARIO (2) – 333 1234567 – 1 celiaco
 ```
 
-Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Sezioni senza coperti non vengono mostrate.
+Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Le prenotazioni annullate non compaiono. Sezioni senza coperti non vengono mostrate.
 
 ## Condividi e stampa
 

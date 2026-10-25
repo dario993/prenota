@@ -22,3 +22,11 @@ export const elencoAdmin = "divide-y divide-line rounded-lg border border-line b
 export const rigaAdmin = "flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between";
 export const azioniAdmin = "flex flex-wrap gap-2";
 export const paginaAdmin = "mx-auto w-full max-w-[1200px] space-y-6 px-4 py-6 lg:px-6";
+
+// contrassegni: verde, giallo, arancio, rosso; senza stato resta il grigio della linea
+export const barraContrassegno = {
+  stampato: "border-l-green-600", prenotato: "border-l-yellow-400", modificato: "border-l-orange-500", annullato: "border-l-red-600",
+} as const;
+export const pallinoContrassegno = {
+  stampato: "bg-green-600", prenotato: "bg-yellow-400", modificato: "bg-orange-500", annullato: "bg-red-600",
+} as const;

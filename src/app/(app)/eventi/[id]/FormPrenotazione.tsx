@@ -19,6 +19,7 @@ import {
   type DettaglioEvento, type Prenotazione,
 } from "@/lib/calcoli";
 import { modificaPrenotazione, eliminaPrenotazione } from "./azioni";
+import { Cronologia } from "./Cronologia";
 
 type Campi = z.input<typeof schemaPrenotazione>;
 const textarea = campo.replace("h-12", "min-h-24 py-3");
@@ -269,6 +270,7 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
             </div>
           )}
         </form>
+        {iniziale && <Cronologia pid={iniziale.id} tariffe={evento.tariffe} />}
       </div>
     </main>
   );

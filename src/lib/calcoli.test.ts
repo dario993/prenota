@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  descriviBiglietti, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, incassoRistorante,
+  confrontaVersioni, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, incassoRistorante,
   incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante,
   TARIFFA_ELIMINATA, type Prenotazione, type Tariffa,
 } from "./calcoli";
@@ -77,6 +77,7 @@ describe("calcoli", () => {
       pren({ cognome_nome: "Altro", pacchetti: 1, ristorante: "CASALE", pasto: "PRANZO" }),
       pren({ cognome_nome: "Altro2", pacchetti: 1, ristorante: "GIAMAICA", pasto: "CENA" }),
       pren({ cognome_nome: "NoPacchetti", righe: [riga(A, 3)] }),
+      pren({ cognome_nome: "Annullata", pacchetti: 1, ristorante: "CASALE", pasto: "CENA", contrassegno: "annullato" }),
     ];
     expect(elencoRistorante(l, "CASALE", "CENA").map((x) => x.cognome_nome)).toEqual(["alfa", "Zeta"]);
   });
@@ -106,4 +107,24 @@ describe("calcoli", () => {
   test("formattaEuro", () => expect(formattaEuro(4900).replace(/\s/g, " ")).toBe("49,00 €"));
   test("formattaDataOra usa Europe/Rome", () =>
     expect(formattaDataOra(new Date("2026-11-07T20:00:00Z"))).toContain("21:00"));
+  test("confrontaVersioni: valore precedente solo sui campi cambiati", () => {
+    const prima = pren({ cognome_nome: "Rossi", telefono: "333", righe: [riga(A, 2, 1500)] });
+    const dopo = pren({ cognome_nome: "Rossi", telefono: "334", righe: [riga(A, 3, 1500)], contrassegno: "stampato" });
+    const cambiati = confrontaVersioni(dopo, prima, tariffe).filter((c) => c.era !== undefined)
+      .map((c) => [c.campo, c.era, c.valore]);
+    expect(cambiati.map((c) => c.join("|").replace(/\s/g, " "))).toEqual([
+      "Telefono|333|334", "Biglietti|2 Adulti|3 Adulti", "Persone|2|3", "Totale|30,00 €|45,00 €", "Stato|Nessuno stato|Stampato",
+    ]);
+    expect(confrontaVersioni(dopo, null, tariffe).every((c) => c.era === undefined)).toBe(true);
+  });
+  test("spostaElemento e indiceDestinazione per il trascinamento", () => {
+    expect(spostaElemento(["a", "b", "c", "d"], 0, 2)).toEqual(["b", "c", "a", "d"]);
+    expect(spostaElemento(["a", "b", "c", "d"], 3, 0)).toEqual(["d", "a", "b", "c"]);
+    expect(spostaElemento(["a", "b"], 1, 1)).toEqual(["a", "b"]);
+    const centri = [10, 30, 50, 70];
+    expect(indiceDestinazione(centri, 0, 12)).toBe(0); // appena mosso: resta
+    expect(indiceDestinazione(centri, 0, 55)).toBe(2); // oltre il terzo
+    expect(indiceDestinazione(centri, 3, 5)).toBe(0); // in cima
+    expect(indiceDestinazione(centri, 1, 999)).toBe(3); // in fondo
+  });
 });

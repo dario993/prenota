@@ -33,12 +33,12 @@ export function PaginaEvento({ id }: { id: string }) {
   const arrivate = new Set(data.prenotazioni.map((p) => p.id));
   const coda = inAttesa.filter((p) => !arrivate.has(p.id)).map((p) => ({ ...p, righe: righeConPrezzi(p.righe, evento.tariffe), ...prezziPacchettoDi(evento), in_attesa: true }));
   const prenotazioni = [...data.prenotazioni, ...coda];
-  // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono
-  const valide = prenotazioni.filter((p) => !("stato" in p) || p.stato === "pending");
+  // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono; le annullate neppure
+  const valide = prenotazioni.filter((p) => ("stato" in p ? p.stato === "pending" : p.contrassegno !== "annullato"));
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6">
+    <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0">
       {coda.some((p) => p.stato === "pending") && (
-        <p role="status" className="sticky top-0 z-20 mb-4 flex items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
+        <p role="status" className="sticky top-0 z-20 mb-4 flex print:hidden items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
           <CloudOff size={20} aria-hidden className="shrink-0 text-warning" />
           {online ? "Invio delle prenotazioni in attesa…" : "Salvate sul telefono, verranno inviate quando torna la rete"}
         </p>
@@ -46,9 +46,9 @@ export function PaginaEvento({ id }: { id: string }) {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-title lg:text-display">{evento.titolo}</h1>
-          <p className="mt-1 text-caption text-ink-muted">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
+          <p className="mt-1 text-caption text-ink-muted print:text-ink">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 print:hidden">
           <Link href={`/eventi/${id}/ristoranti`} className={btnSecondario}>
             <UtensilsCrossed size={20} aria-hidden />Ristoranti
           </Link>
@@ -58,12 +58,12 @@ export function PaginaEvento({ id }: { id: string }) {
         </div>
       </div>
       <div className="space-y-6">
-        <Riepilogo prenotazioni={valide} capienza={evento.capienza} tariffe={evento.tariffe} />
+        <div className="print:hidden"><Riepilogo prenotazioni={valide} capienza={evento.capienza} tariffe={evento.tariffe} /></div>
         <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} />
       </div>
       {/* telefono: azione principale in basso, sopra la navigazione, raggiungibile col pollice */}
       <Link href={nuova} aria-label="Nuova prenotazione"
-        className="fixed bottom-[calc(64px+env(safe-area-inset-bottom)+16px)] right-4 z-10 inline-flex size-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-overlay transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover lg:hidden">
+        className="fixed bottom-[calc(64px+env(safe-area-inset-bottom)+16px)] right-4 z-10 inline-flex size-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-overlay transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover lg:hidden print:hidden">
         <Plus size={28} aria-hidden />
       </Link>
     </main>

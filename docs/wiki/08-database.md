@@ -69,9 +69,24 @@ Tariffario libero di ogni opera (il pacchetto resta sull'opera).
 | ristorante | text | `GIAMAICA` \| `CASALE` \| null |
 | pasto | text | `PRANZO` \| `CENA` \| null |
 | posti, provenienza, note | text | |
+| ordine | integer | posizione scelta con «Riordina»; null = in fondo, per `creata_il` |
+| contrassegno | text | null (nessuno stato, all'inserimento) \| `prenotato` \| `stampato` \| `modificato` \| `annullato` |
 | prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante | integer | copiati dall'opera al primo salvataggio |
 | creata_da | uuid → utenti | |
 | creata_il, aggiornata_il | timestamptz | |
+
+### `prenotazioni_storico`
+Cronologia di ogni prenotazione (on delete cascade). Una riga a ogni creazione (`POST /api/prenotazioni`), modifica e
+cambio di stato.
+| Colonna | Tipo | Note |
+|---|---|---|
+| id | bigint identity PK | |
+| prenotazione_id | uuid → prenotazioni | indicizzata |
+| utente_id | uuid → utenti | chi ha fatto l'azione |
+| il | timestamptz | `now()` |
+| azione | text | `creata` \| `modificata` \| `stato` |
+| contrassegno | text | stato della prenotazione dopo l'azione (null = nessuno) |
+| dati | jsonb | copia della prenotazione dopo l'azione (campi, quote pacchetto, righe tariffa con prezzi), scritta da `src/lib/storico.ts`; null per le voci ricostruite da 004 |
 
 ### `prenotazioni_tariffe`
 Quantità per tariffa di ogni prenotazione. PK (`prenotazione_id`, `tariffa_id`).
@@ -104,6 +119,8 @@ applicata).
   `prenotazioni.adulti`.
 - `002-utenti-api.sql`: aggiunge il ruolo `api` al vincolo su `utenti.ruolo` rende `email` facoltativa per i soli utenti `api` ed
   elimina la tabella `chiavi_api` della prima versione delle chiavi. Riapplicarla non cambia nulla.
+- `003-ordine-contrassegno.sql`: aggiunge `prenotazioni.ordine` e `prenotazioni.contrassegno` (facoltativo, senza default).
+- `004-storico.sql`: aggiunge `prenotazioni_storico.dati` se manca; per le prenotazioni senza cronologia crea la voce «creata» da `creata_il` / `creata_da` (senza copia).
 
 ## Backup
 

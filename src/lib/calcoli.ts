@@ -4,6 +4,11 @@ export const PASTI = ["PRANZO", "CENA"] as const;
 export type Pasto = (typeof PASTI)[number];
 export const NOMI_RISTORANTI: Record<Ristorante, string> = { GIAMAICA: "Giamaica", CASALE: "Casale" };
 export const NOMI_PASTI: Record<Pasto, string> = { PRANZO: "Pranzo", CENA: "Cena" };
+export const CONTRASSEGNI = ["prenotato", "stampato", "modificato", "annullato"] as const;
+export type Contrassegno = (typeof CONTRASSEGNI)[number];
+export const NOMI_CONTRASSEGNI: Record<Contrassegno, string> = {
+  prenotato: "Prenotato", stampato: "Stampato", modificato: "Modificato", annullato: "Annullato",
+};
 
 // Tariffario libero per opera; il pacchetto resta a parte (ristorante, pasto, due quote).
 export interface Tariffa { id: string; nome: string; prezzo: number; nascosta: boolean; ordine: number }
@@ -13,12 +18,20 @@ export interface Prenotazione extends PrezziPacchetto {
   id: string; evento_id: string; cognome_nome: string; telefono: string;
   righe: RigaTariffa[]; pacchetti: number;
   ristorante: Ristorante | null; pasto: Pasto | null; posti: string; provenienza: string; note: string;
+  contrassegno?: Contrassegno | null; // null o assente (in coda sul telefono) = nessuno stato
   in_attesa?: boolean; // solo lato client
 }
 export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number }
 export interface DettaglioEvento {
   evento: Omit<EventoLista, "persone"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
   prenotazioni: Prenotazione[];
+}
+// Copia della prenotazione salvata a ogni voce di cronologia (null per le voci ricostruite, senza copia).
+export type DatiStorico = Pick<Prenotazione, "cognome_nome" | "telefono" | "pacchetti" | "ristorante" | "pasto" | "posti"
+  | "provenienza" | "note" | "contrassegno" | "righe" | "prezzo_pacchetto_teatro" | "prezzo_pacchetto_ristorante">;
+export interface VoceStorico {
+  il: string; utente: string | null; azione: "creata" | "modificata" | "stato"; contrassegno: Contrassegno | null;
+  dati: DatiStorico | null;
 }
 export interface VoceTariffa { tariffa_id: string; nome: string; quantita: number }
 export interface Riepilogo {
@@ -108,8 +121,9 @@ export function descriviBiglietti(
 export const ordinaPerNome = <T extends { cognome_nome: string }>(lista: T[]): T[] =>
   [...lista].sort((a, b) => a.cognome_nome.localeCompare(b.cognome_nome, "it", { sensitivity: "base" }));
 
+// le annullate non vanno ai ristoranti
 export const elencoRistorante = (prenotazioni: Prenotazione[], r: Ristorante, p: Pasto): Prenotazione[] =>
-  ordinaPerNome(prenotazioni.filter((x) => x.pacchetti > 0 && x.ristorante === r && x.pasto === p));
+  ordinaPerNome(prenotazioni.filter((x) => x.pacchetti > 0 && x.ristorante === r && x.pasto === p && x.contrassegno !== "annullato"));
 
 export function testoElencoRistorante(a: {
   ristorante: Ristorante; pasto: Pasto; dataOra: Date; titolo: string; prenotazioni: Prenotazione[];
@@ -137,3 +151,31 @@ const dataOra = new Intl.DateTimeFormat("it-IT", {
   timeZone: "Europe/Rome",
 });
 export const formattaDataOra = (d: Date): string => dataOra.format(d);
+
+// Una versione della prenotazione come [campo, valore] da mostrare nella cronologia.
+export const campiVersione = (d: DatiStorico, tariffe: Tariffa[]): [string, string][] => [
+  ["Nome", d.cognome_nome], ["Telefono", d.telefono], ["Biglietti", descriviBiglietti(d, tariffe)],
+  ["Persone", String(persone(d))], ["Totale", formattaEuro(incassoTeatro(d) + incassoRistorante(d))],
+  ["Posti", d.posti], ["Provenienza", d.provenienza], ["Note", d.note],
+  ["Stato", d.contrassegno ? NOMI_CONTRASSEGNI[d.contrassegno] : "Nessuno stato"],
+];
+
+// Campi di una versione col valore della versione precedente se è cambiato (prima = null: niente confronto).
+export function confrontaVersioni(dopo: DatiStorico, prima: DatiStorico | null, tariffe: Tariffa[]) {
+  const vecchi = new Map(prima ? campiVersione(prima, tariffe) : []);
+  return campiVersione(dopo, tariffe).map(([campo, valore]) => {
+    const era = vecchi.get(campo);
+    return { campo, valore, era: era !== undefined && era !== valore ? era : undefined };
+  });
+}
+
+// Trascinamento nell'elenco: l'elemento in posizione «da» finisce in posizione «a».
+export function spostaElemento<T>(lista: T[], da: number, a: number): T[] {
+  const nuova = [...lista];
+  nuova.splice(a, 0, ...nuova.splice(da, 1));
+  return nuova;
+}
+
+// Posizione di arrivo: quanti altri elementi hanno il centro sopra il centro di quello trascinato.
+export const indiceDestinazione = (centri: number[], da: number, centro: number): number =>
+  centri.filter((c, i) => i !== da && c < centro).length;

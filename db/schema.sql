@@ -59,6 +59,10 @@ create table if not exists prenotazioni (
   posti text not null default '',
   provenienza text not null default '',
   note text not null default '',
+  -- posizione scelta a mano nell'elenco; null = in fondo, in ordine di inserimento
+  ordine integer,
+  -- null = nessuno stato (appena inserita)
+  contrassegno text check (contrassegno in ('prenotato', 'stampato', 'modificato', 'annullato')),
   prezzo_pacchetto_teatro integer not null check (prezzo_pacchetto_teatro >= 0),
   prezzo_pacchetto_ristorante integer not null check (prezzo_pacchetto_ristorante >= 0),
   creata_da uuid references utenti (id),
@@ -77,5 +81,17 @@ create table if not exists prenotazioni_tariffe (
   primary key (prenotazione_id, tariffa_id)
 );
 
+-- Cronologia: chi e quando ha creato, modificato o cambiato lo stato; contrassegno = lo stato dopo l'azione.
+create table if not exists prenotazioni_storico (
+  id bigint generated always as identity primary key,
+  prenotazione_id uuid not null references prenotazioni (id) on delete cascade,
+  utente_id uuid references utenti (id),
+  il timestamptz not null default now(),
+  azione text not null check (azione in ('creata', 'modificata', 'stato')),
+  contrassegno text,
+  dati jsonb -- copia della prenotazione dopo l'azione; null per le voci ricostruite da 004
+);
+
+create index if not exists prenotazioni_storico_prenotazione_id_idx on prenotazioni_storico (prenotazione_id);
 create index if not exists prenotazioni_evento_id_idx on prenotazioni (evento_id);
 create index if not exists eventi_data_ora_idx on eventi (data_ora);

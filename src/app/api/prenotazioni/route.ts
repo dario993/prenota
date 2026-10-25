@@ -3,6 +3,7 @@ import { sql } from "@/lib/db";
 import { ERRORE_IMPREVISTO } from "@/lib/esito";
 import { schemaPrenotazione } from "@/lib/schemi";
 import { inserisciRighe, TariffaNonValida } from "@/lib/righe";
+import { registraStorico } from "@/lib/storico";
 
 export async function POST(req: Request) {
   const utente = await utenteCorrente();
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
         returning id`;
       if (!p) return false;
       await inserisciRighe(tx, d.id, d.evento_id, d.righe);
+      await registraStorico(tx, d.id, utente.id, "creata");
       return true;
     });
     if (nuova) return Response.json({ id: d.id }, { status: 201 });
