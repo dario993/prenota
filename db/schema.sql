@@ -15,6 +15,16 @@ create table if not exists sessioni (
   scade_il timestamptz not null
 );
 
+-- Chiavi API per l'accesso remoto (Authorization: Bearer). Si salva solo lo sha256: la chiave si vede una volta sola.
+create table if not exists chiavi_api (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null,
+  hash text not null unique,
+  utente_id uuid not null references utenti (id) on delete cascade,
+  creata_il timestamptz not null default now(),
+  usata_il timestamptz
+);
+
 create table if not exists locali (
   id uuid primary key default gen_random_uuid(),
   nome text not null,

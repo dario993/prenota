@@ -23,6 +23,15 @@ PostgreSQL. Schema (stato finale) in `db/schema.sql` e migrazioni in `db/migrazi
 | utente_id | uuid → utenti | on delete cascade |
 | scade_il | timestamptz | |
 
+### `chiavi_api`
+| Colonna | Tipo | Note |
+|---|---|---|
+| id | uuid PK | |
+| nome | text | etichetta scelta dall'admin |
+| hash | text unique | sha256 della chiave; la chiave in chiaro non si salva |
+| utente_id | uuid → utenti | admin che l'ha creata, on delete cascade |
+| creata_il / usata_il | timestamptz | `usata_il` aggiornata a ogni richiesta |
+
 ### `locali`
 | Colonna | Tipo | Note |
 |---|---|---|

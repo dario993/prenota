@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, ChevronRight, Clapperboard, Ticket, Users } from "lucide-react";
+import { Building2, ChevronRight, Clapperboard, KeyRound, Ticket, Users } from "lucide-react";
 import { richiediAdmin } from "@/lib/auth";
 import { paginaAdmin } from "@/components/stili";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -9,6 +9,7 @@ const LINK = [
   ["/admin/opere", "Opere", "Titoli e tariffario", Clapperboard],
   ["/admin/eventi", "Eventi (admin)", "Opera, locale, data e ora", Ticket],
   ["/admin/utenti", "Utenti", "Accessi e ruoli", Users],
+  ["/admin/chiavi", "API key", "Accesso remoto all'app", KeyRound],
 ] as const;
 
 export default async function Admin() {

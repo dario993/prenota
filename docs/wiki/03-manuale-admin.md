@@ -55,6 +55,12 @@ Da **Admin → Utenti**:
 - **Disattiva** toglie l'accesso subito, anche a chi è già collegato (le sue prenotazioni restano); **Attiva** lo ripristina.
 - Non puoi disattivare né declassare te stesso, così c'è sempre almeno un admin.
 
+## API key
+
+Da **Admin → API key** si crea una chiave per gestire l'app da remoto (es. da Claude): si dà un nome, si preme **Crea chiave** e
+la chiave compare **una sola volta**, da copiare subito. L'elenco mostra chi l'ha creata e quando è stata usata l'ultima volta;
+**Revoca** la disattiva all'istante. La chiave ha i pieni poteri di un admin (vedi pagina 9): revocarla quando non serve più.
+
 ## Il primo admin
 
 Alla prima apertura, con il database vuoto, l'app chiede di creare il primo amministratore (nome, email, password e conferma). Non servono comandi da terminale. `npm run crea-admin` resta per il recupero di un accesso perso (vedi [Sviluppo e test](12-sviluppo-e-test.md)).

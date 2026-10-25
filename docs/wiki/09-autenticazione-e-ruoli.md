@@ -30,6 +30,21 @@ Un utente **disattivato** non può accedere e perde subito l'accesso anche con u
 
 Un operatore che apre una pagina `/admin/...` viene riportato alla home (`/`); se chiama direttamente un'azione admin, l'azione viene rifiutata con "Non autorizzato".
 
+## Chiavi API (accesso remoto)
+
+Create da **Admin → API key** (tabella `chiavi_api`, solo sha256 nel database). Con l'intestazione
+`Authorization: Bearer <chiave>` `utenteCorrente()` restituisce l'admin che ha creato la chiave, purché sia ancora admin e attivo;
+così la chiave vale su tutte le route API. In più `POST /api/sql` (solo admin) esegue qualsiasi query:
+
+```bash
+curl -X POST https://<host>/api/sql -H "Authorization: Bearer $CHIAVE" \
+  -d '{"query": "select * from locali where capienza > $1", "params": [100]}'
+# → {"righe": [...], "conteggio": n}; errore SQL → 400 {"errore": "..."}
+```
+
+Va usata rispettando le regole dell'app (importi in centesimi, tariffe usate nascoste e non eliminate). Una chiave sbagliata
+non ricade sul cookie: risponde «Non autorizzato».
+
 ## Primo admin
 
 Non ci sono credenziali predefinite. Finché il database non ha nessun utente, `/` e `/login` portano a `/primo-accesso`, dove si crea il primo admin (nome, email, password di almeno 8 caratteri, conferma password) e si entra subito nell'app. Appena esiste un utente, `/primo-accesso` rimanda a `/login`.

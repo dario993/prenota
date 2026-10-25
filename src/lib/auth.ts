@@ -1,6 +1,6 @@
 import "server-only";
-import { randomBytes } from "node:crypto";
-import { cookies } from "next/headers";
+import { createHash, randomBytes } from "node:crypto";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { sql } from "./db";
 import { hashPassword, verificaPassword } from "./password.mjs";
@@ -15,7 +15,21 @@ export type Utente = {
 export const COOKIE_SESSIONE = "sessione";
 const DURATA_SECONDI = 30 * 24 * 60 * 60; // fissa, senza rinnovo
 
+export const hashChiave = (chiave: string) => createHash("sha256").update(chiave).digest("hex");
+
+// Chiave API (Authorization: Bearer …): vale come l'admin che l'ha creata, finché resta admin attivo.
+async function utenteDaChiave(chiave: string): Promise<Utente | null> {
+  const [u] = await sql<Utente[]>`
+    with c as (update chiavi_api set usata_il = now() where hash = ${hashChiave(chiave)} returning utente_id)
+    select u.id, u.nome, u.email, u.ruolo
+    from c join utenti u on u.id = c.utente_id
+    where u.attivo and u.ruolo = 'admin'`;
+  return u ?? null;
+}
+
 export async function utenteCorrente(): Promise<Utente | null> {
+  const bearer = (await headers()).get("authorization")?.match(/^Bearer\s+(\S+)$/i)?.[1];
+  if (bearer) return utenteDaChiave(bearer);
   const token = (await cookies()).get(COOKIE_SESSIONE)?.value;
   if (!token) return null;
   const [u] = await sql<Utente[]>`

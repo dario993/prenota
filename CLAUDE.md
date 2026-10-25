@@ -27,7 +27,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 
 ## Mappa del codice
 
-- `src/app/` pagine e Server Action (`login/`, `(app)/eventi/[id]/`, `(app)/admin/`), `api/` route JSON e `POST /api/prenotazioni`.
+- `src/app/` pagine e Server Action (`login/`, `(app)/eventi/[id]/`, `(app)/admin/`), `api/` route JSON, `POST /api/prenotazioni` e `POST /api/sql` (gestione remota con API key da Admin → API key, `Authorization: Bearer`).
 - `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `password.mjs`.
 - `src/proxy.ts` reindirizza a `/login`; `public/sw.js` service worker; `db/schema.sql` + `db/migrazioni/`; `scripts/` (db-init, crea-admin, esporta-dati.sh, backup.sh).
 - `Dockerfile`, `docker-compose.yml`: deploy homelab, vedi wiki 13.
