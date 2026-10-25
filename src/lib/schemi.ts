@@ -103,16 +103,25 @@ export const schemaEvento = z.object({
     }, "Data e ora non valide"),
 });
 
+// Utente «api»: niente email né password (la chiave è generata). Gli altri: email obbligatoria.
 export const schemaUtente = z.object({
   nome: testo(80),
-  email,
+  email: z.string().trim().toLowerCase().optional(),
   // "" o assente in modifica = password invariata (undefined)
   password: z
     .string()
     .transform((v) => (v === "" ? undefined : v))
     .pipe(z.string().min(8, "Almeno 8 caratteri").optional())
     .optional(),
-  ruolo: z.enum(["admin", "operatore"]),
+  ruolo: z.enum(["admin", "operatore", "api"]),
+}).transform((d, ctx) => {
+  if (d.ruolo === "api") return { ...d, email: null, password: undefined };
+  const e = email.safeParse(d.email ?? "");
+  if (!e.success) {
+    ctx.addIssue({ code: "custom", message: "Email non valida", path: ["email"] });
+    return z.NEVER;
+  }
+  return { ...d, email: e.data };
 });
 
 export const schemaLogin = z.object({

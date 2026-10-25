@@ -11,9 +11,9 @@ PostgreSQL. Schema (stato finale) in `db/schema.sql` e migrazioni in `db/migrazi
 |---|---|---|
 | id | uuid PK | |
 | nome | text | |
-| email | text unique | minuscole |
+| email | text unique | obbligatoria tranne per il ruolo `api` (vincolo `utenti_email_check`) |
 | password_hash | text | scrypt (`node:crypto`) |
-| ruolo | text | `admin` \| `operatore` |
+| ruolo | text | `admin` \| `operatore` \| `api` (accesso remoto: in `password_hash` lo sha256 della chiave, `sha256$…`) |
 | attivo | boolean | default true |
 
 ### `sessioni`
@@ -22,15 +22,6 @@ PostgreSQL. Schema (stato finale) in `db/schema.sql` e migrazioni in `db/migrazi
 | id | text PK | token casuale |
 | utente_id | uuid → utenti | on delete cascade |
 | scade_il | timestamptz | |
-
-### `chiavi_api`
-| Colonna | Tipo | Note |
-|---|---|---|
-| id | uuid PK | |
-| nome | text | etichetta scelta dall'admin |
-| hash | text unique | sha256 della chiave; la chiave in chiaro non si salva |
-| utente_id | uuid → utenti | admin che l'ha creata, on delete cascade |
-| creata_il / usata_il | timestamptz | `usata_il` aggiornata a ogni richiesta |
 
 ### `locali`
 | Colonna | Tipo | Note |
@@ -111,6 +102,8 @@ applicata).
   Adulti, Ridotti gruppi, Bambini (prezzi dell'opera) e Omaggi (0 €), copia le quantità di ogni prenotazione in
   `prenotazioni_tariffe` con i suoi prezzi congelati, poi elimina le colonne vecchie. Si attiva solo se esiste ancora
   `prenotazioni.adulti`.
+- `002-utenti-api.sql`: aggiunge il ruolo `api` al vincolo su `utenti.ruolo` rende `email` facoltativa per i soli utenti `api` ed
+  elimina la tabella `chiavi_api` della prima versione delle chiavi. Riapplicarla non cambia nulla.
 
 ## Backup
 

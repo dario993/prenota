@@ -3,26 +3,17 @@
 create table if not exists utenti (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
-  email text not null unique,
+  email text unique, -- null solo per gli utenti «api»
   password_hash text not null,
-  ruolo text not null check (ruolo in ('admin', 'operatore')),
-  attivo boolean not null default true
+  ruolo text not null check (ruolo in ('admin', 'operatore', 'api')), -- api: accesso remoto con chiave, senza login
+  attivo boolean not null default true,
+  constraint utenti_email_check check (ruolo = 'api' or email is not null)
 );
 
 create table if not exists sessioni (
   id text primary key,
   utente_id uuid not null references utenti (id) on delete cascade,
   scade_il timestamptz not null
-);
-
--- Chiavi API per l'accesso remoto (Authorization: Bearer). Si salva solo lo sha256: la chiave si vede una volta sola.
-create table if not exists chiavi_api (
-  id uuid primary key default gen_random_uuid(),
-  nome text not null,
-  hash text not null unique,
-  utente_id uuid not null references utenti (id) on delete cascade,
-  creata_il timestamptz not null default now(),
-  usata_il timestamptz
 );
 
 create table if not exists locali (

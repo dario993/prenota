@@ -114,6 +114,15 @@ test("schemaUtente: password opzionale ma min 8, email normalizzata", () => {
   expect(schemaUtente.safeParse({ ...u, ruolo: "boss" }).success).toBe(false);
 });
 
+test("schemaUtente: email obbligatoria tranne che per API key", () => {
+  const u = { nome: "Mario", ruolo: "operatore" };
+  expect(schemaUtente.safeParse(u).success).toBe(false);
+  expect(schemaUtente.safeParse({ ...u, email: "" }).success).toBe(false);
+  const api = schemaUtente.parse({ ...u, ruolo: "api", email: "", password: "" });
+  expect(api.email).toBeNull();
+  expect(api.password).toBeUndefined();
+});
+
 test("schemaUtente: password vuota = undefined", () => {
   const u = { nome: "Mario", email: "m@x.it", ruolo: "admin", password: "" };
   const r = schemaUtente.parse(u);

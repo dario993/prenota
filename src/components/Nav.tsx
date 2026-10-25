@@ -7,7 +7,7 @@ import { useIsRestoring, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useInAttesa, riprendiCoda, svuotaDatiLocali } from "@/lib/query";
 import { TemaToggle } from "./TemaToggle";
-import { CalendarDays, Building2, Clapperboard, Ticket, Users, KeyRound, Settings, LogOut } from "lucide-react";
+import { CalendarDays, Building2, Clapperboard, Ticket, Users, Settings, LogOut } from "lucide-react";
 
 type Voce = { href: string; testo: string; Icona: typeof CalendarDays; solo?: "desktop" | "mobile" };
 
@@ -17,7 +17,6 @@ const VOCI_ADMIN: Voce[] = [
   { href: "/admin/opere", testo: "Opere", Icona: Clapperboard, solo: "desktop" },
   { href: "/admin/eventi", testo: "Eventi (admin)", Icona: Ticket, solo: "desktop" },
   { href: "/admin/utenti", testo: "Utenti", Icona: Users, solo: "desktop" },
-  { href: "/admin/chiavi", testo: "API key", Icona: KeyRound, solo: "desktop" },
 ];
 
 export function Nav({ admin, esci }: { admin: boolean; esci?: () => Promise<void> }) {

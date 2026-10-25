@@ -43,3 +43,4 @@
 | 2026-10-25 | Admin → API key: chiavi create dall'admin (mostrate una volta, salvato solo l'hash, revocabili) per la gestione remota con `Authorization: Bearer`; `POST /api/sql` esegue query arbitrarie per un admin; tabella `chiavi_api` | 3, 8, 9 |
 | 2026-10-25 | Stack Portainer: porta sull'host configurabile con la variabile `PORTA` (predefinita 3005) | 13 |
 | 2026-10-25 | Menu desktop: voce «API key» (prima raggiungibile solo dalla pagina Admin, che su desktop non è nel menu) | 3 |
+| 2026-10-25 | API key come ruolo utente: si creano da Admin → Utenti (ruolo «API key» senza email né password, chiave generata e mostrata una volta, disattivabili come gli altri); tolte la pagina e la voce di menu «API key» e la tabella `chiavi_api` (migrazione `002-utenti-api.sql`) | 3, 8, 9 |

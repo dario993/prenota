@@ -54,12 +54,9 @@ Da **Admin → Utenti**:
 - **Modifica** cambia nome, email e ruolo; la password si cambia solo se compilata, altrimenti resta invariata (così si reimposta quella dimenticata).
 - **Disattiva** toglie l'accesso subito, anche a chi è già collegato (le sue prenotazioni restano); **Attiva** lo ripristina.
 - Non puoi disattivare né declassare te stesso, così c'è sempre almeno un admin.
-
-## API key
-
-Da **Admin → API key** (su desktop **API key** nel menu) si crea una chiave per gestire l'app da remoto (es. da Claude): si dà un nome, si preme **Crea chiave** e
-la chiave compare **una sola volta**, da copiare subito. L'elenco mostra chi l'ha creata e quando è stata usata l'ultima volta;
-**Revoca** la disattiva all'istante. La chiave ha i pieni poteri di un admin (vedi pagina 9): revocarla quando non serve più.
+- Ruolo **API key**: un utente per l'accesso remoto (es. Claude). Email e password non servono (per gli altri ruoli sono obbligatorie): al salvataggio compare la chiave,
+  **una sola volta**, con «Copia» e «Fatto». Ha i pieni poteri di un admin via API (pagina 9) ma non entra nell'app web.
+  Per toglierle l'accesso: **Disattiva**. Per una chiave nuova: crea un altro utente API key (il tipo non si cambia).
 
 ## Il primo admin
 

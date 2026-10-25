@@ -5,9 +5,10 @@ import { BottoneElimina, FormAzione } from "@/components/FormAzione";
 import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin, scelta } from "@/components/stili";
 import { attivaUtente, salvaUtente } from "./azioni";
 
-type U = { id: string; nome: string; email: string; ruolo: "admin" | "operatore"; attivo: boolean };
+type U = { id: string; nome: string; email: string | null; ruolo: "admin" | "operatore" | "api"; attivo: boolean };
 
-const RUOLI = [["operatore", "Operatore"], ["admin", "Admin"]] as const;
+const RUOLI = [["operatore", "Operatore"], ["admin", "Admin"], ["api", "API key"]] as const;
+const NOME_RUOLO = Object.fromEntries(RUOLI);
 
 export default async function Utenti({ searchParams }: { searchParams: Promise<{ modifica?: string; nuovo?: string }> }) {
   const me = await richiediAdmin();
@@ -15,6 +16,7 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
   const utenti = await sql<U[]>`select id, nome, email, ruolo, attivo from utenti order by nome`;
   const corrente = utenti.find((u) => u.id === modifica);
   const sonoIo = corrente?.id === me.id; // il proprio ruolo non si cambia
+  const api = corrente?.ruolo === "api"; // né quello di un utente API key, che non ha password
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
       <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.nome}` : "Nuovo utente"}</h1>
@@ -27,14 +29,17 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
         <label className={etichetta}>Nome
           <input name="nome" defaultValue={corrente?.nome} required maxLength={80} className={campo} />
         </label>
-        <label className={etichetta}>Email
-          <input name="email" type="email" defaultValue={corrente?.email} required autoComplete="off" className={campo} />
-        </label>
-        <label className={etichetta}>Password
-          <input name="password" type="password" minLength={8} required={!corrente} autoComplete="new-password" className={campo} />
-          <span className="text-caption font-normal text-ink-muted">{corrente ? "Lascia vuoto per non cambiarla." : "Almeno 8 caratteri."}</span>
-        </label>
-        {sonoIo ? <input type="hidden" name="ruolo" value={corrente.ruolo} /> : (
+        {!api && <label className={etichetta}>Email
+          <input name="email" type="email" defaultValue={corrente?.email ?? ""} autoComplete="off" className={campo} />
+          {!corrente && <span className="text-caption font-normal text-ink-muted">Obbligatoria, tranne che per API key.</span>}
+        </label>}
+        {!api && <label className={etichetta}>Password
+          <input name="password" type="password" minLength={8} autoComplete="new-password" className={campo} />
+          <span className="text-caption font-normal text-ink-muted">
+            {corrente ? "Lascia vuoto per non cambiarla." : "Obbligatoria, almeno 8 caratteri. Per API key lascia vuoto: la chiave viene generata e mostrata una volta."}
+          </span>
+        </label>}
+        {sonoIo || api ? <input type="hidden" name="ruolo" value={corrente.ruolo} /> : (
           <fieldset className="space-y-2">
             <legend className="mb-2 text-label">Ruolo</legend>
             <div className="flex gap-2">
@@ -64,7 +69,7 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
                 <span className={`font-semibold ${u.attivo ? "" : "text-ink-muted"}`}>{u.nome}</span>
                 {!u.attivo && <span className="rounded-sm bg-surface-sunken px-2 py-1 text-label text-ink-muted">disattivato</span>}
               </div>
-              <div className="text-caption text-ink-muted">{u.email} · {u.ruolo === "admin" ? "Admin" : "Operatore"}</div>
+              <div className="text-caption text-ink-muted">{[u.email, NOME_RUOLO[u.ruolo]].filter(Boolean).join(" · ")}</div>
             </div>
             <div className={azioniAdmin}>
               <Link href={`/admin/utenti?modifica=${u.id}`} aria-label={`Modifica ${u.nome}`} className={btnSecondario}>Modifica</Link>

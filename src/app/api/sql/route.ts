@@ -2,7 +2,7 @@ import { z } from "zod";
 import { utenteCorrente } from "@/lib/auth";
 import { sql } from "@/lib/db";
 
-// Gestione remota con chiave API (o sessione admin): esegue una query qualsiasi, con parametri $1, $2… opzionali.
+// Gestione remota: utente «api» con la sua chiave (o sessione admin): esegue una query qualsiasi, con parametri $1, $2… opzionali.
 const schemaQuery = z.object({
   query: z.string().trim().min(1),
   params: z.array(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
@@ -10,7 +10,7 @@ const schemaQuery = z.object({
 
 export async function POST(req: Request) {
   const utente = await utenteCorrente();
-  if (!utente || utente.ruolo !== "admin") return Response.json({ errore: "Non autorizzato" }, { status: 401 });
+  if (!utente || utente.ruolo === "operatore") return Response.json({ errore: "Non autorizzato" }, { status: 401 });
   const dati = schemaQuery.safeParse(await req.json().catch(() => null));
   if (!dati.success) return Response.json({ errore: "Richiesta non valida: { query, params? }" }, { status: 400 });
   try {

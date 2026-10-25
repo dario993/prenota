@@ -28,13 +28,16 @@ Un utente **disattivato** non può accedere e perde subito l'accesso anche con u
 | Locali, opere, eventi | no | sì |
 | Utenti | no | sì |
 
+L'utente **API key** non usa l'app web: via API ha gli stessi poteri di un admin, incluso `POST /api/sql`.
+
 Un operatore che apre una pagina `/admin/...` viene riportato alla home (`/`); se chiama direttamente un'azione admin, l'azione viene rifiutata con "Non autorizzato".
 
-## Chiavi API (accesso remoto)
+## Utenti API key (accesso remoto)
 
-Create da **Admin → API key** (tabella `chiavi_api`, solo sha256 nel database). Con l'intestazione
-`Authorization: Bearer <chiave>` `utenteCorrente()` restituisce l'admin che ha creato la chiave, purché sia ancora admin e attivo;
-così la chiave vale su tutte le route API. In più `POST /api/sql` (solo admin) esegue qualsiasi query:
+Si creano da **Admin → Utenti** con ruolo **API key**: invece della password viene generata una chiave, mostrata una volta;
+in `password_hash` resta solo `sha256$<hash>` (formato diverso da scrypt: con la chiave non si entra dal login web).
+Con l'intestazione `Authorization: Bearer <chiave>` `utenteCorrente()` restituisce quell'utente, se attivo; la chiave vale
+su tutte le route API e `POST /api/sql` (solo admin e API key) esegue qualsiasi query:
 
 ```bash
 curl -X POST https://<host>/api/sql -H "Authorization: Bearer $CHIAVE" \

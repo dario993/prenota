@@ -8,22 +8,26 @@ import { hashPassword, verificaPassword } from "./password.mjs";
 export type Utente = {
   id: string;
   nome: string;
-  email: string;
-  ruolo: "admin" | "operatore";
+  email: string | null; // null per gli utenti «api»
+  ruolo: "admin" | "operatore" | "api";
 };
 
 export const COOKIE_SESSIONE = "sessione";
 const DURATA_SECONDI = 30 * 24 * 60 * 60; // fissa, senza rinnovo
 
-export const hashChiave = (chiave: string) => createHash("sha256").update(chiave).digest("hex");
+// Utente di tipo «api»: la chiave sta in password_hash come sha256 (formato diverso da scrypt, quindi niente login web).
+const hashChiave = (chiave: string) => `sha256$${createHash("sha256").update(chiave).digest("hex")}`;
 
-// Chiave API (Authorization: Bearer …): vale come l'admin che l'ha creata, finché resta admin attivo.
+export function nuovaChiave(): { chiave: string; hash: string } {
+  const chiave = `prenota_${randomBytes(32).toString("base64url")}`;
+  return { chiave, hash: hashChiave(chiave) };
+}
+
+// Authorization: Bearer <chiave> di un utente «api» attivo.
 async function utenteDaChiave(chiave: string): Promise<Utente | null> {
   const [u] = await sql<Utente[]>`
-    with c as (update chiavi_api set usata_il = now() where hash = ${hashChiave(chiave)} returning utente_id)
-    select u.id, u.nome, u.email, u.ruolo
-    from c join utenti u on u.id = c.utente_id
-    where u.attivo and u.ruolo = 'admin'`;
+    select id, nome, email, ruolo from utenti
+    where ruolo = 'api' and attivo and password_hash = ${hashChiave(chiave)}`;
   return u ?? null;
 }
 
