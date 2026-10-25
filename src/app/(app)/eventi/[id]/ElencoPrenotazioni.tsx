@@ -103,13 +103,19 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
       {CONTRASSEGNI.map((c) => <option key={c} value={c}>{NOMI_CONTRASSEGNI[c]}</option>)}
     </select>
   );
+  // maniglia in testa, subito dopo il numero
+  const maniglia = (p: Voce) => {
+    const i = sulServer.findIndex((x) => x.id === p.id);
+    return frecce && i >= 0 && (
+      <button type="button" onPointerDown={(e) => afferra(e, i)} onPointerMove={trascina} onPointerUp={lascia} onPointerCancel={() => setTr(null)}
+        aria-label={`Trascina per spostare ${p.cognome_nome}`} title="Trascina per spostare"
+        className="inline-flex size-9 shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-md text-ink-muted active:cursor-grabbing print:hidden"><GripVertical size={22} aria-hidden /></button>
+    );
+  };
   const pulsantiSposta = (p: Voce) => {
     const i = sulServer.findIndex((x) => x.id === p.id);
     return frecce && i >= 0 && (
       <span className="inline-flex gap-1 print:hidden">
-        <button type="button" onPointerDown={(e) => afferra(e, i)} onPointerMove={trascina} onPointerUp={lascia} onPointerCancel={() => setTr(null)}
-          aria-label={`Trascina per spostare ${p.cognome_nome}`} title="Trascina per spostare"
-          className="inline-flex size-10 cursor-grab touch-none select-none items-center justify-center rounded-md text-ink-muted active:cursor-grabbing"><GripVertical size={22} aria-hidden /></button>
         <button type="button" onClick={() => sposta(i, i - 1)} disabled={i === 0} aria-label={`Sposta su ${p.cognome_nome}`}
           className="inline-flex size-10 items-center justify-center rounded-md border border-line-control disabled:opacity-30"><ArrowUp size={18} aria-hidden /></button>
         <button type="button" onClick={() => sposta(i, i + 1)} disabled={i === sulServer.length - 1} aria-label={`Sposta giù ${p.cognome_nome}`}
@@ -120,7 +126,9 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
   const contenutoScheda = (p: Voce) => (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0 space-y-1">
-        <div className="font-semibold"><span className="mr-2 tabular-nums text-ink-muted">{numero.get(p.id)}</span>{p.cognome_nome}</div>
+        <div className="flex items-center font-semibold">
+          <span className="mr-2 tabular-nums text-ink-muted">{numero.get(p.id)}</span>{maniglia(p)}<span className="min-w-0">{p.cognome_nome}</span>
+        </div>
         {p.telefono && <div className="text-caption text-ink-muted">{p.telefono}</div>}
         <div className="text-label">{descriviBiglietti(p, tariffe)}</div>
         {p.posti && <div className="font-mono text-label text-ink-muted">{p.posti}</div>}
@@ -169,7 +177,9 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
               <div className="p-4">{contenutoScheda(p)}</div>
             ) : (
               <>
-                <Link href={href(p)} onClick={apri} className="block p-4 pb-2">{contenutoScheda(p)}</Link>
+                {/* riordinando la scheda non si apre: la maniglia sta dentro e un tocco non deve portare altrove */}
+                {frecce ? <div className="p-4 pb-2">{contenutoScheda(p)}</div>
+                  : <Link href={href(p)} onClick={apri} className="block p-4 pb-2">{contenutoScheda(p)}</Link>}
                 <div className="flex items-center justify-between gap-2 px-4 pb-3">{sceltaContrassegno(p)}{pulsantiSposta(p)}</div>
               </>
             )}
@@ -190,7 +200,9 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
                 if (p.in_attesa || (e.target as HTMLElement).closest("a, button, select") || !apri(e)) return;
                 router.push(href(p));
               }} className={`border-t border-line bg-surface align-top print:break-inside-avoid [&>td]:print:px-2 [&>td]:print:py-1 ${trascinata(p)} ${p.in_attesa ? "" : "cursor-pointer hover:bg-surface-sunken"}`}>
-                <td className={`border-l-4 px-3 py-3 text-right tabular-nums text-ink-muted ${barra(p)}`}>{numero.get(p.id)}</td>
+                <td className={`border-l-4 px-3 py-3 tabular-nums text-ink-muted ${barra(p)}`}>
+                  <div className="flex items-center justify-end gap-1">{numero.get(p.id)}{maniglia(p)}</div>
+                </td>
                 <td className="px-3 py-3 font-semibold">
                   {p.in_attesa ? <div className="space-y-1">{p.cognome_nome}<div>{statoDi(p)}</div></div>
                     : <Link href={href(p)} onClick={apri} className="hover:text-accent">{p.cognome_nome}</Link>}

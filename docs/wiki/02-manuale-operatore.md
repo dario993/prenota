@@ -29,8 +29,9 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
   coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
 - **Elenco prenotazioni** nell'ordine in cui sono state inserite (le nuove in fondo), con campo di **ricerca** per nome o numero di telefono.
   Ogni riga ha un **numero progressivo** (resta lo stesso anche filtrando con la ricerca).
-  **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮: tienila premuta (dito o mouse) e trascina la riga dove
-  vuoi, le altre si scostano per farle posto; vicino al bordo dello schermo l'elenco scorre da solo. Ci sono anche le
+  **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮, in testa subito dopo il numero: tienila premuta (dito o
+  mouse) e trascina la riga dove vuoi, le altre si scostano per farle posto (sul telefono, finché sei in Riordina, la
+  scheda non si apre al tocco); vicino al bordo dello schermo l'elenco scorre da solo. Ci sono anche le
   frecce ↑ ↓ per spostare di un posto (utili da tastiera). L'ordine è salvato per tutti (serve la rete, e la ricerca
   vuota). Le prenotazioni aggiunte dopo vanno in fondo.
   **Stato** colorato di ogni prenotazione, scelto dal menu sulla riga: appena inserita non ha stato (barra grigia);
