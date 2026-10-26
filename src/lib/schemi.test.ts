@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { schemaEvento, schemaLocale, schemaLogin, schemaOpera, schemaPrenotazione, schemaPrimoAccesso, schemaUtente } from "./schemi";
+import { schemaEvento, schemaLocale, schemaLogin, schemaOpera, schemaOrdineLiveticket, schemaPrenotazione, schemaPrimoAccesso, schemaUtente } from "./schemi";
 
 const T1 = "2c9a6a8e-6f0e-4a57-8d3e-3c1f0a2b7c33", T2 = "3c9a6a8e-6f0e-4a57-8d3e-3c1f0a2b7c44";
 const base = {
@@ -159,4 +159,26 @@ test("schemaOpera rifiuta importi enormi", () => {
   const p = { titolo: "A", tariffe: [{ nome: "Adulti", prezzo: "100001", nascosta: false }],
     prezzo_pacchetto_teatro: "1", prezzo_pacchetto_ristorante: "1", pacchetto_nascosto: false };
   expect(schemaOpera.safeParse(p).error!.issues[0].message).toBe("Importo non valido: Adulti");
+});
+
+describe("schemaOrdineLiveticket", () => {
+  const ordine = { codice: "lvtckt-30534501", nome: "Chiara", cognome: "Ferro", telefono: "+393472300236",
+    spettacolo: "CHIARA DI DIO", data: "2026-10-25", ora: "16:30", biglietti_dichiarati: 2,
+    biglietti: [{ posto: "Platea, Fila P, Posto n. 14", tariffa: "Intero" }], importo_pagato: 5900, anomalie: [],
+    email_id: "<a@b>", email_data: "24 Oct 2026 12:10:05 +0200" };
+  const ok = (o: object) => schemaOrdineLiveticket.safeParse(o).success;
+  test("accetta l'esempio e i campi opzionali null o assenti", () => {
+    expect(ok(ordine)).toBe(true);
+    expect(ok({ ...ordine, telefono: null, importo_pagato: null, data: null, ora: null })).toBe(true);
+    const { telefono, importo_pagato, data, ora, ...resto } = ordine;
+    void telefono; void importo_pagato; void data; void ora;
+    expect(schemaOrdineLiveticket.parse(resto)).toMatchObject({ telefono: null, importo_pagato: null, data: null, ora: null });
+  });
+  test("rifiuta codice, ora, data e troppi biglietti non validi", () => {
+    expect(ok({ ...ordine, codice: "xyz-1" })).toBe(false);
+    expect(ok({ ...ordine, ora: "9:30" })).toBe(false);
+    expect(ok({ ...ordine, data: "25/10/2026" })).toBe(false);
+    expect(ok({ ...ordine, biglietti: Array(201).fill(ordine.biglietti[0]) })).toBe(false);
+    expect(ok({ ...ordine, biglietti: Array(200).fill(ordine.biglietti[0]) })).toBe(true);
+  });
 });

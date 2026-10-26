@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { Tariffa } from "./calcoli";
-import { ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, pacchettoDaTariffa } from "./liveticket";
+import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa } from "./liveticket";
 
 const t = (id: string, nome: string, prezzo: number, nascosta = false): Tariffa => ({ id, nome, prezzo, nascosta, ordine: 0 });
 const tariffe = [t("int", "Intero", 2800), t("o65", "Over 65", 2200), t("gru", "Gruppi", 2200),
@@ -59,4 +59,17 @@ describe("assegnaBiglietti", () => {
     expect(r.biglietti[0]).toMatchObject({ tariffa_id: null, ristorante: null, pasto: null, prezzo: 0 });
     expect(r.anomalie).toEqual(lettura);
   });
+});
+
+test("cognomeNome", () => {
+  expect(cognomeNome("Chiara", "Ferro")).toBe("FERRO CHIARA");
+  expect(cognomeNome("Chiara Ferro", "")).toBe("CHIARA FERRO");
+});
+
+test("abbinaEvento: uno solo → id, zero o due → null", () => {
+  const ev = [{ id: "a", data_ora: "2026-11-01T15:30:00.000Z" }, { id: "b", data_ora: "2026-11-02T15:30:00.000Z" }];
+  expect(abbinaEvento("2026-11-01T15:30:00Z", ev)).toBe("a");
+  expect(abbinaEvento("2026-11-03T15:30:00Z", ev)).toBeNull();
+  expect(abbinaEvento("2026-11-01T15:30:00Z", [...ev, { id: "c", data_ora: "2026-11-01T15:30:00Z" }])).toBeNull();
+  expect(abbinaEvento(null, ev)).toBeNull();
 });

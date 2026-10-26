@@ -59,3 +59,4 @@
 | 2026-10-26 | Admin → Utenti: pulsante «Elimina» (solo admin, con conferma, non su sé stessi); un utente con prenotazioni o voci in cronologia non si elimina, si disattiva | 3 |
 | 2026-10-26 | LiveTicket, base dati e logica: tabella `liveticket_ordini` (migrazione `007-liveticket.sql`) e `src/lib/liveticket.ts` che assegna i biglietti alle tariffe dell'opera (pacchetti `PRANZO/CENA + SPETTACOLO CM/GG`, prefisso più lungo, controllo importo con commissione 1,50 €, anomalie di lettura = nessuna tariffa) | 8 |
 | 2026-10-26 | Migrazione `002-utenti-api.sql`: il vincolo sul ruolo include `visualizzatore`, così `db-init` non fallisce con utenti visualizzatore già presenti | 8 |
+| 2026-10-26 | LiveTicket, route `POST /api/liveticket`: riceve gli ordini letti da n8n (utente «API key»), abbina l'evento per data e ora, assegna i biglietti alle tariffe e salva con upsert su `codice` | 7 |

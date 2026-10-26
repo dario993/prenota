@@ -141,3 +141,21 @@ export const schemaPrimoAccesso = z
     message: "Le password non coincidono",
     path: ["conferma"],
   });
+
+// Ordine LiveTicket letto da n8n (POST /api/liveticket): data/ora locali Europe/Rome, tutto ciò che può mancare è null.
+const opz = <T extends z.ZodType>(s: T) => s.nullish().transform((v) => v ?? null);
+export const schemaOrdineLiveticket = z.object({
+  codice: z.string().regex(/^lvtckt-\d+$/, "Codice non valido"),
+  nome: z.string().trim().max(120).default(""),
+  cognome: z.string().trim().max(120).default(""),
+  telefono: opz(z.string().trim().max(40)),
+  spettacolo: z.string().trim().max(200).default(""),
+  data: opz(z.iso.date()),
+  ora: opz(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Ora non valida")),
+  biglietti_dichiarati: opz(z.number().int().min(0).max(10000)),
+  biglietti: z.array(z.object({ posto: z.string().trim().max(200), tariffa: z.string().trim().max(200) })).max(200),
+  importo_pagato: opz(z.number().int().min(0).max(10_000_000)),
+  anomalie: z.array(z.string().max(300)).max(50).default([]),
+  email_id: z.string().max(500).default(""),
+  email_data: z.string().max(200).default(""),
+});

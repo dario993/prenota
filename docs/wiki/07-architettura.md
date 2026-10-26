@@ -55,6 +55,10 @@ prenota/
   - `GET /api/provenienze` → `string[]` distinte, non vuote, ordinate, chiave `["provenienze"]`.
 - **Scrittura**: Server Actions (admin, modifica/eliminazione prenotazioni). La **creazione** di prenotazioni passa da
   `POST /api/prenotazioni`, così può essere messa in coda offline (vedi [Offline](10-offline.md)).
+- `POST /api/liveticket` (ruolo `admin` o `api`, Bearer come `/api/sql`): un ordine LiveTicket letto da n8n, validato con
+  `schemaOrdineLiveticket`. `salvaOrdine` (`src/lib/liveticket-db.ts`) converte `data` + `ora` (Europe/Rome) in `timestamptz`,
+  abbina l'evento a quella data e ora (zero o più di uno → `evento_id` null), assegna i biglietti alle tariffe dell'opera
+  e fa upsert su `codice` (un rinvio aggiorna, `ricevuto_il` resta). Risposta `{ ok: true, evento_id }`; 401 / 400 `{ errore }`.
 - Dopo ogni scrittura: `invalidateQueries` per aggiornare le liste.
 - Il server **valida sempre** con zod e controlla sessione e ruolo: il client non è fidato.
 - Errori di salvataggio → toast (sonner), il form resta compilato.

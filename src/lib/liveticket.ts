@@ -52,3 +52,14 @@ export function assegnaBiglietti(a: {
   }
   return { biglietti, anomalie: [...anomalie] };
 }
+
+/** «Chiara» + «Ferro» → «FERRO CHIARA»; senza cognome resta il nome com'è, in maiuscolo. */
+export const cognomeNome = (nome: string, cognome: string): string => normalizza(`${cognome} ${nome}`);
+
+/** L'evento alla stessa data e ora (ISO); zero o più di uno → null (l'ordine resta senza evento). */
+export function abbinaEvento(dataOra: string | null, eventi: { id: string; data_ora: string }[]): string | null {
+  if (!dataOra) return null;
+  const t = new Date(dataOra).getTime();
+  const trovati = eventi.filter((e) => new Date(e.data_ora).getTime() === t);
+  return trovati.length === 1 ? trovati[0].id : null;
+}
