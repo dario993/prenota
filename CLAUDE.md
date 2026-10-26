@@ -45,6 +45,8 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 
 ## Regole del progetto
 
+- **Prima in locale, poi in produzione**: ogni modifica richiesta (dati, eventi, tariffe, prenotazioni, codice) si fa
+  solo in locale (`.env.local`) se non è indicato altro; in produzione solo su richiesta esplicita, dopo la verifica in locale.
 - Interfaccia, testi, nomi di variabili e commit in **italiano** (`feat: …`, `fix: …`, `docs: …`).
 - Logica in moduli TS puri e testati (`src/lib/`); i componenti li collegano soltanto.
 - Nessuna nuova dipendenza senza motivo forte.
