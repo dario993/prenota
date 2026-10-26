@@ -2,48 +2,100 @@
 
 Regole d'uso dei pattern ricorrenti di Prenota, con i token da usare. Non sono componenti già pronti: descrivono cosa deve fare chi li costruisce.
 
+## Cornice e foglio
+
+- Desktop: la **cornice** (`bg`) contiene il menu laterale largo 228px; il contenuto sta su un **foglio** `surface`
+  staccato 8px dai bordi della finestra, angoli 16px, bordo `line` da 1px, nessuna ombra.
+- Telefono: niente foglio, il contenuto è su `surface` a tutto schermo; barra in basso sulla cornice (`bg`, `shadow-bar`).
+- **Marchio**: un sipario aperto (mantovana e due teli bianchi) su un quadrato `accent` con angoli 7px
+  (`src/components/Marchio.tsx`, `public/icona.svg`), seguito da "Prenota" in testa al menu e nel login.
+
 ## Navigazione principale
 
-- Voci: **Eventi** (home) e, solo per l'admin, **Admin**; azione **Esci** separata dalle voci.
-- Telefono: barra in basso, fondo `surface`, `shadow-bar`, altezza `nav-h` + area sicura. Ogni voce: icona sopra, testo `label` sotto, area almeno `tap-min`.
-- Desktop: colonna laterale larga `nav-w`, fondo `surface`, bordo destro `line`.
-- Voce attiva: testo e icona `accent`; inattive `ink-muted`.
+- Voci: **Eventi** (home) e, solo per l'admin, **Admin** su telefono o, su desktop, il gruppo "Amministrazione"
+  (Locali, Opere, Eventi, Utenti); **Tema** ed **Esci** in fondo al menu.
+- Telefono: barra in basso, altezza `nav-h` + area sicura. Ogni voce: icona sopra, testo `label` sotto, area almeno `tap-min`; voce attiva in `accent`.
+- Desktop: voci alte 36px, icone 20px a tratto 1.75; voce attiva come pillola `active` con testo `ink`, inattive `ink-muted`.
 - **Contatore** sulla voce Eventi (prenotazioni in attesa di invio): pillola `radius-pill`, testo `label`, fondo `accent` con `on-accent`. Se almeno una è stata rifiutata: fondo `danger` con `on-danger`. Etichetta accessibile: "3 prenotazioni in attesa di invio".
 
-## Scheda evento (home)
+## Elementi di pagina
 
-- Fondo `surface`, bordo `line`, `radius-lg`, padding `space-4`; tutta la scheda è toccabile.
-- Riga 1: titolo dell'opera in `heading`. Riga 2: data e ora · locale in `caption` `ink-muted`.
-- **Indicatore di riempimento**: testo `87 / 105` in `figure-sm` + barra alta 6px, binario `surface-sunken`, riempimento `accent`, `radius-sm`.
-  - Oltre la capienza: barra piena in `warning`, testo in `warning` e la parola "oltre capienza" (`label`). Mai solo il colore.
-- Eventi passati: sezione chiusa di default sotto l'elenco; le schede passate hanno testo `ink-muted` e l'indicatore senza colore.
+- Titolo di pagina `title` (22px) su ogni larghezza; sotto, una frase in `body` `ink-muted` sul dato che conta.
+- **Data come biglietto** (`DataBiglietto`): blocco largo 64px con giorno grande (26px), giorno della settimana e mese,
+  ora; fondo `surface-sunken` negli elenchi, fondo `accent` con testo bianco in testa alla pagina evento.
+- Riquadri: bordo `line`, `radius-lg`, padding 20px, nessuna ombra e nessun fondo diverso dal foglio; titolo `body` semibold
+  e a destra, in grigio, l'unità o il dato secondario.
+
+## Elenco eventi (home)
+
+- Titolo **Eventi** e la frase «Il prossimo è domenica 1 novembre alle 16:30: 187 persone su 296, restano 109 posti.»
+- Schede a sottolineatura **In programma** (con il numero) e **Passati** (caricati solo quando si apre la scheda).
+- Ogni evento è una riga: data come biglietto · titolo (17px semibold) e locale · numero di prenotazioni ·
+  `persone / capienza` con la barra · posti liberi grandi a destra. Righe separate da `line`, al passaggio fondo
+  `surface-sunken` leggero. Su telefono la barra va in seconda riga.
+- **Indicatore di riempimento**: barra alta 6px tonda, binario `surface-sunken`, riempimento `accent`; oltre la capienza
+  `warning` con la parola "oltre capienza" e i posti negativi (`−15`). Mai solo il colore. Eventi passati: barra `ink-muted`.
+- Desktop: a destra il riquadro del prossimo evento (persone, barra di riempimento, persone per tariffa, pacchetti, posti liberi) con il link Apri.
 
 ## Riepilogo dell'evento
 
-- Pannello `surface-sunken`, `radius-lg`, padding `space-4`. Su telefono sopra l'elenco, su desktop colonna affiancata.
-- In evidenza due cifre `figure`: **Persone** e **Posti liberi**. Posti liberi negativi: cifra in `warning` con segno − e la dicitura "oltre capienza".
-- Sotto, righe `body` etichetta/valore allineato a destra (tabular-nums): adulti, ridotti, bambini, pacchetti, omaggi; coperti Giamaica pranzo/cena, Casale pranzo/cena; incasso teatro, incasso pacchetti (totale e per ristorante). Gli importi portano la nota "previsto" in `caption`.
+- In testa: link "‹ Eventi", data come biglietto pieno, titolo, giorno · ora · locale in `ink`, azioni Ristoranti e
+  Stampa (solo desktop) e Nuova prenotazione; su telefono **Nuova** sta nella barra fissa in alto accanto al titolo.
+- Tre riquadri (desktop largo: affiancati; tablet: Sala sopra, gli altri due affiancati; telefono: uno sotto l'altro):
+  - **Sala**: a destra i posti liberi (in `warning` "oltre capienza"), persone in 34px `accent`, la barra di riempimento, poi
+    prenotazioni attive, senza stato, in attesa di invio (se ci sono), annullate.
+  - **Biglietti**: una riga per tariffa usata con il prezzo in grigio, i pacchetti, **Incasso teatro previsto**.
+  - **Ristoranti**: coperti per ristorante e pasto, incasso per ristorante rientrato, **Incasso pacchetti previsto**,
+    nota "Importi previsti, non incassati."
+- Righe etichetta / cifra in `label`, separate da `line`, cifre tabellari a destra.
 
 ## Elenco prenotazioni
 
-- Campo di ricerca in cima: fondo `surface-sunken`, `radius-md`, altezza `control-h`, placeholder "Cerca per nome o telefono".
-- **Telefono**: una scheda per prenotazione — nome `body-strong`, telefono `caption` `ink-muted`, sigle quantità in `code`, totale persone in `figure-sm` a destra.
-- **Desktop**: tabella su `surface`, intestazioni `label` su `surface-sunken`, righe separate da `line`, padding verticale `space-3`; colonne numeriche allineate a destra; telefono come link `tel:` in `accent`.
-- **Etichette di stato** (`label`, `radius-sm`, padding `space-1` `space-2`):
+- Intestazione **Prenotazioni N** come scheda sottolineata (2px `ink`) su una riga `line`.
+- Sotto: campo di ricerca largo 300px con bordo `line-control`, icona a sinistra, accanto Riordina; a destra
+  «187 persone in 14 prenotazioni» (senza annullate).
+- **Tacca dello stato**: a sinistra di ogni riga una tacca larga 4px, arrotondata, staccata 12–14px dai bordi della
+  riga così le righe vicine non si toccano; colori originali (giallo prenotato, verde stampato, arancio modificato,
+  rosso annullato), mai da cambiare; senza stato niente tacca. Si stampa.
+- **Scelta dello stato**: pallino del colore dello stato + parola in un menu compatto (bordo solo al passaggio del mouse
+  su desktop, sempre su telefono).
+- **Telefono**: una riga per prenotazione — numero, nome semibold (barrato se annullata), sotto in `caption` telefono,
+  biglietti, posti, note; persone a destra in 17px; sotto la scelta dello stato.
+- **Desktop**: tabella senza fondo nell'intestazione (`caption` `ink-muted`), righe separate da `line`, al passaggio fondo
+  `surface-sunken` leggero; telefono sottolineato in grigio come link `tel:`; posti nel font del testo; persone a destra.
+- **Etichette di stato dell'invio** (`label`, `radius-sm`, padding `space-1` `space-2`):
   - "in attesa di invio": fondo `accent-soft`, testo `accent`.
   - "non inviata": fondo `danger-soft`, testo `danger`, seguita dal motivo in `caption`.
 
 ## Modulo prenotazione
 
-- Una sola colonna, larga al massimo `form-max`, campi distanziati `space-4`.
-- Campo di testo: altezza `control-h`, bordo `line-control` da 1px, `radius-md`, fondo `surface`, valore `body`, etichetta `label` sopra.
-- **Stepper quantità**: riga con etichetta (es. "Adulti") e prezzo unitario in `caption` `ink-muted` a sinistra; a destra `−` · campo numerico · `+`. Pulsanti quadrati `control-h`, bordo `line-control`; campo centrale in `figure-sm` centrato, `inputmode="numeric"`, il valore si seleziona tutto al tocco. − disattivato a 0.
-- **Scelta a pulsanti** (Giamaica / Casale, Pranzo / Cena, Ruolo admin / operatore): gruppo di pulsanti affiancati a tutta larghezza, `control-h`, bordo `line-control`; quello scelto ha fondo `accent-soft`, bordo `accent` da 2px e testo `ink`. Semantica di gruppo radio.
-- La sezione ristorante compare solo con Pacchetti > 0, subito sotto gli stepper.
-- **Riepilogo in tempo reale**: barra fissa in basso su telefono (sopra la navigazione), fondo `surface`, `shadow-bar`. Totale persone, importo teatro, importo ristorante, totale in `figure-sm`; a destra **Salva** pieno `accent`.
-  - Se si supera la capienza compare sopra i totali una riga su `warning-soft` con testo `warning`: "Supera la capienza di N posti". Salva resta attivo.
-- **Annulla**: pulsante secondario (fondo `surface`, bordo `line-control`, testo `ink`).
-- **Elimina** (solo in modifica): pulsante testo `danger`, lontano da Salva (in fondo al modulo, separato da `space-8`). La conferma usa un pulsante pieno `danger` con `on-danger`.
+- Testa: «‹ Titolo · giorno», titolo `title`, frase sotto (posti che restano, o lo stato in modifica). Su telefono
+  `BarraTelefono` con titolo e giorno dell'evento e **Annulla**.
+- Desktop largo (≥ 1280px): due colonne 7/5. A sinistra i riquadri **Cliente** (nome e telefono affiancati),
+  **Biglietti**, **Posti e note** (posti e provenienza affiancati, note sotto) e, in modifica, **Cronologia** ed
+  **Elimina prenotazione**; a destra il riepilogo, fermo mentre si scorre. Sotto 1280px una colonna, riepilogo in fondo.
+- Campo di testo: 48px su telefono, 44px su desktop, bordo `line-control` da 1px, `radius-md`, fondo `surface`,
+  valore `body`, etichetta `label` sopra.
+- **Riga biglietto** (`Contatore`): nome 15px medio e prezzo 13px grigio a sinistra; `−` · campo numerico · `+`
+  (48px su telefono, 40px su desktop; il numero 18px semibold, `inputmode="numeric"`, tutto selezionato al tocco);
+  a destra l'importo della riga («–» se zero). Righe separate da `line`. − disattivato a 0.
+- **Scelta a segmenti** (Giamaica / Casale, Pranzo / Cena, Ruolo): gruppo su `surface-sunken` con padding 4px; la
+  scelta attiva è un segmento `surface` con bordo `line` e testo `ink`, le altre `ink-muted`. Semantica radio.
+- La sezione ristorante compare solo con Pacchetti > 0, dentro il riquadro Biglietti.
+- **Riepilogo come biglietto**: data come biglietto pieno, titolo, giorno e locale; linea tratteggiata; nome del
+  cliente (18px); righe quantità × prezzo; Teatro e Ristorante rientrati; **Totale** in 30px con le persone; poi
+  **Capienza**: barra di riempimento (già prenotati + questa) e la riga «Già prenotati N · questa prenotazione N · su N».
+- **Salva** (pieno `accent`) e **Annulla** sotto il riepilogo; su telefono barra fissa in basso con persone, totale
+  e **Salva**.
+- **Elimina** (solo in modifica): pulsante testo `danger` in fondo alla colonna sinistra, lontano da Salva.
+
+## Pagine admin e Ristoranti
+
+- `TestaPagina`: «‹ indietro» (nei moduli), titolo, frase sotto, azioni a destra (Nuovo … con +).
+- Elenchi: righe sul foglio separate da `line`, azioni a destra su desktop (sotto su telefono).
+- Moduli: riquadri (`scheda`) larghi al massimo 640px; i fieldset hanno il titolo dentro il riquadro (`legendaPannello`).
+- Ristoranti: un riquadro per ristorante e pasto, due per riga su desktop, coperti in 34px `accent`.
+- Su telefono ogni pagina ha la `BarraTelefono` con il marchio e il titolo.
 
 ## Pulsanti
 

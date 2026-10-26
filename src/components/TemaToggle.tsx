@@ -13,8 +13,8 @@ function cambiaTema() {
 export function TemaToggle({ className }: { className?: string }) {
   return (
     <button type="button" onClick={cambiaTema} className={className}>
-      <Moon size={24} strokeWidth={2} aria-hidden className="dark:hidden" />
-      <Sun size={24} strokeWidth={2} aria-hidden className="hidden dark:block" />
+      <Moon size={24} strokeWidth={1.75} aria-hidden className="dark:hidden" />
+      <Sun size={24} strokeWidth={1.75} aria-hidden className="hidden dark:block" />
       <span className="dark:hidden">Tema scuro</span>
       <span className="hidden dark:inline">Tema chiaro</span>
     </button>

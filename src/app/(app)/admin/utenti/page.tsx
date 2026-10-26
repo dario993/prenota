@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { BarraTelefono } from "@/components/BarraTelefono";
+import { Plus } from "lucide-react";
+import { TestaPagina } from "@/components/TestaPagina";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { BottoneElimina, FormAzione } from "@/components/FormAzione";
-import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin, scelta } from "@/components/stili";
+import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin, scelta, segmenti } from "@/components/stili";
 import { attivaUtente, salvaUtente } from "./azioni";
 
 type U = { id: string; nome: string; email: string | null; ruolo: "admin" | "operatore" | "api"; attivo: boolean };
@@ -19,7 +22,8 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
   const api = corrente?.ruolo === "api"; // né quello di un utente API key, che non ha password
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
-      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.nome}` : "Nuovo utente"}</h1>
+      <BarraTelefono titolo="Utenti" />
+      <TestaPagina titolo={corrente ? `Modifica: ${corrente.nome}` : "Nuovo utente"} indietro={{ href: "/admin/utenti", testo: "Utenti" }} />
       <FormAzione
         azione={salvaUtente}
         dopo="/admin/utenti"
@@ -42,7 +46,7 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
         {sonoIo || api ? <input type="hidden" name="ruolo" value={corrente.ruolo} /> : (
           <fieldset className="space-y-2">
             <legend className="mb-2 text-label">Ruolo</legend>
-            <div className="flex gap-2">
+            <div className={segmenti}>
               {RUOLI.map(([valore, testo]) => (
                 <label key={valore} className={scelta}>
                   <input type="radio" name="ruolo" value={valore} defaultChecked={(corrente?.ruolo ?? "operatore") === valore} className="sr-only" />{testo}
@@ -56,10 +60,10 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
   );
   return (
     <main className={paginaAdmin}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-title lg:text-display">Utenti</h1>
-        <Link href="/admin/utenti?nuovo" className={btnPrimario}>Nuovo utente</Link>
-      </div>
+      <BarraTelefono titolo="Utenti" />
+      <TestaPagina titolo="Utenti" sottotitolo="Chi può entrare in Prenota e con quale ruolo.">
+        <Link href="/admin/utenti?nuovo" className={btnPrimario}><Plus size={16} aria-hidden />Nuovo utente</Link>
+      </TestaPagina>
 
       <ul className={elencoAdmin}>
         {utenti.map((u) => (

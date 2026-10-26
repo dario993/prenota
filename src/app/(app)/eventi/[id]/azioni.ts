@@ -21,7 +21,7 @@ export async function modificaPrenotazione(dati: DatiPrenotazione): Promise<Esit
       const r = await tx`
         update prenotazioni set cognome_nome = ${d.cognome_nome}, telefono = ${d.telefono},
           pacchetti = ${d.pacchetti}, ristorante = ${d.ristorante}, pasto = ${d.pasto}, posti = ${d.posti},
-          provenienza = ${d.provenienza}, note = ${d.note}, aggiornata_il = now()
+          provenienza = ${d.provenienza}, note = ${d.note}, pagamento = ${d.pagamento}, aggiornata_il = now()
         where id = ${d.id} and evento_id = ${d.evento_id}`;
       if (r.count === 0) return false;
       await aggiornaRighe(tx, d.id, d.evento_id, d.righe);

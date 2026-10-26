@@ -20,6 +20,11 @@ describe("schemaPrenotazione", () => {
     const i = r.error!.issues.find((x) => x.path[0] === "righe");
     expect(i?.message).toBe("Inserisci almeno una persona");
   });
+  test("pagamento: assente = null, valore sconosciuto rifiutato", () => {
+    expect(schemaPrenotazione.parse(base).pagamento).toBeNull();
+    expect(schemaPrenotazione.parse({ ...base, pagamento: "bonifico" }).pagamento).toBe("bonifico");
+    expect(schemaPrenotazione.safeParse({ ...base, pagamento: "contanti" }).success).toBe(false);
+  });
   test("solo pacchetti basta", () =>
     expect(schemaPrenotazione.safeParse({ ...base, righe: [], pacchetti: 2, ristorante: "CASALE", pasto: "CENA" }).success).toBe(true));
   test("la stessa tariffa due volte è rifiutata", () => {

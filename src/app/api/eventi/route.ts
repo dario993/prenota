@@ -16,11 +16,13 @@ export async function GET(req: Request) {
   try {
     const righe = await sql`
       select e.id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
-             coalesce(sum(p.pacchetti + coalesce(t.quantita, 0)), 0)::int as persone
+             coalesce(sum(p.pacchetti + coalesce(t.quantita, 0)), 0)::int as persone,
+             count(p.id)::int as prenotazioni
       from eventi e
       join opere o on o.id = e.opera_id
       join locali l on l.id = e.locale_id
-      left join prenotazioni p on p.evento_id = e.id
+      -- le annullate non contano, come nel riepilogo dell'evento
+      left join prenotazioni p on p.evento_id = e.id and p.contrassegno is distinct from 'annullato'
       left join (select prenotazione_id, sum(quantita) as quantita from prenotazioni_tariffe group by 1) t
         on t.prenotazione_id = p.id
       where ${passati ? sql`e.data_ora < ${oggi}` : sql`e.data_ora >= ${oggi}`}

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  confrontaVersioni, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, incassoRistorante,
+  confrontaVersioni, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, partiData, incassoRistorante,
   incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante,
   TARIFFA_ELIMINATA, type Prenotazione, type Tariffa,
 } from "./calcoli";
@@ -53,6 +53,13 @@ describe("calcoli", () => {
     expect(r.persone).toBe(38); expect(r.postiLiberi).toBe(-2); expect(r.oltreCapienza).toBe(true);
     expect(r.ristoranti.CASALE).toEqual({ PRANZO: 0, CENA: 2, incasso: 5400 });
     expect(r.ristoranti.GIAMAICA).toEqual({ PRANZO: 0, CENA: 0, incasso: 0 });
+  });
+  test("riepilogo: prenotazioni e totale per pagamento scelto", () => {
+    const r = riepilogoEvento([pren({ righe: [riga(A, 2, 1500)], pagamento: "da_pagare" }),
+      pren({ righe: [riga(A, 1, 1500)], pacchetti: 1, ristorante: "CASALE", pasto: "CENA", pagamento: "da_pagare" }),
+      pren({ righe: [riga(A, 1, 1500)] })], 100, tariffe);
+    expect(r.pagamenti.da_pagare).toEqual({ prenotazioni: 2, importo: 3000 + 1500 + 2200 + 2700 });
+    expect(r.pagamenti.bonifico).toEqual({ prenotazioni: 0, importo: 0 });
   });
   test("riepilogo esattamente pieno non è oltre capienza", () => {
     const r = riepilogoEvento([pren({ righe: [riga(A, 36, 1500)] })], 36, tariffe);
@@ -107,6 +114,10 @@ describe("calcoli", () => {
   test("formattaEuro", () => expect(formattaEuro(4900).replace(/\s/g, " ")).toBe("49,00 €"));
   test("formattaDataOra usa Europe/Rome", () =>
     expect(formattaDataOra(new Date("2026-11-07T20:00:00Z"))).toContain("21:00"));
+  test("partiData: giorno, mese e ora in Europe/Rome", () =>
+    expect(partiData(new Date("2026-11-01T15:30:00Z"))).toEqual({
+      giorno: "1", settimana: "dom", mese: "nov", ora: "16:30", lunga: "domenica 1 novembre",
+    }));
   test("confrontaVersioni: valore precedente solo sui campi cambiati", () => {
     const prima = pren({ cognome_nome: "Rossi", telefono: "333", righe: [riga(A, 2, 1500)] });
     const dopo = pren({ cognome_nome: "Rossi", telefono: "334", righe: [riga(A, 3, 1500)], contrassegno: "stampato" });

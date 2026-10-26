@@ -9,6 +9,9 @@ export type Contrassegno = (typeof CONTRASSEGNI)[number];
 export const NOMI_CONTRASSEGNI: Record<Contrassegno, string> = {
   prenotato: "Prenotato", stampato: "Stampato", modificato: "Modificato", annullato: "Annullato",
 };
+export const PAGAMENTI = ["da_pagare", "bonifico"] as const;
+export type Pagamento = (typeof PAGAMENTI)[number];
+export const NOMI_PAGAMENTI: Record<Pagamento, string> = { da_pagare: "Da pagare", bonifico: "Bonifico" };
 
 // Tariffario libero per opera; il pacchetto resta a parte (ristorante, pasto, due quote).
 export interface Tariffa { id: string; nome: string; prezzo: number; nascosta: boolean; ordine: number }
@@ -19,16 +22,17 @@ export interface Prenotazione extends PrezziPacchetto {
   righe: RigaTariffa[]; pacchetti: number;
   ristorante: Ristorante | null; pasto: Pasto | null; posti: string; provenienza: string; note: string;
   contrassegno?: Contrassegno | null; // null o assente (in coda sul telefono) = nessuno stato
+  pagamento?: Pagamento | null; // null o assente = nessuna scelta
   in_attesa?: boolean; // solo lato client
 }
-export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number }
+export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number; prenotazioni: number }
 export interface DettaglioEvento {
-  evento: Omit<EventoLista, "persone"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
+  evento: Omit<EventoLista, "persone" | "prenotazioni"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
   prenotazioni: Prenotazione[];
 }
 // Copia della prenotazione salvata a ogni voce di cronologia (null per le voci ricostruite, senza copia).
 export type DatiStorico = Pick<Prenotazione, "cognome_nome" | "telefono" | "pacchetti" | "ristorante" | "pasto" | "posti"
-  | "provenienza" | "note" | "contrassegno" | "righe" | "prezzo_pacchetto_teatro" | "prezzo_pacchetto_ristorante">;
+  | "provenienza" | "note" | "contrassegno" | "pagamento" | "righe" | "prezzo_pacchetto_teatro" | "prezzo_pacchetto_ristorante">;
 export interface VoceStorico {
   il: string; utente: string | null; azione: "creata" | "modificata" | "stato"; contrassegno: Contrassegno | null;
   dati: DatiStorico | null;
@@ -38,6 +42,8 @@ export interface Riepilogo {
   persone: number; capienza: number; postiLiberi: number; oltreCapienza: boolean;
   perTariffa: VoceTariffa[]; pacchetti: number; incassoTeatro: number; incassoRistorante: number;
   ristoranti: Record<Ristorante, { PRANZO: number; CENA: number; incasso: number }>;
+  // prenotazioni con quel pagamento scelto e il loro totale (teatro + ristorante)
+  pagamenti: Record<Pagamento, { prenotazioni: number; importo: number }>;
 }
 
 export const TARIFFA_ELIMINATA = "Tariffa eliminata";
@@ -76,6 +82,7 @@ export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, 
     GIAMAICA: { PRANZO: 0, CENA: 0, incasso: 0 },
     CASALE: { PRANZO: 0, CENA: 0, incasso: 0 },
   };
+  const pagamenti = { da_pagare: { prenotazioni: 0, importo: 0 }, bonifico: { prenotazioni: 0, importo: 0 } };
   let teatro = 0, ristorante = 0, pacchetti = 0, tot = 0;
   for (const p of prenotazioni) {
     for (const r of p.righe) quante.set(r.tariffa_id, (quante.get(r.tariffa_id) ?? 0) + r.quantita);
@@ -88,6 +95,10 @@ export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, 
       ristoranti[p.ristorante][p.pasto] += p.pacchetti;
       ristoranti[p.ristorante].incasso += inc;
     }
+    if (p.pagamento) {
+      pagamenti[p.pagamento].prenotazioni++;
+      pagamenti[p.pagamento].importo += incassoTeatro(p) + inc;
+    }
   }
   const note = [...tariffe].sort(perOrdine).filter((t) => quante.has(t.id))
     .map((t) => ({ tariffa_id: t.id, nome: t.nome, quantita: quante.get(t.id)! }));
@@ -95,7 +106,7 @@ export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, 
     .map(([tariffa_id, quantita]) => ({ tariffa_id, nome: TARIFFA_ELIMINATA, quantita }));
   return { persone: tot, capienza, postiLiberi: capienza - tot, oltreCapienza: tot > capienza,
     perTariffa: [...note, ...ignote].filter((v) => v.quantita > 0), pacchetti,
-    incassoTeatro: teatro, incassoRistorante: ristorante, ristoranti };
+    incassoTeatro: teatro, incassoRistorante: ristorante, ristoranti, pagamenti };
 }
 
 // Contatori del modulo: le tariffe visibili, più (in modifica) le nascoste che la prenotazione usa già.
@@ -152,12 +163,25 @@ const dataOra = new Intl.DateTimeFormat("it-IT", {
 });
 export const formattaDataOra = (d: Date): string => dataOra.format(d);
 
+// Pezzi della data per il blocco "biglietto" (giorno grande, giorno e mese, ora) e la frase lunga, in Europe/Rome.
+const pezzi = new Intl.DateTimeFormat("it-IT", {
+  weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome",
+});
+export function partiData(d: Date): { giorno: string; settimana: string; mese: string; ora: string; lunga: string } {
+  const p = Object.fromEntries(pezzi.formatToParts(d).map((x) => [x.type, x.value]));
+  return {
+    giorno: p.day, settimana: p.weekday.slice(0, 3), mese: p.month.slice(0, 3), ora: `${p.hour}:${p.minute}`,
+    lunga: `${p.weekday} ${p.day} ${p.month}`,
+  };
+}
+
 // Una versione della prenotazione come [campo, valore] da mostrare nella cronologia.
 export const campiVersione = (d: DatiStorico, tariffe: Tariffa[]): [string, string][] => [
   ["Nome", d.cognome_nome], ["Telefono", d.telefono], ["Biglietti", descriviBiglietti(d, tariffe)],
   ["Persone", String(persone(d))], ["Totale", formattaEuro(incassoTeatro(d) + incassoRistorante(d))],
   ["Posti", d.posti], ["Provenienza", d.provenienza], ["Note", d.note],
   ["Stato", d.contrassegno ? NOMI_CONTRASSEGNI[d.contrassegno] : "Nessuno stato"],
+  ["Pagamento", d.pagamento ? NOMI_PAGAMENTI[d.pagamento] : "–"],
 ];
 
 // Campi di una versione col valore della versione precedente se è cambiato (prima = null: niente confronto).

@@ -22,7 +22,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!evento) return Response.json({ errore: "Evento non trovato" }, { status: 404 });
     const prenotazioni = await sql`
       select p.id, p.evento_id, p.cognome_nome, p.telefono, p.pacchetti, p.ristorante, p.pasto, p.posti, p.provenienza,
-             p.note, p.contrassegno, p.prezzo_pacchetto_teatro, p.prezzo_pacchetto_ristorante,
+             p.note, p.contrassegno, p.pagamento, p.prezzo_pacchetto_teatro, p.prezzo_pacchetto_ristorante,
              coalesce((select json_agg(json_build_object('tariffa_id', r.tariffa_id, 'quantita', r.quantita, 'prezzo', r.prezzo))
                        from prenotazioni_tariffe r where r.prenotazione_id = p.id), '[]') as righe
       from prenotazioni p where p.evento_id = ${id.data}

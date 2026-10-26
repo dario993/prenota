@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BarraTelefono } from "@/components/BarraTelefono";
+import { Plus } from "lucide-react";
+import { TestaPagina } from "@/components/TestaPagina";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formattaEuro } from "@/lib/calcoli";
@@ -34,7 +37,8 @@ export default async function Opere({ searchParams }: { searchParams: Promise<{ 
   const corrente = opere.find((o) => o.id === modifica);
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
-      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.titolo}` : "Nuova opera"}</h1>
+      <BarraTelefono titolo="Opere" />
+      <TestaPagina titolo={corrente ? `Modifica: ${corrente.titolo}` : "Nuova opera"} indietro={{ href: "/admin/opere", testo: "Opere" }} />
       <FormOpera
         salva={salvaOpera.bind(null, corrente?.id ?? null)}
         iniziale={corrente ? {
@@ -49,10 +53,10 @@ export default async function Opere({ searchParams }: { searchParams: Promise<{ 
   );
   return (
     <main className={paginaAdmin}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-title lg:text-display">Opere</h1>
-        <Link href="/admin/opere?nuovo" className={btnPrimario}>Nuova opera</Link>
-      </div>
+      <BarraTelefono titolo="Opere" />
+      <TestaPagina titolo="Opere" sottotitolo="Tariffe e pacchetto di ogni spettacolo.">
+        <Link href="/admin/opere?nuovo" className={btnPrimario}><Plus size={16} aria-hidden />Nuova opera</Link>
+      </TestaPagina>
 
       {opere.length === 0 ? <p className="py-6 text-center text-ink-muted">Nessuna opera</p> : (
         <ul className={elencoAdmin}>

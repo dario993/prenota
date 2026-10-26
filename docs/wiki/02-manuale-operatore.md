@@ -13,20 +13,25 @@ o finché scade (vedi [Autenticazione e ruoli](09-autenticazione-e-ruoli.md)).
 - **Desktop**: le stesse voci in un menu laterale fisso a sinistra.
 - **Tema scuro / Tema chiaro** (nel menu laterale su desktop, nella pagina **Admin** su telefono) cambia i colori con un tocco; la scelta resta sul dispositivo.
 
-## Prossimi eventi
+## Eventi
 
-La pagina iniziale mostra gli eventi da oggi in poi, dal più vicino. Ogni scheda indica opera, data e ora, locale e una barra
-`persone / capienza`. Tocca una scheda per aprire l'evento. Se non ci sono eventi futuri compare "Nessun evento in programma". Senza rete
+La pagina iniziale si apre con una frase sul prossimo evento (giorno, ora, persone, posti rimasti) e mostra, nella
+scheda **In programma**, gli eventi da oggi in poi, dal più vicino. Ogni riga indica la data come un biglietto (giorno,
+mese, ora), opera, locale, numero di prenotazioni, `persone / capienza` con la barra e i posti liberi (le annullate non
+contano). Su desktop a destra c'è il riquadro del prossimo evento, con la barra della capienza e le persone per tariffa. Tocca una riga per aprire l'evento. Se non ci sono eventi futuri compare "Nessun evento in programma". Senza rete
 resta visibile l'ultimo elenco caricato; se il telefono non ha mai caricato i dati compare "Serve la rete per caricare
 i dati la prima volta" (lo stesso nella pagina evento).
 
-In fondo, la sezione chiusa **Eventi passati**: aprendola si caricano gli eventi prima di oggi, dal più recente, con
-le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un evento già fatto.
+La scheda **Passati** carica, quando la apri, gli eventi prima di oggi, dal più recente, con
+le stesse righe. Tocca una scheda per rivedere riepilogo e prenotazioni di un evento già fatto.
 
 ## Pagina evento
 
-- **Riepilogo** sempre in alto, sopra l'elenco (su desktop i blocchi sono affiancati): persone prenotate, posti liberi, quantità per tariffa (solo quelle usate, anche se nel frattempo nascoste) e pacchetti,
-  coperti per ristorante e pasto, incasso teatro, incasso pacchetti ristorante (totale e per ristorante).
+- **Riepilogo** sempre in alto, sopra l'elenco, in tre riquadri: **Sala** (persone su capienza, posti liberi, la barra
+  della capienza, prenotazioni attive, senza stato, annullate), **Biglietti** (quantità per tariffa
+  con il prezzo, solo quelle usate anche se nel frattempo nascoste, pacchetti, incasso teatro previsto; sotto, solo se scelti in almeno una prenotazione, **Da pagare** e **Bonifico**
+  con il numero di prenotazioni e il loro totale teatro + ristorante, annullate escluse) e **Ristoranti**
+  (coperti per ristorante e pasto, incasso pacchetti per ristorante e totale).
 - **Elenco prenotazioni** nell'ordine in cui sono state inserite (le nuove in fondo), con campo di **ricerca** per nome o numero di telefono.
   Ogni riga ha un **numero progressivo** (resta lo stesso anche filtrando con la ricerca).
   **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮, in testa subito dopo il numero: tienila premuta (dito o
@@ -34,30 +39,35 @@ le stesse schede. Tocca una scheda per rivedere riepilogo e prenotazioni di un e
   scheda non si apre al tocco); vicino al bordo dello schermo l'elenco scorre da solo. Ci sono anche le
   frecce ↑ ↓ per spostare di un posto (utili da tastiera). L'ordine è salvato per tutti (serve la rete, e la ricerca
   vuota). Le prenotazioni aggiunte dopo vanno in fondo.
-  **Stato** colorato di ogni prenotazione, scelto dal menu sulla riga: appena inserita non ha stato (barra grigia);
+  **Stato** colorato di ogni prenotazione, scelto dal menu sulla riga: appena inserita non ha stato (nessun colore);
   poi **Stampato** (verde), **Prenotato** (giallo), **Modificato** (arancio), **Annullato** (rosso, non conta più nel
-  riepilogo né negli elenchi per i ristoranti) oppure di nuovo «Nessuno stato». Il colore è la barra a sinistra della
-  scheda o della riga.
-  **Stampa / PDF**: apre la stampa del browser con la sola tabella (numero, nome, telefono, biglietti, posti, note,
-  stato, totale), impaginata A4 con l'intestazione ripetuta su ogni pagina; per il PDF scegli «Salva come PDF». Stampa
+  riepilogo né negli elenchi per i ristoranti) oppure di nuovo «Nessuno stato». Il colore è la tacca a sinistra della
+  riga (staccata dai bordi, le righe vicine non si toccano) e il pallino accanto alla parola.
+  **Stampa** (in testa alla pagina, solo su desktop): apre la stampa del browser con la sola tabella (numero, nome, telefono, biglietti, posti, note,
+  stato, persone), impaginata A4 con l'intestazione ripetuta su ogni pagina; per il PDF scegli «Salva come PDF». Stampa
   ciò che è in elenco: svuota la ricerca per averlo tutto.
   Telefono: una scheda per prenotazione, con i biglietti in una riga (es. «2 Adulti · 1 Associato · 2 Pacchetti Casale
   cena») e il telefono del cliente. Desktop: tabella (numero, nome, telefono cliccabile per chiamare, biglietti, posti, note,
   stato, totale persone).
   Tocca una prenotazione per aprirla. Se superi la capienza i posti liberi diventano negativi (es. `−6`), evidenziati con la scritta "oltre capienza" (la prenotazione non viene bloccata).
+- Aprendo una prenotazione, nel riquadro «Posti e note» c'è **Pagamento** a segmenti (come Ristorante e Pasto), **Da pagare** e **Bonifico**,
+  con la spunta sulla scelta: se ne mette una sola o nessuna (si toglie toccandola di nuovo), e vale con «Salva modifiche». Solo nel dettaglio, non
+  nella nuova prenotazione né nell'elenco.
 - Aprendo una prenotazione, sotto il modulo c'è la **Cronologia**: ogni creazione, modifica e cambio di stato con
   data e ora, utente, stato e campi cambiati, dalla più recente. Toccando una voce si vede la prenotazione com'era
-  dopo quell'azione (nome, telefono, biglietti, persone, totale, posti, provenienza, note, stato), con il valore
+  dopo quell'azione (nome, telefono, biglietti, persone, totale, posti, provenienza, note, stato, pagamento), con il valore
   precedente barrato accanto ai campi cambiati. Le prenotazioni inserite prima della cronologia hanno solo la voce
   «Creata», senza dati.
-- Pulsante **Nuova prenotazione** (su telefono il tondo **+** fisso in basso a destra); link **Ristoranti** per gli elenchi da inviare.
+- Pulsanti in testa: **Ristoranti** per gli elenchi da inviare, **Stampa** e **Nuova prenotazione** (su telefono **Nuova** è nella barra fissa in alto, accanto al titolo).
 - Se l'evento non esiste compare "Evento non trovato".
 
 ## Nuova prenotazione
 
-In testa resta sempre visibile, anche scorrendo, l'evento che stai prenotando (titolo, giorno e ora, locale); vale anche per la modifica.
+L'evento che stai prenotando resta sempre visibile: su telefono nella barra fissa in alto (titolo e giorno, con
+**Annulla**), su desktop nel riepilogo a destra che resta fermo mentre scorri; vale anche per la modifica. Sotto il
+titolo: in una nuova i posti che restano, in modifica lo stato attuale.
 
-Tutto in una schermata:
+Tutto in una schermata, in tre riquadri (**Cliente**, **Biglietti**, **Posti e note**):
 
 1. **Cognome Nome** (obbligatorio) – anche un nome di gruppo, es. "Gruppo Sicilia".
 2. **Telefono** (facoltativo).
@@ -72,7 +82,11 @@ Tutto in una schermata:
 6. **Provenienza** – scrivi o scegli tra i valori già usati (clienti, Facebook, manifesti…).
 7. **Note** – es. "1 carrozzina", "sedere vicino al sindaco".
 
-In una barra fissa in basso (sopra il menu; su desktop in fondo al modulo), accanto a **Salva**, vedi in tempo reale **totale persone** e **importo** (teatro, ristorante e totale), calcolato con le tariffe
+Ogni riga dei biglietti mostra anche il suo importo. Il **riepilogo** (a destra su desktop largo, sotto i riquadri
+altrimenti) è come un biglietto: evento, nome del cliente, righe quantità × prezzo, teatro, ristorante, **totale** e
+persone, e la **capienza** con la barra di riempimento (già prenotati più questa prenotazione) e i posti liberi dopo
+questa. **Salva** e **Annulla** sono sotto il riepilogo; su telefono una barra fissa in basso (sopra il menu) mostra
+persone, totale e **Salva**. Gli importi sono calcolati con le tariffe
 attuali dell'opera. Se l'evento supera la capienza compare un **avviso** "Supera la capienza di N posti":
 puoi comunque salvare.
 

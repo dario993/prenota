@@ -63,6 +63,8 @@ create table if not exists prenotazioni (
   ordine integer,
   -- null = nessuno stato (appena inserita)
   contrassegno text check (contrassegno in ('prenotato', 'stampato', 'modificato', 'annullato')),
+  -- null = nessuna scelta; si sceglie solo nel dettaglio della prenotazione
+  pagamento text check (pagamento in ('da_pagare', 'bonifico')),
   prezzo_pacchetto_teatro integer not null check (prezzo_pacchetto_teatro >= 0),
   prezzo_pacchetto_ristorante integer not null check (prezzo_pacchetto_ristorante >= 0),
   creata_da uuid references utenti (id),

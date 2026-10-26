@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BarraTelefono } from "@/components/BarraTelefono";
+import { Plus } from "lucide-react";
+import { TestaPagina } from "@/components/TestaPagina";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { formattaDataOra } from "@/lib/calcoli";
@@ -24,7 +27,8 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
   const adesso = new Date();
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
-      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${nome(corrente)}` : "Nuovo evento"}</h1>
+      <BarraTelefono titolo="Eventi" />
+      <TestaPagina titolo={corrente ? `Modifica: ${nome(corrente)}` : "Nuovo evento"} indietro={{ href: "/admin/eventi", testo: "Eventi" }} />
       <FormAzione
         azione={salvaEvento}
         dopo="/admin/eventi"
@@ -51,10 +55,10 @@ export default async function Eventi({ searchParams }: { searchParams: Promise<{
   );
   return (
     <main className={paginaAdmin}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-title lg:text-display">Eventi</h1>
-        <Link href="/admin/eventi?nuovo" className={btnPrimario}>Nuovo evento</Link>
-      </div>
+      <BarraTelefono titolo="Eventi" />
+      <TestaPagina titolo="Eventi" sottotitolo="Ogni evento è un'opera in un locale, a una data e ora.">
+        <Link href="/admin/eventi?nuovo" className={btnPrimario}><Plus size={16} aria-hidden />Nuovo evento</Link>
+      </TestaPagina>
 
       {eventi.length === 0 ? <p className="py-6 text-center text-ink-muted">Nessun evento</p> : (
         <ul className={elencoAdmin}>

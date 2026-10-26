@@ -2,13 +2,14 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap");
 
 :root, [data-theme="light"] {
-  --bg: #f4f5f7;
+  --bg: #f1f4f8;
   --surface: #ffffff;
-  --surface-sunken: #eaecef;
-  --line: #dadde2;
-  --line-control: #7d8590;
-  --ink: #15181c;
-  --ink-muted: #57606a;
+  --surface-sunken: #e9eef5;
+  --active: #e3eaf4;
+  --line: #e2e7ee;
+  --line-control: #7c8696;
+  --ink: #121722;
+  --ink-muted: #56606e;
   --accent: #1d5fc4;
   --accent-hover: #174d9f;
   --on-accent: #ffffff;
@@ -23,17 +24,18 @@
   --success-soft: #e2f4f1;
   --toast-bg: #15181c;
   --toast-ink: #ffffff;
-  --shadow-bar: 0 -1px 0 #dadde2, 0 -4px 12px rgba(21,24,28,0.06);
+  --shadow-bar: 0 -1px 0 #e2e7ee;
   --shadow-overlay: 0 8px 24px rgba(21,24,28,0.18);
 }
 [data-theme="dark"] {
-  --bg: #111316;
-  --surface: #1a1d21;
-  --surface-sunken: #0b0d0f;
-  --line: #2e3339;
-  --line-control: #727b86;
-  --ink: #eceef1;
-  --ink-muted: #a2aab4;
+  --bg: #0b0e13;
+  --surface: #131820;
+  --surface-sunken: #1a2029;
+  --active: #222b38;
+  --line: #232b37;
+  --line-control: #5d6878;
+  --ink: #eef2f7;
+  --ink-muted: #a9b3c1;
   --accent: #6ea3f2;
   --accent-hover: #8bb6f5;
   --on-accent: #0a1a33;
@@ -48,17 +50,18 @@
   --success-soft: #0f2e2a;
   --toast-bg: #eceef1;
   --toast-ink: #15181c;
-  --shadow-bar: 0 -1px 0 #2e3339;
+  --shadow-bar: 0 -1px 0 #232b37;
   --shadow-overlay: 0 8px 24px rgba(0,0,0,0.6);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #111316;
-  --surface: #1a1d21;
-  --surface-sunken: #0b0d0f;
-  --line: #2e3339;
-  --line-control: #727b86;
-  --ink: #eceef1;
-  --ink-muted: #a2aab4;
+  --bg: #0b0e13;
+  --surface: #131820;
+  --surface-sunken: #1a2029;
+  --active: #222b38;
+  --line: #232b37;
+  --line-control: #5d6878;
+  --ink: #eef2f7;
+  --ink-muted: #a9b3c1;
   --accent: #6ea3f2;
   --accent-hover: #8bb6f5;
   --on-accent: #0a1a33;
@@ -73,7 +76,7 @@
   --success-soft: #0f2e2a;
   --toast-bg: #eceef1;
   --toast-ink: #15181c;
-  --shadow-bar: 0 -1px 0 #2e3339;
+  --shadow-bar: 0 -1px 0 #232b37;
   --shadow-overlay: 0 8px 24px rgba(0,0,0,0.6);
 } }
 :root {
@@ -108,7 +111,7 @@
 .body { font-family: var(--font-sans); font-size: 16px; line-height: 24px; font-weight: 400; }
 .body-strong { font-family: var(--font-sans); font-size: 16px; line-height: 24px; font-weight: 600; }
 .label { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500; }
-.caption { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 400; }
+.caption { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 400; }
 .figure { font-family: var(--font-sans); font-size: 32px; line-height: 36px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .figure-sm { font-family: var(--font-sans); font-size: 20px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .code { font-family: var(--font-mono); font-size: 14px; line-height: 20px; font-weight: 500; }

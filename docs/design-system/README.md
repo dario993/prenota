@@ -1,4 +1,4 @@
-Prenota è lo strumento interno con cui lo staff del teatro raccoglie le prenotazioni, quasi sempre dal telefono, in piedi, con una mano, mentre parla con il cliente. Il sistema è un gestionale neutro: grigi puliti, un solo blu per l'azione, nessuna decorazione. Ogni scelta serve a leggere un numero al volo e a toccare il pulsante giusto al primo colpo.
+Prenota è lo strumento interno con cui lo staff del teatro raccoglie le prenotazioni, quasi sempre dal telefono, in piedi, con una mano, mentre parla con il cliente. Il sistema è un gestionale con un volto: cornice grigio-blu, foglio bianco, un solo blu per i dati e l'azione, il marchio del sipario, nessuna decorazione. Ogni scelta serve a leggere un numero al volo e a toccare il pulsante giusto al primo colpo.
 
 ## Principi
 

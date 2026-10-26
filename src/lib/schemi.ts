@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { euroInCentesimi, PASTI, RISTORANTI } from "./calcoli";
+import { euroInCentesimi, PAGAMENTI, PASTI, RISTORANTI } from "./calcoli";
 
 const testo = (max: number) =>
   z.string().trim().min(1, "Campo obbligatorio").max(max, `Massimo ${max} caratteri`);
@@ -30,6 +30,7 @@ export const schemaPrenotazione = z
     pacchetti: quantita,
     ristorante: z.enum(RISTORANTI).nullable(),
     pasto: z.enum(PASTI).nullable(),
+    pagamento: z.enum(PAGAMENTI).nullable().default(null), // salvato solo in modifica
   })
   .superRefine((d, ctx) => {
     if (new Set(d.righe.map((r) => r.tariffa_id)).size !== d.righe.length)

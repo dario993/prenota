@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { ERRORE_IMPREVISTO, type Esito } from "@/lib/esito";
-import { btnDistruttivo, btnPrimario, btnSecondario, campo, etichetta, scheda } from "@/components/stili";
+import { btnDistruttivo, btnPrimario, btnSecondario, campo, etichetta, legendaPannello, scheda } from "@/components/stili";
 
 // Valori come li scrive l'admin (prezzi in testo con la virgola); la validazione è sul server (schemaOpera).
 export type ValoriOpera = {
@@ -47,7 +47,7 @@ export function FormOpera({ iniziale, salva }: { iniziale: ValoriOpera; salva: (
       </div>
 
       <fieldset className={`${scheda} space-y-4`}>
-        <legend className="px-1 text-label">Tariffe</legend>
+        <legend className={legendaPannello}>Tariffe</legend>
         {fields.map((f, i) => (
           <div key={f.chiave} className="grid grid-cols-[minmax(0,1fr)_7rem] items-end gap-3 border-b border-line pb-4 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_7rem_auto_auto]">
             <label className={etichetta}>Nome
@@ -60,12 +60,12 @@ export function FormOpera({ iniziale, salva }: { iniziale: ValoriOpera; salva: (
               <input type="checkbox" {...register(`tariffe.${i}.nascosta`)} className="size-5 accent-(--accent)" />Nascosta
             </label>
             <button type="button" onClick={() => remove(i)} aria-label={`Elimina la tariffa ${i + 1}`} className={btnDistruttivo}>
-              <Trash2 size={20} aria-hidden />Elimina
+              <Trash2 size={16} aria-hidden />Elimina
             </button>
           </div>
         ))}
         <button type="button" onClick={() => append({ nome: "", prezzo: "", nascosta: false })} className={btnSecondario}>
-          <Plus size={20} aria-hidden />Aggiungi tariffa
+          <Plus size={16} aria-hidden />Aggiungi tariffa
         </button>
         <p className="text-caption text-ink-muted">
           Le tariffe nascoste non compaiono quando si prenota, ma le prenotazioni che le usano restano valide.
@@ -74,7 +74,7 @@ export function FormOpera({ iniziale, salva }: { iniziale: ValoriOpera; salva: (
       </fieldset>
 
       <fieldset className={`${scheda} space-y-4`}>
-        <legend className="px-1 text-label">Pacchetto</legend>
+        <legend className={legendaPannello}>Pacchetto</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={etichetta}>Quota teatro (€)
             <input {...register("prezzo_pacchetto_teatro")} required inputMode="decimal" className={`${campo} tabular-nums`} />

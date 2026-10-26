@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BarraTelefono } from "@/components/BarraTelefono";
+import { Plus } from "lucide-react";
+import { TestaPagina } from "@/components/TestaPagina";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { BottoneElimina, FormAzione } from "@/components/FormAzione";
@@ -14,7 +17,8 @@ export default async function Locali({ searchParams }: { searchParams: Promise<{
   const corrente = locali.find((l) => l.id === modifica);
   if (corrente || nuovo !== undefined) return (
     <main className={paginaAdmin}>
-      <h1 className="text-title lg:text-display">{corrente ? `Modifica: ${corrente.nome}` : "Nuovo locale"}</h1>
+      <BarraTelefono titolo="Locali" />
+      <TestaPagina titolo={corrente ? `Modifica: ${corrente.nome}` : "Nuovo locale"} indietro={{ href: "/admin/locali", testo: "Locali" }} />
       <FormAzione
         azione={salvaLocale}
         dopo="/admin/locali"
@@ -32,10 +36,10 @@ export default async function Locali({ searchParams }: { searchParams: Promise<{
   );
   return (
     <main className={paginaAdmin}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-title lg:text-display">Locali</h1>
-        <Link href="/admin/locali?nuovo" className={btnPrimario}>Nuovo locale</Link>
-      </div>
+      <BarraTelefono titolo="Locali" />
+      <TestaPagina titolo="Locali" sottotitolo="Ogni locale ha la sua capienza: l'avviso di sala piena parte da qui.">
+        <Link href="/admin/locali?nuovo" className={btnPrimario}><Plus size={16} aria-hidden />Nuovo locale</Link>
+      </TestaPagina>
 
       {locali.length === 0 ? <p className="py-6 text-center text-ink-muted">Nessun locale</p> : (
         <ul className={elencoAdmin}>

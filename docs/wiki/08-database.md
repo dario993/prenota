@@ -71,6 +71,7 @@ Tariffario libero di ogni opera (il pacchetto resta sull'opera).
 | posti, provenienza, note | text | |
 | ordine | integer | posizione scelta con «Riordina»; null = in fondo, per `creata_il` |
 | contrassegno | text | null (nessuno stato, all'inserimento) \| `prenotato` \| `stampato` \| `modificato` \| `annullato` |
+| pagamento | text | null (nessuna scelta) \| `da_pagare` \| `bonifico`; si sceglie solo nel dettaglio della prenotazione |
 | prezzo_pacchetto_teatro, prezzo_pacchetto_ristorante | integer | copiati dall'opera al primo salvataggio |
 | creata_da | uuid → utenti | |
 | creata_il, aggiornata_il | timestamptz | |
@@ -121,6 +122,7 @@ applicata).
   elimina la tabella `chiavi_api` della prima versione delle chiavi. Riapplicarla non cambia nulla.
 - `003-ordine-contrassegno.sql`: aggiunge `prenotazioni.ordine` e `prenotazioni.contrassegno` (facoltativo, senza default).
 - `004-storico.sql`: aggiunge `prenotazioni_storico.dati` se manca; per le prenotazioni senza cronologia crea la voce «creata» da `creata_il` / `creata_da` (senza copia).
+- `005-pagamento.sql`: aggiunge `prenotazioni.pagamento` (facoltativo, senza default).
 
 ## Backup
 

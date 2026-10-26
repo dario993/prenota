@@ -2,10 +2,12 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { CloudOff, Plus, UtensilsCrossed } from "lucide-react";
+import { ChevronLeft, CloudOff, Plus, Printer, UtensilsCrossed } from "lucide-react";
 import { getJson, SERVE_RETE, useInAttesa, useOnline, chiaveEvento } from "@/lib/query";
-import { formattaDataOra, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
+import { partiData, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
 import { Stato } from "@/components/Stato";
+import { DataBiglietto } from "@/components/DataBiglietto";
+import { BarraTelefono } from "@/components/BarraTelefono";
 import { btnPrimario, btnSecondario } from "@/components/stili";
 import { Riepilogo } from "./Riepilogo";
 import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
@@ -37,35 +39,44 @@ export function PaginaEvento({ id }: { id: string }) {
   const valide = prenotazioni.filter((p) => ("stato" in p ? p.stato === "pending" : p.contrassegno !== "annullato"));
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0">
+      {/* telefono: in alto marchio, titolo e «Nuova» (come nella proposta grafica) */}
+      <BarraTelefono titolo={evento.titolo}>
+        <Link href={nuova} className={`${btnPrimario} !h-10 !px-3 !text-label`}><Plus size={16} aria-hidden />Nuova</Link>
+      </BarraTelefono>
       {coda.some((p) => p.stato === "pending") && (
-        <p role="status" className="sticky top-0 z-20 mb-4 flex print:hidden items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
+        <p role="status" className="sticky top-14 z-20 mb-4 lg:top-0 flex print:hidden items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
           <CloudOff size={20} aria-hidden className="shrink-0 text-warning" />
           {online ? "Invio delle prenotazioni in attesa…" : "Salvate sul telefono, verranno inviate quando torna la rete"}
         </p>
       )}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-title lg:text-display">{evento.titolo}</h1>
-          <p className="mt-1 text-caption text-ink-muted print:text-ink">{formattaDataOra(new Date(evento.data_ora))} · {evento.locale}</p>
+      <Link href="/" className="-mt-1 mb-3 inline-flex min-h-11 items-center gap-1 text-label font-normal text-ink-muted hover:text-ink lg:min-h-0 print:hidden">
+        <ChevronLeft size={16} aria-hidden />Eventi
+      </Link>
+      <div className="mb-6 flex flex-wrap items-center gap-4">
+        <DataBiglietto dataOra={evento.data_ora} piena />
+        <div className="min-w-0 flex-[1_1_220px]">
+          <h1 className="text-title">{evento.titolo}</h1>
+          <p className="mt-0.5 text-[15px] leading-[22px] first-letter:uppercase">{partiData(new Date(evento.data_ora)).lunga}, {partiData(new Date(evento.data_ora)).ora} · {evento.locale}</p>
         </div>
-        <div className="flex items-center gap-2 print:hidden">
-          <Link href={`/eventi/${id}/ristoranti`} className={btnSecondario}>
-            <UtensilsCrossed size={20} aria-hidden />Ristoranti
+        {/* come nella proposta: Ristoranti, Stampa e Nuova prenotazione in testa; su telefono solo Ristoranti (Nuova è in alto) */}
+        <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto print:hidden">
+          <Link href={`/eventi/${id}/ristoranti`} className={`${btnSecondario} flex-1 sm:flex-none`}>
+            <UtensilsCrossed size={16} aria-hidden />Ristoranti
           </Link>
-          <Link href={nuova} className={`${btnPrimario} hidden lg:inline-flex`}>
-            <Plus size={20} aria-hidden />Nuova prenotazione
+          {prenotazioni.length > 0 && (
+            <button type="button" className={`${btnSecondario} max-lg:hidden`} onClick={() => window.print()}>
+              <Printer size={16} aria-hidden />Stampa
+            </button>
+          )}
+          <Link href={nuova} className={`${btnPrimario} max-lg:hidden`}>
+            <Plus size={16} aria-hidden />Nuova prenotazione
           </Link>
         </div>
       </div>
-      <div className="space-y-6">
-        <div className="print:hidden"><Riepilogo prenotazioni={valide} capienza={evento.capienza} tariffe={evento.tariffe} /></div>
+      <div className="space-y-10">
+        <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
         <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} />
       </div>
-      {/* telefono: azione principale in basso, sopra la navigazione, raggiungibile col pollice */}
-      <Link href={nuova} aria-label="Nuova prenotazione"
-        className="fixed bottom-[calc(64px+env(safe-area-inset-bottom)+16px)] right-4 z-10 inline-flex size-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-overlay transition-colors duration-150 hover:bg-accent-hover active:bg-accent-hover lg:hidden print:hidden">
-        <Plus size={28} aria-hidden />
-      </Link>
     </main>
   );
 }

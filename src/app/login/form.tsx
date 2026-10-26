@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { schemaLogin } from "@/lib/schemi";
 import { btnPrimario, campo, erroreCampo, etichetta, scheda } from "@/components/stili";
+import { Marchio } from "@/components/Marchio";
 import { azioneAccedi } from "./azioni";
 
 type Campi = { email: string; password: string };
@@ -24,7 +25,7 @@ export function FormLogin() {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <form method="post" onSubmit={invia} className={`${scheda} w-full max-w-sm space-y-4 p-6`}>
-        <h1 className="text-title">Prenota</h1>
+        <h1 className="flex items-center gap-3 text-title"><Marchio size={36} />Prenota</h1>
         <label className={etichetta}>
           Email
           <input

@@ -49,5 +49,4 @@
 
 - Import del Google Sheet esistente.
 - Collegamento alla piantina di `biglietteria` per la scelta dei posti.
-- Stato di pagamento sulle prenotazioni.
 - Esportazione CSV/PDF di un evento.
