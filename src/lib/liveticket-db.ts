@@ -51,8 +51,8 @@ const daRifare = (a: string) => a.startsWith(ANOMALIA_TARIFFA) || a === ANOMALIA
 /** Ripete abbinamento e assegnazione per gli ordini senza evento o con anomalie di tariffa/importo. Ritorna quanti sono cambiati. */
 export async function riabbinaOrdini(): Promise<number> {
   const ordini = await sql<{ codice: string; data_ora: Date | null; evento_id: string | null; biglietti: BigliettoLiveticket[];
-    importo_pagato: number | null; anomalie: string[]; aggiornato_il: Date; data_evento: Date | null }[]>`
-    select l.codice, l.data_ora, l.evento_id, l.biglietti, l.importo_pagato, l.anomalie, l.aggiornato_il, e.data_ora as data_evento
+    importo_pagato: number | null; anomalie: string[]; versione: string; data_evento: Date | null }[]>`
+    select l.codice, l.data_ora, l.evento_id, l.biglietti, l.importo_pagato, l.anomalie, l.aggiornato_il::text as versione, e.data_ora as data_evento
     from liveticket_ordini l left join eventi e on e.id = l.evento_id`;
   let cambiati = 0;
   // anche gli ordini la cui data non coincide più con quella dell'evento abbinato (evento spostato)
@@ -66,9 +66,10 @@ export async function riabbinaOrdini(): Promise<number> {
     });
     if (eventoId === o.evento_id && assegnazione(biglietti) === assegnazione(o.biglietti)
       && JSON.stringify(anomalie) === JSON.stringify(o.anomalie)) continue;
-    await sql`update liveticket_ordini set evento_id = ${eventoId}, biglietti = ${sql.json(biglietti as never)},
-      anomalie = ${anomalie}, aggiornato_il = now() where codice = ${o.codice} and aggiornato_il = ${o.aggiornato_il}`;
-    cambiati++;
+    // aggiornato_il ha i microsecondi: si confronta come testo, non come Date (millisecondi)
+    const r = await sql`update liveticket_ordini set evento_id = ${eventoId}, biglietti = ${sql.json(biglietti as never)},
+      anomalie = ${anomalie}, aggiornato_il = now() where codice = ${o.codice} and aggiornato_il::text = ${o.versione}`;
+    cambiati += r.count;
   }
   return cambiati;
 }
