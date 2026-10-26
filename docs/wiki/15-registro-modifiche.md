@@ -64,3 +64,4 @@
 | 2026-10-26 | Riepilogo evento con LiveTicket: persone, posti liberi, righe per tariffa e coperti includono i biglietti LiveTicket; «Incasso teatro/pacchetti previsto» solo lista; nuova riga «Incasso LiveTicket»; ristoranti divisi «Prenotati» / «LiveTicket» | 4, 5, 6 |
 | 2026-10-26 | Tab LiveTicket nella pagina evento (`ElencoLiveticket`, `?tab=liveticket`) e pacchetti LiveTicket nell'elenco ristoranti; `descriviBiglietti` chiama «Non abbinata (LiveTicket)» le righe senza tariffa | 2, 4, 6 |
 | 2026-10-26 | Avviso di possibile doppione (stesso nome o telefono) tra prenotazioni e tra prenotazioni e ordini LiveTicket: etichetta nei due elenchi, riga nel riquadro Sala, avviso non bloccante nel modulo (`src/lib/doppioni.ts`) | 2 |
+| 2026-10-26 | Pagina Admin → LiveTicket: tutti gli ordini, filtri «con anomalie» / «senza evento», pulsante «Riabbina» (`riabbinaOrdini`, abbinamento evento e tariffe rifatti dai biglietti salvati) | 3, 7 |

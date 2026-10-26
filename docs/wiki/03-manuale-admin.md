@@ -46,6 +46,13 @@ L'elenco è ordinato per data e comprende anche gli eventi passati; il titolo ap
 prenotazioni), **Modifica** apre il modulo con i dati dell'evento.
 Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci sono prenotazioni»): prima vanno eliminate le prenotazioni.
 
+## LiveTicket
+
+**Admin → LiveTicket** (solo admin): tutti gli ordini online letti da n8n, dal più recente per data evento. Colonne: codice,
+nome, data e ora, evento (link alla tab LiveTicket) o «Senza evento», persone, pacchetti, importo, anomalie, ricevuto il.
+Filtri: **Con anomalie**, **Senza evento**. **Riabbina** ripete abbinamento all'evento e assegnazione alle tariffe per gli ordini
+senza evento o con anomalie di tariffa o importo (utile dopo aver creato l'evento o la tariffa mancante) e mostra quanti ordini sono cambiati.
+
 ## Utenti
 
 Da **Admin → Utenti**:

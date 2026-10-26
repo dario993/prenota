@@ -28,7 +28,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 ## Mappa del codice
 
 - `src/app/` pagine e Server Action (`login/`, `(app)/eventi/[id]/`, `(app)/admin/`), `api/` route JSON, `POST /api/prenotazioni` e `POST /api/sql` (gestione remota: utente con ruolo «API key» da Admin → Utenti, `Authorization: Bearer`).
-- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `storico.ts` (cronologia con copia della prenotazione), `password.mjs`.
+- `src/lib/` logica pura e testata: `calcoli.ts`, `schemi.ts`, `auth.ts`, `db.ts`, `query.ts` (cache e coda offline), `righe.ts` (righe tariffa di una prenotazione, lato server), `storico.ts` (cronologia con copia della prenotazione), `password.mjs`, `liveticket.ts` + `liveticket-db.ts` (ordini LiveTicket: abbinamento evento/tariffe, salvataggio, riabbinamento; `POST /api/liveticket` da n8n, pagina Admin → LiveTicket).
 - `src/proxy.ts` reindirizza a `/login`; `public/sw.js` service worker; `db/schema.sql` + `db/migrazioni/`; `scripts/` (db-init, crea-admin, esporta-dati.sh, backup.sh).
 - `Dockerfile`, `docker-compose.yml`: deploy homelab, vedi wiki 13.
 
@@ -40,6 +40,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 - Capienza: avvisa, non blocca. Offline: si possono solo aggiungere prenotazioni, mai doppioni (id UUID + `on conflict do nothing`).
 - Ogni route API e Server Action valida con zod e controlla sessione/ruolo.
 - Ogni creazione, modifica o cambio di stato di una prenotazione chiama `registraStorico` nella stessa transazione.
+- Ordini LiveTicket (`liveticket_ordini`) non sono prenotazioni: fuori da incassi e cronologia Prenota («Incasso teatro/pacchetti previsto» = solo lista); la commissione (`COMMISSIONE_LIVETICKET`) non si conteggia mai negli incassi.
 - Cookie `Secure` in produzione: serve HTTPS.
 
 ## Regole del progetto

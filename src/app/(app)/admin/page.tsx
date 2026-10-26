@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BarraTelefono } from "@/components/BarraTelefono";
 import { TestaPagina } from "@/components/TestaPagina";
-import { Building2, ChevronRight, Clapperboard, Ticket, Users } from "lucide-react";
+import { Building2, ChevronRight, Clapperboard, Ticket, TicketCheck, Users } from "lucide-react";
 import { richiediAdmin } from "@/lib/auth";
 import { paginaAdmin } from "@/components/stili";
 import { TemaToggle } from "@/components/TemaToggle";
@@ -10,6 +10,7 @@ const LINK = [
   ["/admin/locali", "Locali", "Luoghi e capienza", Building2],
   ["/admin/opere", "Opere", "Titoli e tariffario", Clapperboard],
   ["/admin/eventi", "Eventi (admin)", "Opera, locale, data e ora", Ticket],
+  ["/admin/liveticket", "LiveTicket", "Ordini online e anomalie", TicketCheck],
   ["/admin/utenti", "Utenti", "Accessi, ruoli e API key", Users],
 ] as const;
 
