@@ -150,7 +150,7 @@ pulsante **«Riabbina»** ripete abbinamento e assegnazione tariffe per gli ordi
 non se ne creano di nuove):
 - `PRANZO|CENA + SPETTACOLO CM|GG` → **pacchetto** (CM = CASALE, GG = GIAMAICA) con prezzo
   `prezzo_pacchetto_teatro + prezzo_pacchetto_ristorante` dell'opera, come i pacchetti delle prenotazioni.
-- Altrimenti → la tariffa dell'opera (anche nascosta) il cui nome coincide con l'inizio del nome LiveTicket, senza
+- Altrimenti → la tariffa dell'opera (anche nascosta) il cui nome compare a parole intere nel nome LiveTicket (aggiornato 2026-10-27: prima solo all'inizio), senza
   distinzione di maiuscole/spazi: «Bambini 4 - 12 anni» → **Bambini**, «Intero» → **Intero**. Se più tariffe
   coincidono vince il nome più lungo.
 - Nessuna corrispondenza → anomalia «Tariffa non presente nell'opera: X»; il biglietto conta nelle persone ma non in
@@ -236,7 +236,7 @@ anche un doppione dentro la lista Prenotazioni. L'app **segnala, non blocca** (c
 
 - Abbinamento evento per data/ora esatta, senza `evento_id` salvato.
 - Ordini con anomalie: contano nelle persone, non nei pacchetti; visibili ovunque con l'anomalia.
-- Abbinamento tariffa per inizio del nome («Bambini 4 - 12 anni» → Bambini); pulsante «Riabbina» in Admin.
+- Abbinamento tariffa per nome contenuto a parole intere («Bambini 4 - 12 anni» → Bambini, «Ridotto over 65» → Over 65); pulsante «Riabbina» in Admin.
 - La quota ristorante dei pacchetti LiveTicket non entra in nessun incasso (né «Incasso pacchetti previsto», né
   «Incasso LiveTicket», che è solo teatro).
 - Verificato: gli eventi nel DB locale sono tutti alle 16:30 al Teatro Leo Amici, come negli ordini LiveTicket.

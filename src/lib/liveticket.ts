@@ -38,11 +38,12 @@ export function assegnaBiglietti(a: {
     const vuoto = { ...b, tariffa_id: null, ristorante: null, pasto: null, prezzo: 0 };
     const pacchetto = pacchettoDaTariffa(b.tariffa);
     if (pacchetto) return { ...vuoto, ...pacchetto, prezzo: prezzoPacchetto };
-    const nome = normalizza(b.tariffa);
-    let scelta: Tariffa | null = null; // nome più lungo vince
+    // il nome della tariffa compare a parole intere in quello LiveTicket («Over 65» in «Ridotto over 65»); il più lungo vince
+    const nome = ` ${normalizza(b.tariffa)} `;
+    let scelta: Tariffa | null = null;
     for (const t of a.tariffe) {
       const n = normalizza(t.nome);
-      if ((nome === n || nome.startsWith(n + " ")) && (!scelta || n.length > normalizza(scelta.nome).length)) scelta = t;
+      if (nome.includes(` ${n} `) && (!scelta || n.length > normalizza(scelta.nome).length)) scelta = t;
     }
     if (!scelta) { anomalie.add(ANOMALIA_TARIFFA + b.tariffa.trim()); return vuoto; }
     return { ...vuoto, tariffa_id: scelta.id, prezzo: scelta.prezzo };

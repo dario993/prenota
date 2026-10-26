@@ -50,6 +50,12 @@ describe("assegnaBiglietti", () => {
   test("il prefisso deve finire a parola intera", () => {
     expect(assegna(["Internazionale"], null).biglietti[0].tariffa_id).toBeNull();
   });
+  test("nome della tariffa anche dentro quello LiveTicket", () => {
+    const r = assegna(["Ridotto over 65", "Ridotto  OVER 65"], 4700);
+    expect(r.biglietti.map((b) => b.tariffa_id)).toEqual(["o65", "o65"]);
+    expect(r.anomalie).toEqual([]);
+    expect(assegna(["Ridotto over 650"], null).biglietti[0].tariffa_id).toBeNull();
+  });
   test("tariffa nascosta abbinata", () => {
     expect(assegna(["Associato"], null).biglietti[0]).toMatchObject({ tariffa_id: "ass", prezzo: 500 });
   });
