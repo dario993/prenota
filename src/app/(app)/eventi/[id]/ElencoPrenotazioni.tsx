@@ -30,7 +30,7 @@ const tacca = (p: Voce, sopra: string) => p.contrassegno &&
 // trascinamento in corso: posizioni in coordinate di pagina (l'elenco può scorrere mentre si trascina)
 type Trascina = { id: string; da: number; a: number; dy: number; alt: number; y0: number; centri: number[] };
 
-export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { eventoId: string; prenotazioni: Voce[]; tariffe: Tariffa[] }) {
+export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe, solaLettura }: { eventoId: string; prenotazioni: Voce[]; tariffe: Tariffa[]; solaLettura: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
   const online = useOnline();
@@ -101,7 +101,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
   const sceltaContrassegno = (p: Voce) => !p.in_attesa && (
     <span className="relative inline-flex items-center print:hidden">
       <span aria-hidden className={`pointer-events-none absolute left-2.5 size-2.5 rounded-full ${p.contrassegno ? pallinoContrassegno[p.contrassegno] : "bg-line-control/50"}`} />
-      <select value={p.contrassegno ?? ""} onChange={(e) => contrassegna(p, (e.target.value || null) as Contrassegno | null)}
+      <select value={p.contrassegno ?? ""} disabled={solaLettura} onChange={(e) => contrassegna(p, (e.target.value || null) as Contrassegno | null)}
         aria-label={`Stato di ${p.cognome_nome}`}
         className={`h-10 rounded-md border border-line-control bg-surface pl-7 pr-2 text-label font-normal lg:-my-1.5 lg:h-9 lg:border-transparent lg:hover:border-line-control ${p.contrassegno ? "text-ink" : "text-ink-muted"}`}>
         <option value="">Nessuno stato</option>
@@ -162,7 +162,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
           <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca per nome o telefono" aria-label="Cerca per nome o telefono"
             className="h-12 w-full rounded-md border border-line-control bg-surface pl-9 pr-3 text-body text-ink placeholder:text-ink-muted lg:h-9 lg:text-label lg:font-normal" />
         </div>
-        {sulServer.length > 1 && (
+        {sulServer.length > 1 && !solaLettura && (
           <button type="button" aria-pressed={riordina} onClick={() => setRiordina(!riordina)}
             className={`${btnSecondario} ${riordina ? "border-accent bg-accent-soft" : ""}`}>
             <ArrowUpDown size={16} aria-hidden />{riordina ? "Fine" : "Riordina"}
@@ -178,7 +178,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe }: { evento
           {prenotazioni.length ? <p>Nessun risultato per «{cerca.trim()}»</p> : (
             <>
               <p>Nessuna prenotazione</p>
-              <Link href={`/eventi/${eventoId}/prenotazioni/nuova`} className={`${btnPrimario} mt-4`}><Plus size={20} aria-hidden />Nuova prenotazione</Link>
+              {!solaLettura && <Link href={`/eventi/${eventoId}/prenotazioni/nuova`} className={`${btnPrimario} mt-4`}><Plus size={20} aria-hidden />Nuova prenotazione</Link>}
             </>
           )}
         </div>

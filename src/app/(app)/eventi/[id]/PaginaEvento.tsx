@@ -12,7 +12,7 @@ import { btnPrimario, btnSecondario } from "@/components/stili";
 import { Riepilogo } from "./Riepilogo";
 import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
 
-export function PaginaEvento({ id }: { id: string }) {
+export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boolean }) {
   const { data, isPending, error, fetchStatus } = useQuery({
     queryKey: chiaveEvento(id),
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
@@ -41,7 +41,7 @@ export function PaginaEvento({ id }: { id: string }) {
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0">
       {/* telefono: in alto marchio, titolo e «Nuova» (come nella proposta grafica) */}
       <BarraTelefono titolo={evento.titolo}>
-        <Link href={nuova} className={`${btnPrimario} !h-10 !px-3 !text-label`}><Plus size={16} aria-hidden />Nuova</Link>
+        {!solaLettura && <Link href={nuova} className={`${btnPrimario} !h-10 !px-3 !text-label`}><Plus size={16} aria-hidden />Nuova</Link>}
       </BarraTelefono>
       {coda.some((p) => p.stato === "pending") && (
         <p role="status" className="sticky top-14 z-20 mb-4 lg:top-0 flex print:hidden items-center gap-3 rounded-md bg-warning-soft p-3 text-ink">
@@ -68,14 +68,16 @@ export function PaginaEvento({ id }: { id: string }) {
               <Printer size={16} aria-hidden />Stampa
             </button>
           )}
-          <Link href={nuova} className={`${btnPrimario} max-lg:hidden`}>
-            <Plus size={16} aria-hidden />Nuova prenotazione
-          </Link>
+          {!solaLettura && (
+            <Link href={nuova} className={`${btnPrimario} max-lg:hidden`}>
+              <Plus size={16} aria-hidden />Nuova prenotazione
+            </Link>
+          )}
         </div>
       </div>
       <div className="space-y-10">
         <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
-        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} />
+        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
       </div>
     </main>
   );

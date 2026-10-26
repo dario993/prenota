@@ -13,6 +13,7 @@ import { CONTRASSEGNI, type Contrassegno } from "@/lib/calcoli";
 export async function modificaPrenotazione(dati: DatiPrenotazione): Promise<Esito> {
   const utente = await utenteCorrente();
   if (!utente) return { errore: "Sessione scaduta" };
+  if (utente.ruolo === "visualizzatore") return { errore: "Non autorizzato" };
   const v = schemaPrenotazione.safeParse(dati);
   if (!v.success) return { errore: v.error.issues[0].message };
   const d = v.data;
@@ -38,7 +39,9 @@ export async function modificaPrenotazione(dati: DatiPrenotazione): Promise<Esit
 }
 
 export async function eliminaPrenotazione(id: string): Promise<Esito> {
-  if (!(await utenteCorrente())) return { errore: "Sessione scaduta" };
+  const utente = await utenteCorrente();
+  if (!utente) return { errore: "Sessione scaduta" };
+  if (utente.ruolo === "visualizzatore") return { errore: "Non autorizzato" };
   const uuid = z.uuid().safeParse(id);
   if (!uuid.success) return { errore: "Prenotazione non trovata" };
   try {
@@ -54,7 +57,9 @@ export async function eliminaPrenotazione(id: string): Promise<Esito> {
 // Ordine scelto a mano: gli id dell'evento nell'ordine voluto (quelle non elencate restano in fondo).
 const schemaRiordino = z.object({ evento_id: z.uuid(), ids: z.array(z.uuid()).max(5000) });
 export async function riordinaPrenotazioni(evento_id: string, ids: string[]): Promise<Esito> {
-  if (!(await utenteCorrente())) return { errore: "Sessione scaduta" };
+  const utente = await utenteCorrente();
+  if (!utente) return { errore: "Sessione scaduta" };
+  if (utente.ruolo === "visualizzatore") return { errore: "Non autorizzato" };
   const v = schemaRiordino.safeParse({ evento_id, ids });
   if (!v.success) return { errore: "Dati non validi" };
   try {
@@ -73,6 +78,7 @@ const schemaContrassegno = z.object({ id: z.uuid(), contrassegno: z.enum(CONTRAS
 export async function contrassegnaPrenotazione(id: string, contrassegno: Contrassegno | null): Promise<Esito> {
   const utente = await utenteCorrente();
   if (!utente) return { errore: "Sessione scaduta" };
+  if (utente.ruolo === "visualizzatore") return { errore: "Non autorizzato" };
   const v = schemaContrassegno.safeParse({ id, contrassegno });
   if (!v.success) return { errore: "Dati non validi" };
   try {

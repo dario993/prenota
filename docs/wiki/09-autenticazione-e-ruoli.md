@@ -20,13 +20,17 @@ Un utente **disattivato** non può accedere e perde subito l'accesso anche con u
 
 ## Permessi
 
-| Azione | Operatore | Admin |
-|---|---|---|
-| Vedere eventi e prenotazioni | sì | sì |
-| Creare / modificare / eliminare prenotazioni (anche di altri) | sì | sì |
-| Elenco ristoranti, condividi, stampa | sì | sì |
-| Locali, opere, eventi | no | sì |
-| Utenti | no | sì |
+| Azione | Visualizzatore | Operatore | Admin |
+|---|---|---|---|
+| Vedere eventi e prenotazioni (anche il dettaglio e la cronologia) | sì | sì | sì |
+| Creare / modificare / eliminare prenotazioni (anche di altri), cambiare stato, riordinare | no | sì | sì |
+| Elenco ristoranti, condividi, stampa | sì | sì | sì |
+| Locali, opere, eventi | no | no | sì |
+| Utenti | no | no | sì |
+
+Il **visualizzatore** non vede «Nuova prenotazione», «Riordina» né Elimina/Salva; lo stato è mostrato ma non si cambia e il
+dettaglio di una prenotazione si apre con i campi disattivati. `/prenotazioni/nuova` lo riporta alla pagina evento; le Server
+Action di modifica rispondono «Non autorizzato» e `POST /api/prenotazioni` 403.
 
 L'utente **API key** non usa l'app web: via API ha gli stessi poteri di un admin, incluso `POST /api/sql`.
 

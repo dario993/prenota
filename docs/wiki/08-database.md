@@ -13,7 +13,7 @@ PostgreSQL. Schema (stato finale) in `db/schema.sql` e migrazioni in `db/migrazi
 | nome | text | |
 | email | text unique | obbligatoria tranne per il ruolo `api` (vincolo `utenti_email_check`) |
 | password_hash | text | scrypt (`node:crypto`) |
-| ruolo | text | `admin` \| `operatore` \| `api` (accesso remoto: in `password_hash` lo sha256 della chiave, `sha256$…`) |
+| ruolo | text | `admin` \| `operatore` \| `visualizzatore` \| `api` (accesso remoto: in `password_hash` lo sha256 della chiave, `sha256$…`) |
 | attivo | boolean | default true |
 
 ### `sessioni`
@@ -123,6 +123,7 @@ applicata).
 - `003-ordine-contrassegno.sql`: aggiunge `prenotazioni.ordine` e `prenotazioni.contrassegno` (facoltativo, senza default).
 - `004-storico.sql`: aggiunge `prenotazioni_storico.dati` se manca; per le prenotazioni senza cronologia crea la voce «creata» da `creata_il` / `creata_da` (senza copia).
 - `005-pagamento.sql`: aggiunge `prenotazioni.pagamento` (facoltativo, senza default).
+- `006-visualizzatore.sql`: aggiunge il ruolo `visualizzatore` al vincolo su `utenti.ruolo`.
 
 ## Backup
 

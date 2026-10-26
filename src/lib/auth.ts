@@ -9,7 +9,7 @@ export type Utente = {
   id: string;
   nome: string;
   email: string | null; // null per gli utenti «api»
-  ruolo: "admin" | "operatore" | "api";
+  ruolo: "admin" | "operatore" | "visualizzatore" | "api";
 };
 
 export const COOKIE_SESSIONE = "sessione";

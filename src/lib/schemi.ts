@@ -114,7 +114,7 @@ export const schemaUtente = z.object({
     .transform((v) => (v === "" ? undefined : v))
     .pipe(z.string().min(8, "Almeno 8 caratteri").optional())
     .optional(),
-  ruolo: z.enum(["admin", "operatore", "api"]),
+  ruolo: z.enum(["admin", "operatore", "visualizzatore", "api"]),
 }).transform((d, ctx) => {
   if (d.ruolo === "api") return { ...d, email: null, password: undefined };
   const e = email.safeParse(d.email ?? "");

@@ -117,6 +117,7 @@ test("schemaUtente: password opzionale ma min 8, email normalizzata", () => {
   expect(schemaUtente.safeParse({ ...u, password: "corta" }).success).toBe(false);
   expect(schemaUtente.safeParse({ ...u, password: "abcdefgh" }).success).toBe(true);
   expect(schemaUtente.safeParse({ ...u, ruolo: "boss" }).success).toBe(false);
+  expect(schemaUtente.safeParse({ ...u, ruolo: "visualizzatore" }).success).toBe(true);
 });
 
 test("schemaUtente: email obbligatoria tranne che per API key", () => {

@@ -50,10 +50,11 @@ Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci so
 
 Da **Admin → Utenti**:
 
-- Crea un utente con nome, email, password iniziale (almeno 8 caratteri, obbligatoria) e ruolo (**admin** o **operatore**). L'email è unica («Email già in uso») e viene salvata in minuscolo.
+- Crea un utente con nome, email, password iniziale (almeno 8 caratteri, obbligatoria) e ruolo (**admin**, **operatore** o **visualizzatore**, che vede tutto come l'operatore ma non modifica nulla). L'email è unica («Email già in uso») e viene salvata in minuscolo.
 - **Modifica** cambia nome, email e ruolo; la password si cambia solo se compilata, altrimenti resta invariata (così si reimposta quella dimenticata).
 - **Disattiva** toglie l'accesso subito, anche a chi è già collegato (le sue prenotazioni restano); **Attiva** lo ripristina.
-- Non puoi disattivare né declassare te stesso, così c'è sempre almeno un admin.
+- **Elimina** (con conferma) toglie l'utente definitivamente, solo se non ha mai creato o modificato prenotazioni (altrimenti «Impossibile eliminare…»: si disattiva, così la cronologia resta completa).
+- Non puoi disattivare, eliminare né declassare te stesso, così c'è sempre almeno un admin.
 - Ruolo **API key**: un utente per l'accesso remoto (es. Claude). Email e password non servono (per gli altri ruoli sono obbligatorie): al salvataggio compare la chiave,
   **una sola volta**, con «Copia» e «Fatto». Ha i pieni poteri di un admin via API (pagina 9) ma non entra nell'app web.
   Per toglierle l'accesso: **Disattiva**. Per una chiave nuova: crea un altro utente API key (il tipo non si cambia).

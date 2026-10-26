@@ -13,7 +13,8 @@ NOME, INT, RID, NOTE, TELEFONO, POSTI PREN.
 Solo lo **staff interno** (nessuna prenotazione pubblica). Più persone, ognuna con il proprio accesso:
 
 - **admin** – gestisce locali, opere, eventi e utenti, oltre alle prenotazioni;
-- **operatore** – inserisce, modifica ed elimina prenotazioni.
+- **operatore** – inserisce, modifica ed elimina prenotazioni;
+- **visualizzatore** – vede quello che vede l'operatore, senza poter modificare nulla.
 
 Si usa soprattutto dal **telefono**, ma è ottimizzata anche per il **desktop**.
 

@@ -76,3 +76,22 @@ export async function attivaUtente(id: string, attivo: boolean): Promise<Esito> 
   revalidatePath("/admin/utenti");
   return { ok: true };
 }
+
+// Solo chi non compare in prenotazioni né cronologia: gli altri si disattivano (le sessioni si cancellano a cascata).
+export async function eliminaUtente(id: string): Promise<Esito> {
+  const me = await verificaAdmin();
+  const uuid = z.uuid().transform((v) => v.toLowerCase()).safeParse(id);
+  if (!uuid.success) return { errore: "Utente non valido" };
+  if (uuid.data === me.id) return { errore: "Non puoi eliminare te stesso" };
+  try {
+    const r = await sql`delete from utenti where id = ${uuid.data}`;
+    if (r.count === 0) return { errore: "Utente non trovato" };
+  } catch (e) {
+    if ((e as { code?: string }).code === "23503")
+      return { errore: "Impossibile eliminare: ha prenotazioni o modifiche in cronologia. Disattivalo." };
+    console.error(e);
+    return { errore: ERRORE_IMPREVISTO };
+  }
+  revalidatePath("/admin/utenti");
+  return { ok: true };
+}

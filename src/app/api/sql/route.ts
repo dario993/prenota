@@ -10,7 +10,7 @@ const schemaQuery = z.object({
 
 export async function POST(req: Request) {
   const utente = await utenteCorrente();
-  if (!utente || utente.ruolo === "operatore") return Response.json({ errore: "Non autorizzato" }, { status: 401 });
+  if (!utente || (utente.ruolo !== "admin" && utente.ruolo !== "api")) return Response.json({ errore: "Non autorizzato" }, { status: 401 });
   const dati = schemaQuery.safeParse(await req.json().catch(() => null));
   if (!dati.success) return Response.json({ errore: "Richiesta non valida: { query, params? }" }, { status: 400 });
   try {

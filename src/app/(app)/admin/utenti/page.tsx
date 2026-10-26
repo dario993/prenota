@@ -6,11 +6,11 @@ import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { BottoneElimina, FormAzione } from "@/components/FormAzione";
 import { azioniAdmin, btnPrimario, btnSecondario, campo, elencoAdmin, etichetta, paginaAdmin, rigaAdmin, scelta, segmenti } from "@/components/stili";
-import { attivaUtente, salvaUtente } from "./azioni";
+import { attivaUtente, eliminaUtente, salvaUtente } from "./azioni";
 
-type U = { id: string; nome: string; email: string | null; ruolo: "admin" | "operatore" | "api"; attivo: boolean };
+type U = { id: string; nome: string; email: string | null; ruolo: "admin" | "operatore" | "visualizzatore" | "api"; attivo: boolean };
 
-const RUOLI = [["operatore", "Operatore"], ["admin", "Admin"], ["api", "API key"]] as const;
+const RUOLI = [["operatore", "Operatore"], ["visualizzatore", "Visualizzatore"], ["admin", "Admin"], ["api", "API key"]] as const;
 const NOME_RUOLO = Object.fromEntries(RUOLI);
 
 export default async function Utenti({ searchParams }: { searchParams: Promise<{ modifica?: string; nuovo?: string }> }) {
@@ -85,6 +85,7 @@ export default async function Utenti({ searchParams }: { searchParams: Promise<{
                 successo={u.attivo ? "Disattivato" : "Attivato"}
                 variante={u.attivo ? "pericolo" : "normale"}
               />}
+              {u.id !== me.id && <BottoneElimina azione={eliminaUtente.bind(null, u.id)} conferma={`Eliminare l'utente ${u.nome}?`} nome={u.nome} />}
             </div>
           </li>
         ))}

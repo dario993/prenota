@@ -5,7 +5,7 @@ create table if not exists utenti (
   nome text not null,
   email text unique, -- null solo per gli utenti «api»
   password_hash text not null,
-  ruolo text not null check (ruolo in ('admin', 'operatore', 'api')), -- api: accesso remoto con chiave, senza login
+  ruolo text not null check (ruolo in ('admin', 'operatore', 'visualizzatore', 'api')), -- api: accesso remoto con chiave, senza login
   attivo boolean not null default true,
   constraint utenti_email_check check (ruolo = 'api' or email is not null)
 );

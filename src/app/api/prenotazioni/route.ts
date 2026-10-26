@@ -8,6 +8,7 @@ import { registraStorico } from "@/lib/storico";
 export async function POST(req: Request) {
   const utente = await utenteCorrente();
   if (!utente) return Response.json({ errore: "Sessione scaduta" }, { status: 401 });
+  if (utente.ruolo === "visualizzatore") return Response.json({ errore: "Non autorizzato" }, { status: 403 });
   const corpo: unknown = await req.json().catch(() => null);
   if (!corpo || typeof corpo !== "object") return Response.json({ errore: "Dati non validi" }, { status: 400 });
   const dati = schemaPrenotazione.safeParse(corpo);

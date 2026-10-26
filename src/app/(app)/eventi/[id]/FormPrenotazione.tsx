@@ -41,27 +41,28 @@ const useEvento = (id: string, rileggi = true) =>
 // nasce dai dati iniziali e, partendo da una copia vecchia, salvando cancellerebbe le righe aggiunte nel frattempo
 // (senza rete la modifica è comunque bloccata, quindi la copia in cache basta solo per mostrarla). Le riletture
 // successive (ritorno sull'app, rete che torna) non smontano il modulo: si perderebbe quanto scritto.
-export function ModificaPrenotazione({ eventoId, pid }: { eventoId: string; pid: string }) {
+export function ModificaPrenotazione({ eventoId, pid, solaLettura = false }: { eventoId: string; pid: string; solaLettura?: boolean }) {
   const { data, isFetching, isFetchedAfterMount, error, fetchStatus } = useEvento(eventoId);
   const p = data?.prenotazioni.find((x) => x.id === pid);
-  if (p && (isFetchedAfterMount || fetchStatus === "paused")) return <FormPrenotazione eventoId={eventoId} iniziale={p} />;
+  if (p && (isFetchedAfterMount || fetchStatus === "paused")) return <FormPrenotazione eventoId={eventoId} iniziale={p} solaLettura={solaLettura} />;
   if (!data && fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
   if (isFetching) return <Stato testo="Caricamento…" />;
   return <Stato testo={error?.message ?? "Prenotazione non trovata"} nonTrovato />;
 }
 
-export function FormPrenotazione({ eventoId, iniziale }: { eventoId: string; iniziale?: Prenotazione }) {
+export function FormPrenotazione({ eventoId, iniziale, solaLettura = false }: { eventoId: string; iniziale?: Prenotazione; solaLettura?: boolean }) {
   const { data, isPending, error, fetchStatus } = useEvento(eventoId, !iniziale);
   if (!data) {
     if (fetchStatus === "paused") return <Stato testo={SERVE_RETE} />;
     if (isPending) return <Stato testo="Caricamento…" />;
     return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
   }
-  return <Modulo eventoId={eventoId} iniziale={iniziale} data={data} />;
+  return <Modulo eventoId={eventoId} iniziale={iniziale} data={data} solaLettura={solaLettura} />;
 }
 
 // Il form nasce quando il tariffario è noto: un contatore per tariffa (visibili + nascoste già usate in modifica).
-function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Prenotazione; data: DettaglioEvento }) {
+// solaLettura (visualizzatore): campi disattivati, niente Salva né Elimina
+function Modulo({ eventoId, iniziale, data, solaLettura }: { eventoId: string; iniziale?: Prenotazione; data: DettaglioEvento; solaLettura: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
   const { evento } = data;
@@ -174,12 +175,12 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6">
       {/* telefono: evento sempre visibile in alto mentre si scorre il modulo, con Annulla */}
       <BarraTelefono titolo={`${evento.titolo} · ${d.settimana} ${d.giorno} ${d.mese}`}>
-        <Link href={`/eventi/${eventoId}`} className={`${btnSecondario} !h-10 !px-3 !text-label`}>Annulla</Link>
+        <Link href={`/eventi/${eventoId}`} className={`${btnSecondario} !h-10 !px-3 !text-label`}>{solaLettura ? "Chiudi" : "Annulla"}</Link>
       </BarraTelefono>
       <Link href={`/eventi/${eventoId}`} className={linkIndietro}>
         <ChevronLeft size={16} aria-hidden />{evento.titolo} · {d.lunga}
       </Link>
-      <h1 className="text-title">{iniziale ? "Modifica prenotazione" : "Nuova prenotazione"}</h1>
+      <h1 className="text-title">{solaLettura ? "Prenotazione" : iniziale ? "Modifica prenotazione" : "Nuova prenotazione"}</h1>
       <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">
         {iniziale
           ? <>Stato <span className="font-medium text-ink">{iniziale.contrassegno ? NOMI_CONTRASSEGNI[iniziale.contrassegno] : "nessuno"}</span></>
@@ -189,7 +190,7 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
       </p>
       <form id="modulo-prenotazione" onSubmit={(e) => void handleSubmit(salva)(e)} noValidate
         className="mt-6 grid items-start gap-6 pb-40 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pb-0">
-        <div className="grid min-w-0 gap-6">
+        <fieldset disabled={solaLettura} className="grid min-w-0 gap-6">
           <section aria-labelledby="t-cliente" className={pannello}>
             <h2 id="t-cliente" className={`${titoloPannello} mb-4`}>Cliente</h2>
             <div className="grid items-start gap-4 sm:grid-cols-2">
@@ -293,7 +294,7 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
             )}
           </section>
           {iniziale && <Cronologia pid={iniziale.id} tariffe={evento.tariffe} />}
-          {iniziale && (
+          {iniziale && !solaLettura && (
             <div className="flex flex-wrap items-center gap-3">
               <button type="button" onClick={elimina} disabled={occupato || bloccata} className={btnDistruttivo}>
                 <Trash2 size={16} aria-hidden />Elimina prenotazione
@@ -301,7 +302,7 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
               <span className="text-caption text-ink-muted">{bloccata ? "Serve la rete" : "Chiede conferma prima di eliminare."}</span>
             </div>
           )}
-        </div>
+        </fieldset>
 
         {/* il riepilogo come un biglietto: resta fermo mentre si scorre (desktop largo) */}
         <aside aria-labelledby="t-riepilogo" className={`${pannello} xl:sticky xl:top-4`}>
@@ -351,10 +352,10 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
               </p>
             )}
           </div>
-          <div className="mt-5 grid grid-cols-[1fr_auto] gap-2 max-lg:hidden">
+          {!solaLettura && <div className="mt-5 grid grid-cols-[1fr_auto] gap-2 max-lg:hidden">
             <button type="submit" disabled={occupato || bloccata} className={`${btnPrimario} lg:h-11 lg:text-[15px]`}>{salvaTesto}</button>
             <Link href={`/eventi/${eventoId}`} className={`${btnSecondario} lg:h-11 lg:text-[15px]`}>Annulla</Link>
-          </div>
+          </div>}
           {bloccata && <p className="mt-1 text-caption text-ink-muted max-lg:hidden">Serve la rete per salvare le modifiche</p>}
         </aside>
 
@@ -364,7 +365,7 @@ function Modulo({ eventoId, iniziale, data }: { eventoId: string; iniziale?: Pre
             <div className="text-caption text-ink-muted tabular-nums">{pers} {pers === 1 ? "persona" : "persone"}{bloccata && " · serve la rete"}</div>
             <div className="text-[22px] font-semibold leading-[26px] tabular-nums">{formattaEuro(teatro + ristorante)}</div>
           </div>
-          <button type="submit" disabled={occupato || bloccata} className={`${btnPrimario} min-w-30`}>{occupato ? "Invio…" : "Salva"}</button>
+          {!solaLettura && <button type="submit" disabled={occupato || bloccata} className={`${btnPrimario} min-w-30`}>{occupato ? "Invio…" : "Salva"}</button>}
         </div>
       </form>
     </main>
