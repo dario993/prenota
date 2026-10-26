@@ -34,9 +34,10 @@ export async function salvaOpera(id: string | null, dati: unknown): Promise<Esit
       const tenute = d.tariffe.flatMap((t) => (t.id ? [t.id] : []));
       const [usata] = await tx`select t.nome from tariffe t
         where t.opera_id = ${operaId} and t.id <> all(${tenute}::uuid[])
-          and exists (select 1 from prenotazioni_tariffe r where r.tariffa_id = t.id)
+          and (exists (select 1 from prenotazioni_tariffe r where r.tariffa_id = t.id)
+            or exists (select 1 from liveticket_ordini lo, jsonb_array_elements(lo.biglietti) b where b->>'tariffa_id' = t.id::text))
         limit 1`;
-      if (usata) throw new Rifiuto(`Impossibile eliminare «${usata.nome}»: usata da prenotazioni. Puoi nasconderla`);
+      if (usata) throw new Rifiuto(`Impossibile eliminare «${usata.nome}»: usata da prenotazioni o ordini LiveTicket. Puoi nasconderla`);
       await tx`delete from tariffe where opera_id = ${operaId} and id <> all(${tenute}::uuid[])`;
       // nome provvisorio (l'id): due tariffe possono scambiarsi il nome senza urtare l'indice unico
       for (const t of d.tariffe) {

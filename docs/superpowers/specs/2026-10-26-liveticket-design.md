@@ -128,7 +128,7 @@ create table if not exists liveticket_ordini (
   data_ora timestamptz,                  -- null se non letta
   evento_id uuid references eventi (id) on delete set null, -- null = senza evento
   biglietti_dichiarati integer,
-  -- una riga per biglietto: {posto, tariffa_lt, tariffa_id|null, ristorante|null, pasto|null, prezzo}
+  -- una riga per biglietto: {posto, tariffa, tariffa_id|null, ristorante|null, pasto|null, prezzo}
   -- prezzo in centesimi, congelato all'arrivo dal tariffario dell'opera (o pacchetto teatro), senza commissione
   biglietti jsonb not null default '[]',
   importo_pagato integer,                -- «€ X per i biglietti» di LiveTicket, centesimi, solo per controllo
@@ -165,7 +165,7 @@ non se ne creano di nuove):
   (regole sopra). Costante `COMMISSIONE_LIVETICKET = 150`.
 - `riepilogoLiveticket(ordini)` → persone, ordini, quantità per `tariffa_id`, pacchetti per ristorante/pasto,
   **incasso teatro LiveTicket** = Σ prezzi delle righe tariffa + `prezzo_pacchetto_teatro` per ogni pacchetto (solo la
-  parte teatro). **Persone** = `biglietti_dichiarati` (se null: righe biglietto).
+  parte teatro). **Persone** di un ordine = `max(biglietti_dichiarati, righe biglietto)` (`personeOrdine`; per la capienza meglio contare in più).
 - Ordine con anomalie di lettura (dal parser n8n: conteggio non coincidente, riga non riconosciuta…) → conta nelle
   persone ma non porta pacchetti né tariffe («fail closed», come il parser). Le anomalie di tariffa/importo riguardano
   solo il biglietto interessato.

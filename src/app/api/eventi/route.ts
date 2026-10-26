@@ -16,7 +16,10 @@ export async function GET(req: Request) {
   try {
     const righe = await sql`
       select e.id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
-             coalesce(sum(p.pacchetti + coalesce(t.quantita, 0)), 0)::int as persone,
+             coalesce(sum(p.pacchetti + coalesce(t.quantita, 0)), 0)::int
+               -- persone di un ordine LiveTicket = max(dichiarati, letti), come nel riepilogo
+               + (select coalesce(sum(greatest(coalesce(lo.biglietti_dichiarati, 0), jsonb_array_length(lo.biglietti))), 0)
+                  from liveticket_ordini lo where lo.evento_id = e.id)::int as persone,
              count(p.id)::int as prenotazioni
       from eventi e
       join opere o on o.id = e.opera_id

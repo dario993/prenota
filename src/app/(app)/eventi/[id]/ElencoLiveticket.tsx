@@ -17,7 +17,7 @@ export function ElencoLiveticket({ ordini, doppioni, tariffe, prezzi }: { ordini
   });
   const totale = righe.reduce((s, r) => s + r.persone, 0);
   const anomalie = (o: OrdineLiveticket) => o.anomalie.length > 0 && (
-    <ul className="mt-2 rounded-md bg-warning-soft p-2 text-caption text-ink">{o.anomalie.map((a) => <li key={a}>{a}</li>)}</ul>
+    <ul className="mt-2 rounded-md bg-warning-soft p-2 text-caption text-ink">{o.anomalie.map((a, i) => <li key={i}>{a}</li>)}</ul>
   );
   return (
     <section aria-label="Ordini LiveTicket">

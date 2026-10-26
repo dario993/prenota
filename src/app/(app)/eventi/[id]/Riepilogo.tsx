@@ -57,7 +57,7 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza,
           {inAttesa > 0 && <Riga testo="In attesa di invio" valore={inAttesa} />}
           <Riga testo="Annullate" valore={annullate} />
           {ordini > 0 && <Riga testo="LiveTicket" valore={`${rl.persone} ${rl.persone === 1 ? "persona" : "persone"} · ${ordini} ${ordini === 1 ? "ordine" : "ordini"}`} testId="liveticket-persone" />}
-          {doppioni > 0 && <Riga testo="Possibili doppioni" valore={doppioni} testId="doppioni" />}
+          {doppioni > 0 && <Riga testo="Voci con possibile doppione" valore={doppioni} testId="doppioni" />}
         </dl>
       </Riquadro>
       <Riquadro id="r-biglietti" titolo="Biglietti" destra="persone">

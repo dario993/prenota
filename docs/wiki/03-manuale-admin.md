@@ -28,8 +28,8 @@ Si salva tutto con un solo **Salva**; in caso di errore non cambia nulla e i cam
 - Una tariffa **nascosta** non compare tra i contatori di una nuova prenotazione; le prenotazioni che la usano
   restano valide, contano nel riepilogo e la mostrano anche in modifica. Serve per le tariffe che in un certo
   periodo non si vogliono vedere (es. «Associato»).
-- Una tariffa **già usata** da almeno una prenotazione **non si può eliminare** («Impossibile eliminare «Adulti»:
-  usata da prenotazioni. Puoi nasconderla»).
+- Una tariffa **già usata** da almeno una prenotazione (o un ordine LiveTicket) **non si può eliminare** («Impossibile eliminare «Adulti»:
+  usata da prenotazioni o ordini LiveTicket. Puoi nasconderla»).
 - Nomi unici nell'opera (senza badare a maiuscole); «Pacchetti» è riservato. Deve restare visibile almeno una
   tariffa o il pacchetto.
 - Gli importi si scrivono con la virgola o il punto (`22,50`, `22.5`, `22`); testo o valori negativi vengono
@@ -49,9 +49,9 @@ Un evento con prenotazioni non si può eliminare («Impossibile eliminare: ci so
 ## LiveTicket
 
 **Admin → LiveTicket** (solo admin): tutti gli ordini online letti da n8n, dal più recente per data evento. Colonne: codice,
-nome, data e ora, evento (link alla tab LiveTicket) o «Senza evento», persone, pacchetti, importo, anomalie, ricevuto il.
+nome, data e ora, evento (link alla tab LiveTicket) o «Senza evento», persone (il maggiore tra dichiarati e letti), pacchetti, importo (incasso teatro, senza commissione; sotto, in grigio, quanto pagato su LiveTicket), anomalie, ricevuto il.
 Filtri: **Con anomalie**, **Senza evento**. **Riabbina** ripete abbinamento all'evento e assegnazione alle tariffe per gli ordini
-senza evento o con anomalie di tariffa o importo (utile dopo aver creato l'evento o la tariffa mancante) e mostra quanti ordini sono cambiati.
+senza evento, con anomalie di tariffa o importo o con data diversa da quella dell'evento abbinato (evento spostato) (utile dopo aver creato l'evento o la tariffa mancante) e mostra quanti ordini sono cambiati.
 
 ## Utenti
 

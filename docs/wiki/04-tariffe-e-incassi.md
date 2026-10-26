@@ -33,7 +33,7 @@ totale             = incasso_teatro + incasso_ristorante
 
 Per un evento: somma su tutte le prenotazioni. L'incasso ristorante si mostra anche diviso per Giamaica e Casale.
 
-I biglietti LiveTicket contano nelle righe per tariffa e nei pacchetti del riepilogo, ma «Incasso teatro previsto», «Incasso pacchetti previsto» e i totali per pagamento sono **solo della lista Prenota**; gli incassi LiveTicket stanno nella riga a parte «Incasso LiveTicket» (prezzi congelati per le righe tariffa, prezzo attuale del pacchetto teatro dell'opera per i pacchetti; commissione di 1,50 € mai conteggiata).
+I biglietti LiveTicket contano nelle righe per tariffa e nei pacchetti del riepilogo, ma «Incasso teatro previsto», «Incasso pacchetti previsto» e i totali per pagamento sono **solo della lista Prenota**; gli incassi LiveTicket stanno nella riga a parte «Incasso LiveTicket» (prezzi congelati per le righe tariffa, prezzo attuale del pacchetto teatro dell'opera per i pacchetti; commissione di 1,50 € mai conteggiata). Persone di un ordine = il maggiore tra biglietti dichiarati e letti; anche l'elenco eventi le somma. Un ordine senza evento non ha tariffe né prezzi (solo anomalie di lettura).
 
 Gli importi sono **previsti** (l'app non registra i pagamenti). Internamente sono interi in **centesimi**, per
 evitare errori di arrotondamento; a video sono in euro con virgola (`49,00 €`).

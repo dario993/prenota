@@ -29,7 +29,7 @@ export async function salvaOrdine(o: z.infer<typeof schemaOrdineLiveticket>): Pr
       then (${o.data}::text || ' ' || ${o.ora}::text)::timestamp at time zone 'Europe/Rome' end as ts`;
   const { eventoId, tariffe, prezzi } = await contestoEvento(ts);
   const { biglietti, anomalie } = assegnaBiglietti({
-    biglietti: o.biglietti, tariffe, prezzi, importo_pagato: o.importo_pagato, anomalieLettura: o.anomalie,
+    biglietti: o.biglietti, tariffe, prezzi, importo_pagato: o.importo_pagato, anomalieLettura: o.anomalie, senzaEvento: !eventoId,
   });
   await sql`
     insert into liveticket_ordini (codice, cognome_nome, telefono, spettacolo, data_ora, evento_id, biglietti_dichiarati,
@@ -51,19 +51,23 @@ const daRifare = (a: string) => a.startsWith(ANOMALIA_TARIFFA) || a === ANOMALIA
 /** Ripete abbinamento e assegnazione per gli ordini senza evento o con anomalie di tariffa/importo. Ritorna quanti sono cambiati. */
 export async function riabbinaOrdini(): Promise<number> {
   const ordini = await sql<{ codice: string; data_ora: Date | null; evento_id: string | null; biglietti: BigliettoLiveticket[];
-    importo_pagato: number | null; anomalie: string[] }[]>`
-    select codice, data_ora, evento_id, biglietti, importo_pagato, anomalie from liveticket_ordini`;
+    importo_pagato: number | null; anomalie: string[]; aggiornato_il: Date; data_evento: Date | null }[]>`
+    select l.codice, l.data_ora, l.evento_id, l.biglietti, l.importo_pagato, l.anomalie, l.aggiornato_il, e.data_ora as data_evento
+    from liveticket_ordini l left join eventi e on e.id = l.evento_id`;
   let cambiati = 0;
-  for (const o of ordini.filter((o) => o.evento_id === null || o.anomalie.some(daRifare))) {
+  // anche gli ordini la cui data non coincide più con quella dell'evento abbinato (evento spostato)
+  const dataDiversa = (o: { data_ora: Date | null; data_evento: Date | null }) =>
+    o.data_evento !== null && o.data_ora?.getTime() !== o.data_evento.getTime();
+  for (const o of ordini.filter((o) => o.evento_id === null || dataDiversa(o) || o.anomalie.some(daRifare))) {
     const { eventoId, tariffe, prezzi } = await contestoEvento(o.data_ora);
     const { biglietti, anomalie } = assegnaBiglietti({
       biglietti: o.biglietti.map((b) => ({ posto: b.posto, tariffa: b.tariffa })), tariffe, prezzi,
-      importo_pagato: o.importo_pagato, anomalieLettura: o.anomalie.filter((a) => !daRifare(a)),
+      importo_pagato: o.importo_pagato, anomalieLettura: o.anomalie.filter((a) => !daRifare(a)), senzaEvento: !eventoId,
     });
     if (eventoId === o.evento_id && assegnazione(biglietti) === assegnazione(o.biglietti)
       && JSON.stringify(anomalie) === JSON.stringify(o.anomalie)) continue;
     await sql`update liveticket_ordini set evento_id = ${eventoId}, biglietti = ${sql.json(biglietti as never)},
-      anomalie = ${anomalie}, aggiornato_il = now() where codice = ${o.codice}`;
+      anomalie = ${anomalie}, aggiornato_il = now() where codice = ${o.codice} and aggiornato_il = ${o.aggiornato_il}`;
     cambiati++;
   }
   return cambiati;

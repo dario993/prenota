@@ -94,7 +94,7 @@ export function PaginaEvento({ id, solaLettura, tabIniziale }: { id: string; sol
         <div>
           <div role="tablist" aria-label="Elenco" className="-mb-px flex gap-6 border-b border-line print:hidden">
             {schede.map(([t, testo]) => (
-              <button key={t} type="button" role="tab" id={`tab-${t}`} aria-selected={tab === t} aria-controls={`pannello-${t}`} onClick={() => scegli(t)}
+              <button key={t} type="button" role="tab" id={`tab-${t}`} aria-selected={tab === t} onClick={() => scegli(t)}
                 className={`-mb-px min-h-11 border-b-2 py-2.5 text-label ${tab === t ? "border-ink font-semibold" : "border-transparent font-normal text-ink-muted hover:text-ink"}`}>{testo}</button>
             ))}
           </div>

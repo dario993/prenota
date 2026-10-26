@@ -107,7 +107,7 @@ create table if not exists liveticket_ordini (
   data_ora timestamptz,                  -- null se non letta
   evento_id uuid references eventi (id) on delete set null, -- null = senza evento
   biglietti_dichiarati integer,
-  -- una riga per biglietto: {posto, tariffa_lt, tariffa_id|null, ristorante|null, pasto|null, prezzo}
+  -- una riga per biglietto: {posto, tariffa, tariffa_id|null, ristorante|null, pasto|null, prezzo}
   -- prezzo in centesimi, congelato all'arrivo dal tariffario dell'opera (o pacchetto teatro), senza commissione
   biglietti jsonb not null default '[]',
   importo_pagato integer,                -- «€ X per i biglietti» di LiveTicket, centesimi, solo per controllo

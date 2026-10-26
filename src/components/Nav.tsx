@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useInAttesa, riprendiCoda, svuotaDatiLocali } from "@/lib/query";
 import { TemaToggle } from "./TemaToggle";
 import { Marchio } from "./Marchio";
-import { CalendarDays, Building2, Clapperboard, Ticket, Users, Settings, LogOut } from "lucide-react";
+import { CalendarDays, Building2, Clapperboard, Ticket, TicketCheck, Users, Settings, LogOut } from "lucide-react";
 
 type Voce = { href: string; testo: string; Icona: typeof CalendarDays; solo?: "desktop" | "mobile" };
 
@@ -17,6 +17,7 @@ const VOCI_ADMIN: Voce[] = [
   { href: "/admin/locali", testo: "Locali", Icona: Building2, solo: "desktop" },
   { href: "/admin/opere", testo: "Opere", Icona: Clapperboard, solo: "desktop" },
   { href: "/admin/eventi", testo: "Eventi", Icona: Ticket, solo: "desktop" },
+  { href: "/admin/liveticket", testo: "LiveTicket", Icona: TicketCheck, solo: "desktop" },
   { href: "/admin/utenti", testo: "Utenti", Icona: Users, solo: "desktop" },
 ];
 

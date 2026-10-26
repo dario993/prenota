@@ -3,14 +3,20 @@ import { BarraTelefono } from "@/components/BarraTelefono";
 import { TestaPagina } from "@/components/TestaPagina";
 import { richiediAdmin } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { formattaEuro, partiData } from "@/lib/calcoli";
+import { formattaEuro, incassoTeatro, partiData } from "@/lib/calcoli";
+import { personeOrdine, vociLiveticket, type OrdineLiveticket } from "@/lib/liveticket";
 import { btnSecondario, paginaAdmin } from "@/components/stili";
 import { BottoneRiabbina } from "./BottoneRiabbina";
 
-type Riga = {
-  codice: string; cognome_nome: string; data_ora: Date | null; evento_id: string | null; biglietti: { ristorante: string | null }[];
-  importo_pagato: number | null; anomalie: string[]; ricevuto_il: Date;
+type Riga = Omit<OrdineLiveticket, "data_ora" | "ricevuto_il"> & {
+  data_ora: Date | null; ricevuto_il: Date; prezzo_pacchetto_teatro: number | null; prezzo_pacchetto_ristorante: number | null;
 };
+
+// incasso teatro dell'ordine (senza commissione), lo stesso della tab LiveTicket dell'evento
+const incasso = (o: Riga) =>
+  vociLiveticket(o as unknown as OrdineLiveticket,
+    { prezzo_pacchetto_teatro: o.prezzo_pacchetto_teatro ?? 0, prezzo_pacchetto_ristorante: o.prezzo_pacchetto_ristorante ?? 0 })
+    .reduce((s, v) => s + incassoTeatro(v), 0);
 
 const quando = (d: Date) => { const p = partiData(d); return `${p.lunga} ${p.ora}`; };
 
@@ -18,8 +24,12 @@ export default async function AdminLiveticket({ searchParams }: { searchParams: 
   await richiediAdmin();
   const { filtro } = await searchParams;
   const ordini = await sql<Riga[]>`
-    select codice, cognome_nome, data_ora, evento_id, biglietti, importo_pagato, anomalie, ricevuto_il
-    from liveticket_ordini order by data_ora desc nulls last, ricevuto_il desc`;
+    select l.codice, l.cognome_nome, l.telefono, l.spettacolo, l.data_ora, l.evento_id, l.biglietti_dichiarati, l.biglietti,
+      l.importo_pagato, l.anomalie, l.ricevuto_il, op.prezzo_pacchetto_teatro, op.prezzo_pacchetto_ristorante
+    from liveticket_ordini l
+    left join eventi e on e.id = l.evento_id
+    left join opere op on op.id = e.opera_id
+    order by l.data_ora desc nulls last, l.ricevuto_il desc`;
   const visibili = ordini.filter((o) =>
     filtro === "anomalie" ? o.anomalie.length > 0 : filtro === "senza-evento" ? o.evento_id === null : true);
   const filtri = [[undefined, "Tutti"], ["anomalie", "Con anomalie"], ["senza-evento", "Senza evento"]] as const;
@@ -51,10 +61,13 @@ export default async function AdminLiveticket({ searchParams }: { searchParams: 
                   <td className="px-2 py-2">
                     {o.evento_id ? <Link href={`/eventi/${o.evento_id}?tab=liveticket`} className="underline">Apri evento</Link> : <span className="text-danger">Senza evento</span>}
                   </td>
-                  <td className="px-2 py-2">{o.biglietti.length}</td>
+                  <td className="px-2 py-2">{personeOrdine(o)}</td>
                   <td className="px-2 py-2">{o.biglietti.filter((b) => b.ristorante).length}</td>
-                  <td className="px-2 py-2">{o.importo_pagato === null ? "—" : formattaEuro(o.importo_pagato)}</td>
-                  <td className="px-2 py-2 text-danger">{o.anomalie.map((a) => <div key={a}>{a}</div>)}</td>
+                  <td className="px-2 py-2">
+                    {formattaEuro(incasso(o))}
+                    {o.importo_pagato !== null && <div className="text-ink-muted">pagato su LiveTicket {formattaEuro(o.importo_pagato)}</div>}
+                  </td>
+                  <td className="px-2 py-2 text-danger">{o.anomalie.map((a, i) => <div key={i}>{a}</div>)}</td>
                   <td className="px-2 py-2">{quando(o.ricevuto_il)}</td>
                 </tr>
               ))}

@@ -106,7 +106,7 @@ Ordini LiveTicket ricevuti da n8n (un'email = un ordine). PK `codice` (`lvtckt-�
 | cognome_nome, telefono, spettacolo | text | |
 | data_ora | timestamptz | null se non letta |
 | evento_id | uuid → eventi | on delete set null; null = senza evento |
-| biglietti_dichiarati | integer | |
+| biglietti_dichiarati | integer | persone dell'ordine = max(dichiarati, biglietti letti) |
 | biglietti | jsonb | una riga per biglietto: `posto`, `tariffa` (LiveTicket), `tariffa_id`, `ristorante`, `pasto`, `prezzo` (centesimi congelati, senza commissione); assegnate da `assegnaBiglietti` in `src/lib/liveticket.ts` |
 | importo_pagato | integer | «€ X per i biglietti» di LiveTicket, solo per controllo (Σ prezzi + 1,50 € a biglietto) |
 | anomalie | text[] | |
@@ -133,7 +133,7 @@ applicata).
   Adulti, Ridotti gruppi, Bambini (prezzi dell'opera) e Omaggi (0 €), copia le quantità di ogni prenotazione in
   `prenotazioni_tariffe` con i suoi prezzi congelati, poi elimina le colonne vecchie. Si attiva solo se esiste ancora
   `prenotazioni.adulti`.
-- `002-utenti-api.sql`: aggiunge il ruolo `api` al vincolo su `utenti.ruolo` rende `email` facoltativa per i soli utenti `api` ed
+- `002-utenti-api.sql`: aggiunge il ruolo `api` al vincolo su `utenti.ruolo` (che elenca anche `visualizzatore`), rende `email` facoltativa per i soli utenti `api` ed
   elimina la tabella `chiavi_api` della prima versione delle chiavi. Riapplicarla non cambia nulla.
 - `003-ordine-contrassegno.sql`: aggiunge `prenotazioni.ordine` e `prenotazioni.contrassegno` (facoltativo, senza default).
 - `004-storico.sql`: aggiunge `prenotazioni_storico.dati` se manca; per le prenotazioni senza cronologia crea la voce «creata» da `creata_il` / `creata_da` (senza copia).

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { elencoRistorante, persone, riepilogoEvento, TARIFFA_NON_ABBINATA, testoElencoRistorante, type Tariffa } from "./calcoli";
-import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa, vociLiveticket, type OrdineLiveticket } from "./liveticket";
+import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa, personeOrdine, vociLiveticket, type OrdineLiveticket } from "./liveticket";
 
 const t = (id: string, nome: string, prezzo: number, nascosta = false): Tariffa => ({ id, nome, prezzo, nascosta, ordine: 0 });
 const tariffe = [t("int", "Intero", 2800), t("o65", "Over 65", 2200), t("gru", "Gruppi", 2200),
@@ -74,6 +74,28 @@ test("abbinaEvento: uno solo → id, zero o due → null", () => {
   expect(abbinaEvento(null, ev)).toBeNull();
 });
 
+describe("assegnaBiglietti senza evento", () => {
+  test("niente abbinamento né anomalie di tariffa/importo, solo la lettura", () => {
+    const r = assegnaBiglietti({ biglietti: bg("PRANZO + SPETTACOLO CM", "Boh"), tariffe: [], prezzi: { prezzo_pacchetto_teatro: 0, prezzo_pacchetto_ristorante: 0 },
+      importo_pagato: 9999, anomalieLettura: ["Data non letta"], senzaEvento: true });
+    expect(r.anomalie).toEqual(["Data non letta"]);
+    expect(r.biglietti.every((b) => b.tariffa_id === null && b.ristorante === null && b.pasto === null && b.prezzo === 0)).toBe(true);
+  });
+  test("senza anomalie di lettura la lista è vuota", () => {
+    const r = assegnaBiglietti({ biglietti: bg("Intero"), tariffe: [], prezzi, importo_pagato: 1, anomalieLettura: [], senzaEvento: true });
+    expect(r.anomalie).toEqual([]);
+  });
+});
+
+describe("personeOrdine", () => {
+  const bgs = [{}, {}] as unknown[];
+  test("il maggiore tra dichiarati e letti", () => {
+    expect(personeOrdine({ biglietti_dichiarati: 3, biglietti: bgs })).toBe(3);
+    expect(personeOrdine({ biglietti_dichiarati: 1, biglietti: bgs })).toBe(2);
+    expect(personeOrdine({ biglietti_dichiarati: null, biglietti: bgs })).toBe(2);
+  });
+});
+
 describe("vociLiveticket", () => {
   const ordine = (tariffa: string[], extra: Partial<OrdineLiveticket> = {}): OrdineLiveticket => ({
     codice: "lvtckt-30534501", cognome_nome: "FERRO CHIARA", telefono: "+393472300236", spettacolo: "X",
@@ -108,6 +130,10 @@ describe("vociLiveticket", () => {
     const v = vociLiveticket(ordine(["Intero", "Intero"], { biglietti_dichiarati: 3 }), prezzi);
     expect(v[0].righe).toContainEqual({ tariffa_id: "", quantita: 1, prezzo: 0 });
     expect(persone(v[0])).toBe(3);
+  });
+  test("dichiarati in meno dei letti → contano i letti", () => {
+    const v = vociLiveticket(ordine(["Intero", "Intero"], { biglietti_dichiarati: 1 }), prezzi);
+    expect(v.reduce((s, x) => s + persone(x), 0)).toBe(2);
   });
   test("riepilogo, elenco ristorante e testo", () => {
     const v = vociLiveticket(ordine(["Boh", "CENA + SPETTACOLO GG", "CENA + SPETTACOLO GG"]), prezzi);

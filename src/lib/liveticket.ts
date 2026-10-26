@@ -23,9 +23,10 @@ export function pacchettoDaTariffa(t: string): { ristorante: Ristorante; pasto: 
 export function assegnaBiglietti(a: {
   biglietti: BigliettoLetto[]; tariffe: Tariffa[]; prezzi: PrezziPacchetto;
   importo_pagato: number | null; anomalieLettura: string[];
+  senzaEvento?: boolean; // niente evento = niente tariffe né prezzi: biglietti non abbinati, solo le anomalie di lettura
 }): { biglietti: BigliettoLiveticket[]; anomalie: string[] } {
-  // fail closed: con anomalie di lettura nessun pacchetto né tariffa
-  if (a.anomalieLettura.length > 0) {
+  // fail closed: con anomalie di lettura (o senza evento) nessun pacchetto né tariffa
+  if (a.anomalieLettura.length > 0 || a.senzaEvento) {
     return {
       biglietti: a.biglietti.map((b) => ({ ...b, tariffa_id: null, ristorante: null, pasto: null, prezzo: 0 })),
       anomalie: a.anomalieLettura,
@@ -52,6 +53,10 @@ export function assegnaBiglietti(a: {
   }
   return { biglietti, anomalie: [...anomalie] };
 }
+
+/** Persone di un ordine: il maggiore tra biglietti dichiarati e letti (per la capienza meglio contare in più). */
+export const personeOrdine = (o: { biglietti_dichiarati: number | null; biglietti: unknown[] }): number =>
+  Math.max(o.biglietti_dichiarati ?? 0, o.biglietti.length);
 
 /** «Chiara» + «Ferro» → «FERRO CHIARA»; senza cognome resta il nome com'è, in maiuscolo. */
 export const cognomeNome = (nome: string, cognome: string): string => normalizza(`${cognome} ${nome}`);
@@ -82,10 +87,10 @@ export function vociLiveticket(o: OrdineLiveticket, prezzi: PrezziPacchetto): Pr
     if (r) r.quantita++; else righe.push({ tariffa_id, quantita: 1, prezzo });
   }
   // biglietti dichiarati in più di quelli letti: persone mancanti come non abbinate
-  const letti = o.biglietti.length;
-  if (o.biglietti_dichiarati && o.biglietti_dichiarati > letti) {
+  const mancanti = personeOrdine(o) - o.biglietti.length;
+  if (mancanti > 0) {
     const r = righe.find((x) => x.tariffa_id === "");
-    if (r) r.quantita += o.biglietti_dichiarati - letti; else righe.push({ tariffa_id: "", quantita: o.biglietti_dichiarati - letti, prezzo: 0 });
+    if (r) r.quantita += mancanti; else righe.push({ tariffa_id: "", quantita: mancanti, prezzo: 0 });
   }
   const base = {
     id: o.codice, evento_id: o.evento_id ?? "", cognome_nome: o.cognome_nome, telefono: o.telefono,
