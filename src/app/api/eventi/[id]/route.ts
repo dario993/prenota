@@ -27,9 +27,17 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
                        from prenotazioni_tariffe r where r.prenotazione_id = p.id), '[]') as righe
       from prenotazioni p where p.evento_id = ${id.data}
       order by p.ordine nulls last, p.creata_il, p.id`;
+    const liveticket = await sql`
+      select codice, cognome_nome, telefono, spettacolo, data_ora, evento_id, biglietti_dichiarati, biglietti,
+             importo_pagato, anomalie, ricevuto_il
+      from liveticket_ordini where evento_id = ${id.data} order by cognome_nome`;
     const dettaglio = {
       evento: { ...evento, data_ora: new Date(evento.data_ora).toISOString() },
       prenotazioni: prenotazioni as unknown as Prenotazione[],
+      liveticket: liveticket.map((o) => ({
+        ...o, data_ora: o.data_ora ? new Date(o.data_ora).toISOString() : null,
+        ricevuto_il: new Date(o.ricevuto_il).toISOString(),
+      })),
     } as DettaglioEvento;
     return Response.json(dettaglio);
   } catch (e) {

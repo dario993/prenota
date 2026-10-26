@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import type { Tariffa } from "./calcoli";
-import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa } from "./liveticket";
+import { elencoRistorante, persone, riepilogoEvento, TARIFFA_NON_ABBINATA, testoElencoRistorante, type Tariffa } from "./calcoli";
+import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa, vociLiveticket, type OrdineLiveticket } from "./liveticket";
 
 const t = (id: string, nome: string, prezzo: number, nascosta = false): Tariffa => ({ id, nome, prezzo, nascosta, ordine: 0 });
 const tariffe = [t("int", "Intero", 2800), t("o65", "Over 65", 2200), t("gru", "Gruppi", 2200),
@@ -72,4 +72,48 @@ test("abbinaEvento: uno solo → id, zero o due → null", () => {
   expect(abbinaEvento("2026-11-03T15:30:00Z", ev)).toBeNull();
   expect(abbinaEvento("2026-11-01T15:30:00Z", [...ev, { id: "c", data_ora: "2026-11-01T15:30:00Z" }])).toBeNull();
   expect(abbinaEvento(null, ev)).toBeNull();
+});
+
+describe("vociLiveticket", () => {
+  const ordine = (tariffa: string[], extra: Partial<OrdineLiveticket> = {}): OrdineLiveticket => ({
+    codice: "lvtckt-30534501", cognome_nome: "FERRO CHIARA", telefono: "+393472300236", spettacolo: "X",
+    data_ora: null, evento_id: "e1", biglietti_dichiarati: null, importo_pagato: null, anomalie: [],
+    ricevuto_il: "2026-10-26T10:00:00.000Z",
+    biglietti: assegna(tariffa, null).biglietti, ...extra });
+  test("tariffe: una voce con righe, nessun pacchetto", () => {
+    const v = vociLiveticket(ordine(["Intero", "Intero"]), prezzi);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatchObject({ id: "lvtckt-30534501", liveticket: "lvtckt-30534501", pacchetti: 0, contrassegno: null,
+      righe: [{ tariffa_id: "int", quantita: 2, prezzo: 2800 }] });
+    expect(persone(v[0])).toBe(2);
+  });
+  test("pacchetti: una voce per ristorante e pasto, righe solo nella prima", () => {
+    const v = vociLiveticket(ordine(["PRANZO + SPETTACOLO CM", "CENA + SPETTACOLO GG", "CENA + SPETTACOLO GG", "Intero"]), prezzi);
+    expect(v).toHaveLength(3);
+    expect(v.map((x) => x.id)).toEqual(Array(3).fill("lvtckt-30534501"));
+    expect(v[0].righe).toHaveLength(1);
+    expect(v.slice(1).map((x) => [x.ristorante, x.pasto, x.pacchetti, x.righe.length, x.prezzo_pacchetto_teatro]))
+      .toEqual([["CASALE", "PRANZO", 1, 0, 2200], ["GIAMAICA", "CENA", 2, 0, 2200]]);
+  });
+  test("solo pacchetti: righe sulla prima voce pacchetto", () => {
+    const v = vociLiveticket(ordine(["CENA + SPETTACOLO GG"]), prezzi);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatchObject({ pacchetti: 1, ristorante: "GIAMAICA", righe: [] });
+  });
+  test("non abbinati → tariffa_id vuoto, prezzo 0", () => {
+    const v = vociLiveticket(ordine(["Boh"]), prezzi);
+    expect(v[0].righe).toEqual([{ tariffa_id: "", quantita: 1, prezzo: 0 }]);
+  });
+  test("dichiarati in più → riga non abbinata in più", () => {
+    const v = vociLiveticket(ordine(["Intero", "Intero"], { biglietti_dichiarati: 3 }), prezzi);
+    expect(v[0].righe).toContainEqual({ tariffa_id: "", quantita: 1, prezzo: 0 });
+    expect(persone(v[0])).toBe(3);
+  });
+  test("riepilogo, elenco ristorante e testo", () => {
+    const v = vociLiveticket(ordine(["Boh", "CENA + SPETTACOLO GG", "CENA + SPETTACOLO GG"]), prezzi);
+    expect(riepilogoEvento(v, 100, tariffe).perTariffa).toContainEqual({ tariffa_id: "", nome: TARIFFA_NON_ABBINATA, quantita: 1 });
+    expect(elencoRistorante(v, "GIAMAICA", "CENA")).toHaveLength(1);
+    expect(testoElencoRistorante({ ristorante: "GIAMAICA", pasto: "CENA", dataOra: new Date("2026-10-10T19:00:00Z"),
+      titolo: "X", prenotazioni: v })).toContain("- FERRO CHIARA (2) – +393472300236 – LiveTicket");
+  });
 });

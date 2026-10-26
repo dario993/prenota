@@ -1,3 +1,5 @@
+import type { OrdineLiveticket } from "./liveticket"; // solo tipo: nessun import circolare a runtime
+
 export const RISTORANTI = ["GIAMAICA", "CASALE"] as const;
 export type Ristorante = (typeof RISTORANTI)[number];
 export const PASTI = ["PRANZO", "CENA"] as const;
@@ -24,11 +26,13 @@ export interface Prenotazione extends PrezziPacchetto {
   contrassegno?: Contrassegno | null; // null o assente (in coda sul telefono) = nessuno stato
   pagamento?: Pagamento | null; // null o assente = nessuna scelta
   in_attesa?: boolean; // solo lato client
+  liveticket?: string; // codice ordine; solo voci LiveTicket
 }
 export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number; prenotazioni: number }
 export interface DettaglioEvento {
   evento: Omit<EventoLista, "persone" | "prenotazioni"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
   prenotazioni: Prenotazione[];
+  liveticket: OrdineLiveticket[];
 }
 // Copia della prenotazione salvata a ogni voce di cronologia (null per le voci ricostruite, senza copia).
 export type DatiStorico = Pick<Prenotazione, "cognome_nome" | "telefono" | "pacchetti" | "ristorante" | "pasto" | "posti"
@@ -47,6 +51,7 @@ export interface Riepilogo {
 }
 
 export const TARIFFA_ELIMINATA = "Tariffa eliminata";
+export const TARIFFA_NON_ABBINATA = "Non abbinata (LiveTicket)"; // righe LiveTicket con tariffa_id ""
 
 export const persone = (p: { righe: { quantita: number }[]; pacchetti: number }): number =>
   p.righe.reduce((s, r) => s + r.quantita, 0) + p.pacchetti;
@@ -103,7 +108,7 @@ export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, 
   const note = [...tariffe].sort(perOrdine).filter((t) => quante.has(t.id))
     .map((t) => ({ tariffa_id: t.id, nome: t.nome, quantita: quante.get(t.id)! }));
   const ignote = [...quante].filter(([id]) => !tariffe.some((t) => t.id === id))
-    .map(([tariffa_id, quantita]) => ({ tariffa_id, nome: TARIFFA_ELIMINATA, quantita }));
+    .map(([tariffa_id, quantita]) => ({ tariffa_id, nome: tariffa_id === "" ? TARIFFA_NON_ABBINATA : TARIFFA_ELIMINATA, quantita }));
   return { persone: tot, capienza, postiLiberi: capienza - tot, oltreCapienza: tot > capienza,
     perTariffa: [...note, ...ignote].filter((v) => v.quantita > 0), pacchetti,
     incassoTeatro: teatro, incassoRistorante: ristorante, ristoranti, pagamenti };
@@ -145,7 +150,8 @@ export function testoElencoRistorante(a: {
   }).format(a.dataOra);
   const coperti = lista.reduce((s, x) => s + x.pacchetti, 0);
   const righe = lista.map((x) =>
-    `- ${x.cognome_nome} (${x.pacchetti})` + (x.telefono ? ` – ${x.telefono}` : "") + (x.note ? ` – ${x.note}` : ""));
+    `- ${x.cognome_nome} (${x.pacchetti})` + (x.telefono ? ` – ${x.telefono}` : "") + (x.note ? ` – ${x.note}` : "") +
+    (x.liveticket ? " – LiveTicket" : ""));
   return `${a.ristorante} – ${a.pasto} – ${data}\nOpera: ${a.titolo}\nCoperti: ${coperti}\n\n${righe.join("\n")}`;
 }
 

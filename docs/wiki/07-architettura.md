@@ -51,7 +51,7 @@ prenota/
 - **Route di lettura** (401 `{ errore: "Sessione scaduta" }` senza sessione, 500 `{ errore: "Errore imprevisto, riprova" }`):
   - `GET /api/eventi` → eventi da oggi 00:00 (Europe/Rome) in poi, per data: `{ id, data_ora (ISO), titolo, locale, capienza, persone }[]`, chiave query `["eventi"]`.
   - `GET /api/eventi?passati=1` → eventi prima di oggi 00:00 (Europe/Rome), dal più recente, stessa forma, chiave `["eventi", "passati"]` (ricaricata insieme a `["eventi"]`). Altri valori di `passati` → 400.
-  - `GET /api/eventi/[id]` → `{ evento: { id, data_ora, titolo, locale, capienza, prezzi correnti dell'opera }, prenotazioni[] }`, 404 se l'id non è valido o non esiste, chiave `["evento", id]`.
+  - `GET /api/eventi/[id]` → `{ evento: { id, data_ora, titolo, locale, capienza, prezzi correnti dell'opera }, prenotazioni[], liveticket[] }` (`liveticket` = ordini LiveTicket dell'evento, per nome; `vociLiveticket` in `src/lib/liveticket.ts` li converte in voci per i calcoli), 404 se l'id non è valido o non esiste, chiave `["evento", id]`.
   - `GET /api/provenienze` → `string[]` distinte, non vuote, ordinate, chiave `["provenienze"]`.
 - **Scrittura**: Server Actions (admin, modifica/eliminazione prenotazioni). La **creazione** di prenotazioni passa da
   `POST /api/prenotazioni`, così può essere messa in coda offline (vedi [Offline](10-offline.md)).

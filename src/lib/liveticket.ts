@@ -1,4 +1,4 @@
-import type { Pasto, PrezziPacchetto, Ristorante, Tariffa } from "./calcoli";
+import type { Pasto, Prenotazione, PrezziPacchetto, RigaTariffa, Ristorante, Tariffa } from "./calcoli";
 
 export const COMMISSIONE_LIVETICKET = 150; // centesimi a biglietto, trattenuta da LiveTicket, mai conteggiata
 export const ANOMALIA_TARIFFA = "Tariffa non presente nell'opera: ";
@@ -62,4 +62,39 @@ export function abbinaEvento(dataOra: string | null, eventi: { id: string; data_
   const t = new Date(dataOra).getTime();
   const trovati = eventi.filter((e) => new Date(e.data_ora).getTime() === t);
   return trovati.length === 1 ? trovati[0].id : null;
+}
+
+/**
+ * L'ordine come voci Prenotazione per i calcoli: righe tariffa (non abbinate = tariffa_id "") nella prima voce,
+ * una voce per ogni ristorante/pasto con i prezzi pacchetto dell'opera. Ogni voce ha id = codice.
+ */
+export function vociLiveticket(o: OrdineLiveticket, prezzi: PrezziPacchetto): Prenotazione[] {
+  const righe: RigaTariffa[] = [];
+  const pacchetti = new Map<string, { ristorante: Ristorante; pasto: Pasto; n: number }>();
+  for (const b of o.biglietti) {
+    if (b.ristorante && b.pasto) {
+      const k = `${b.ristorante}/${b.pasto}`;
+      pacchetti.set(k, { ristorante: b.ristorante, pasto: b.pasto, n: (pacchetti.get(k)?.n ?? 0) + 1 });
+      continue;
+    }
+    const tariffa_id = b.tariffa_id ?? "", prezzo = tariffa_id ? b.prezzo : 0;
+    const r = righe.find((x) => x.tariffa_id === tariffa_id && x.prezzo === prezzo);
+    if (r) r.quantita++; else righe.push({ tariffa_id, quantita: 1, prezzo });
+  }
+  // biglietti dichiarati in più di quelli letti: persone mancanti come non abbinate
+  const letti = o.biglietti.length;
+  if (o.biglietti_dichiarati && o.biglietti_dichiarati > letti) {
+    const r = righe.find((x) => x.tariffa_id === "");
+    if (r) r.quantita += o.biglietti_dichiarati - letti; else righe.push({ tariffa_id: "", quantita: o.biglietti_dichiarati - letti, prezzo: 0 });
+  }
+  const base = {
+    id: o.codice, evento_id: o.evento_id ?? "", cognome_nome: o.cognome_nome, telefono: o.telefono,
+    posti: o.biglietti.map((b) => b.posto).join(", "), provenienza: "LiveTicket", note: "",
+    contrassegno: null, pagamento: null, liveticket: o.codice, ...prezzi,
+  };
+  const voci = [...pacchetti.values()].map((p): Prenotazione =>
+    ({ ...base, righe: [], pacchetti: p.n, ristorante: p.ristorante, pasto: p.pasto }));
+  if (righe.length || voci.length === 0) voci.unshift({ ...base, righe, pacchetti: 0, ristorante: null, pasto: null });
+  else voci[0].righe = righe;
+  return voci;
 }
