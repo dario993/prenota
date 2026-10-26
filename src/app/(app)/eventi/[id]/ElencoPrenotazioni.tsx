@@ -150,13 +150,8 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe, solaLettur
   const attive = prenotazioni.filter((p) => p.contrassegno !== "annullato" && p.stato !== "error");
   return (
     <section aria-labelledby="t-prenotazioni">
-      {/* come nella proposta: titolo a scheda sottolineata; sotto ricerca e Riordina, il conto a destra */}
-      <div className="border-b border-line print:hidden">
-        <h2 id="t-prenotazioni" className="-mb-px inline-block border-b-2 border-ink py-2.5 text-label font-semibold">
-          Prenotazioni<span className="ml-1.5 font-normal text-ink-muted tabular-nums">{prenotazioni.length}</span>
-        </h2>
-      </div>
-      <div className="mb-2 mt-5 flex flex-wrap items-center gap-2 print:hidden">
+      <h2 id="t-prenotazioni" className="sr-only">Prenotazioni</h2>
+      <div className="mb-2 flex flex-wrap items-center gap-2 print:hidden">
         <div className="relative w-full lg:w-[300px]">
           <Search size={16} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
           <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder="Cerca per nome o telefono" aria-label="Cerca per nome o telefono"

@@ -4,9 +4,10 @@ import { toast } from "sonner";
 import { Printer, Share2 } from "lucide-react";
 import { getJson, SERVE_RETE, chiaveEvento } from "@/lib/query";
 import {
-  elencoRistorante, formattaDataOra, partiData, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
+  elencoRistorante, formattaDataOra, partiData, prezziPacchettoDi, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
   type DettaglioEvento, type Pasto, type Ristorante,
 } from "@/lib/calcoli";
+import { vociLiveticket } from "@/lib/liveticket";
 import { Stato } from "@/components/Stato";
 import { btnSecondario } from "@/components/stili";
 import { BarraTelefono } from "@/components/BarraTelefono";
@@ -22,7 +23,9 @@ export function PaginaRistoranti({ id }: { id: string }) {
     if (isPending) return <Stato testo="Caricamento…" />;
     return <Stato testo={error?.message ?? "Errore imprevisto, riprova"} nonTrovato />;
   }
-  const { evento, prenotazioni } = data;
+  const { evento } = data;
+  const lt = (data.liveticket ?? []).flatMap((o) => vociLiveticket(o, prezziPacchettoDi(evento))); // cache offline senza il campo
+  const prenotazioni = [...data.prenotazioni, ...lt];
   const dataOra = new Date(evento.data_ora);
   const sezioni = RISTORANTI.flatMap((r) => PASTI.map((p) => ({ r, p, lista: elencoRistorante(prenotazioni, r, p) })))
     .filter((s) => s.lista.length > 0);
@@ -75,7 +78,7 @@ export function PaginaRistoranti({ id }: { id: string }) {
                 {lista.map((x) => (
                   <li key={x.id} className="flex justify-between gap-3 py-2.5">
                     <div className="min-w-0">
-                      <p className="font-semibold">{x.cognome_nome}</p>
+                      <p className="font-semibold">{x.cognome_nome}{x.liveticket && <span className="ml-2 text-caption font-normal text-ink-muted print:text-black">LiveTicket</span>}</p>
                       {x.telefono && <p className="text-caption text-ink-muted print:text-black">{x.telefono}</p>}
                       {x.note && <p className="text-caption text-ink-muted print:text-black">{x.note}</p>}
                     </div>

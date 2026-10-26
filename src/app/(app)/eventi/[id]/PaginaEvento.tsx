@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, CloudOff, Plus, Printer, UtensilsCrossed } from "lucide-react";
 import { getJson, SERVE_RETE, useInAttesa, useOnline, chiaveEvento } from "@/lib/query";
-import { partiData, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
+import { partiData, persone, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
 import { vociLiveticket } from "@/lib/liveticket";
 import { Stato } from "@/components/Stato";
 import { DataBiglietto } from "@/components/DataBiglietto";
@@ -12,8 +12,12 @@ import { BarraTelefono } from "@/components/BarraTelefono";
 import { btnPrimario, btnSecondario } from "@/components/stili";
 import { Riepilogo } from "./Riepilogo";
 import { ElencoPrenotazioni } from "./ElencoPrenotazioni";
+import { ElencoLiveticket } from "./ElencoLiveticket";
 
-export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boolean }) {
+type Tab = "prenotazioni" | "liveticket";
+
+export function PaginaEvento({ id, solaLettura, tabIniziale }: { id: string; solaLettura: boolean; tabIniziale: Tab }) {
+  const [tab, setTab] = useState<Tab>(tabIniziale);
   const { data, isPending, error, fetchStatus } = useQuery({
     queryKey: chiaveEvento(id),
     queryFn: () => getJson<DettaglioEvento>(`/api/eventi/${id}`),
@@ -38,7 +42,13 @@ export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boo
   const prenotazioni = [...data.prenotazioni, ...coda];
   // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono; le annullate neppure
   const valide = prenotazioni.filter((p) => ("stato" in p ? p.stato === "pending" : p.contrassegno !== "annullato"));
-  const lt = data.liveticket.flatMap((o) => vociLiveticket(o, prezziPacchettoDi(evento)));
+  const ordini = data.liveticket ?? []; // la cache offline di prima di LiveTicket non ha il campo
+  const lt = ordini.flatMap((o) => vociLiveticket(o, prezziPacchettoDi(evento)));
+  const scegli = (t: Tab) => {
+    setTab(t);
+    history.replaceState(null, "", t === "liveticket" ? "?tab=liveticket" : location.pathname); // link condivisibile
+  };
+  const schede = [["prenotazioni", `Prenotazioni (${prenotazioni.length})`], ["liveticket", `LiveTicket (${lt.reduce((s, v) => s + persone(v), 0)} persone)`]] as const;
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0">
       {/* telefono: in alto marchio, titolo e «Nuova» (come nella proposta grafica) */}
@@ -79,7 +89,19 @@ export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boo
       </div>
       <div className="space-y-10">
         <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} liveticket={lt} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
-        <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
+        <div>
+          <div role="tablist" aria-label="Elenco" className="-mb-px flex gap-6 border-b border-line print:hidden">
+            {schede.map(([t, testo]) => (
+              <button key={t} type="button" role="tab" id={`tab-${t}`} aria-selected={tab === t} aria-controls={`pannello-${t}`} onClick={() => scegli(t)}
+                className={`-mb-px min-h-11 border-b-2 py-2.5 text-label ${tab === t ? "border-ink font-semibold" : "border-transparent font-normal text-ink-muted hover:text-ink"}`}>{testo}</button>
+            ))}
+          </div>
+          <div role="tabpanel" id={`pannello-${tab}`} aria-labelledby={`tab-${tab}`} className="pt-5">
+            {tab === "prenotazioni"
+              ? <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
+              : <ElencoLiveticket ordini={ordini} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} />}
+          </div>
+        </div>
       </div>
     </main>
   );

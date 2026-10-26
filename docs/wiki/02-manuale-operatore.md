@@ -32,6 +32,7 @@ le stesse righe. Tocca una scheda per rivedere riepilogo e prenotazioni di un ev
   con il prezzo, solo quelle usate anche se nel frattempo nascoste, pacchetti, incasso teatro previsto; sotto, solo se scelti in almeno una prenotazione, **Da pagare** e **Bonifico**
   con il numero di prenotazioni e il loro totale teatro + ristorante, annullate escluse) e **Ristoranti**
   (coperti per ristorante e pasto, incasso pacchetti per ristorante e totale).
+- **Due tab** sopra l'elenco: «Prenotazioni (N)» e «LiveTicket (N persone)» (la scelta resta nel link, `?tab=liveticket`). Il tab LiveTicket è in sola lettura, per tutti i ruoli: per ogni ordine nome, telefono, biglietti, posti, incasso teatro e codice; gli ordini con anomalie hanno un riquadro giallo con il motivo.
 - **Elenco prenotazioni** nell'ordine in cui sono state inserite (le nuove in fondo), con campo di **ricerca** per nome o numero di telefono.
   Ogni riga ha un **numero progressivo** (resta lo stesso anche filtrando con la ricerca).
   **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮, in testa subito dopo il numero: tienila premuta (dito o

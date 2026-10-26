@@ -127,8 +127,11 @@ export function descriviBiglietti(
     const q = p.righe.filter((r) => r.tariffa_id === t.id).reduce((s, r) => s + r.quantita, 0);
     return q ? [`${q} ${t.nome}`] : [];
   });
-  const ignote = p.righe.filter((r) => !tariffe.some((t) => t.id === r.tariffa_id)).reduce((s, r) => s + r.quantita, 0);
-  if (ignote) parti.push(`${ignote} ${TARIFFA_ELIMINATA}`);
+  for (const [nome, vuoto] of [[TARIFFA_NON_ABBINATA, true], [TARIFFA_ELIMINATA, false]] as const) {
+    const n = p.righe.filter((r) => (r.tariffa_id === "") === vuoto && !tariffe.some((t) => t.id === r.tariffa_id))
+      .reduce((s, r) => s + r.quantita, 0);
+    if (n) parti.push(`${n} ${nome}`);
+  }
   if (p.pacchetti) parti.push(`${p.pacchetti} Pacchetti` +
     (p.ristorante && p.pasto ? ` ${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : ""));
   return parti.join(" · ");

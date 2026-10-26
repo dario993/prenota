@@ -77,6 +77,8 @@ describe("calcoli", () => {
     expect(descriviBiglietti(pren({ pacchetti: 1, ristorante: "CASALE", pasto: "CENA" }), tariffe))
       .toBe("1 Pacchetti Casale cena");
     expect(descriviBiglietti(pren(), tariffe)).toBe("");
+    expect(descriviBiglietti(pren({ righe: [riga("", 2), riga("x-sparita", 1)] }), tariffe))
+      .toBe("2 Non abbinata (LiveTicket) · 1 Tariffa eliminata");
   });
   test("elencoRistorante filtra ristorante+pasto e ordina", () => {
     const l = [

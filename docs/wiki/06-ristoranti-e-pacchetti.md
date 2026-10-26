@@ -37,6 +37,8 @@ Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Le preno
 - In alto un link riporta alla pagina dell'evento.
 - Entrambe richiedono **HTTPS** in produzione (vedi [Deploy homelab](13-deploy-homelab.md)).
 
+I pacchetti degli ordini LiveTicket entrano nell'elenco con l'etichetta «LiveTicket» (nella pagina) o il suffisso « – LiveTicket» (testo condiviso) e contano nei coperti.
+
 ## Incasso ristorante
 
 `pacchetti · prezzo_pacchetto_ristorante` (27 € di default), mostrato per ristorante nel riepilogo evento.
