@@ -17,6 +17,7 @@ Se salvando una prenotazione l'evento supererebbe la capienza:
   in attesa di invio (non quelle rifiutate);
 - si può **salvare comunque** (sedie aggiunte, liste d'attesa, ecc.);
 - la scheda evento e il riepilogo mostrano la barra e le cifre in colore di avvertimento, la scritta "oltre capienza" e i posti liberi negativi (`−6`).
+- le persone dei biglietti LiveTicket contano nei posti occupati e nei posti liberi del riepilogo (riga «LiveTicket» in Sala: persone · ordini); il form di prenotazione non le conosce.
 
 Il server **non** rifiuta mai una prenotazione per la capienza. Senza rete l'avviso usa i dati in cache più la coda del
 telefono, che potrebbero non includere prenotazioni appena fatte da altri.

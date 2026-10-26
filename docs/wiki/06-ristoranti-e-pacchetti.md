@@ -41,3 +41,5 @@ Righe in ordine alfabetico; telefono e note compaiono solo se presenti. Le preno
 
 `pacchetti · prezzo_pacchetto_ristorante` (27 € di default), mostrato per ristorante nel riepilogo evento.
 Vedi [Tariffe e incassi](04-tariffe-e-incassi.md).
+
+Nel riepilogo evento i coperti di ogni ristorante/pasto sono il totale più due righe «Prenotati» (lista Prenota) e «LiveTicket» (se ce ne sono); gli incassi per ristorante restano solo della lista.

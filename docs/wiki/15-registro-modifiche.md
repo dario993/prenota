@@ -61,3 +61,4 @@
 | 2026-10-26 | Migrazione `002-utenti-api.sql`: il vincolo sul ruolo include `visualizzatore`, così `db-init` non fallisce con utenti visualizzatore già presenti | 8 |
 | 2026-10-26 | LiveTicket, route `POST /api/liveticket`: riceve gli ordini letti da n8n (utente «API key»), abbina l'evento per data e ora, assegna i biglietti alle tariffe e salva con upsert su `codice` | 7 |
 | 2026-10-26 | LiveTicket nei dati dell'evento: `GET /api/eventi/[id]` restituisce anche `liveticket[]`; `vociLiveticket` converte un ordine in voci per i calcoli (righe non abbinate = `tariffa_id ""`, «Non abbinata (LiveTicket)» nel riepilogo, suffisso «– LiveTicket» nell'elenco ristorante) | 7 |
+| 2026-10-26 | Riepilogo evento con LiveTicket: persone, posti liberi, righe per tariffa e coperti includono i biglietti LiveTicket; «Incasso teatro/pacchetti previsto» solo lista; nuova riga «Incasso LiveTicket»; ristoranti divisi «Prenotati» / «LiveTicket» | 4, 5, 6 |

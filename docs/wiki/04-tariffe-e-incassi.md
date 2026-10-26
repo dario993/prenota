@@ -33,6 +33,8 @@ totale             = incasso_teatro + incasso_ristorante
 
 Per un evento: somma su tutte le prenotazioni. L'incasso ristorante si mostra anche diviso per Giamaica e Casale.
 
+I biglietti LiveTicket contano nelle righe per tariffa e nei pacchetti del riepilogo, ma «Incasso teatro previsto», «Incasso pacchetti previsto» e i totali per pagamento sono **solo della lista Prenota**; gli incassi LiveTicket stanno nella riga a parte «Incasso LiveTicket» (prezzi congelati dell'ordine, commissione di 1,50 € mai conteggiata).
+
 Gli importi sono **previsti** (l'app non registra i pagamenti). Internamente sono interi in **centesimi**, per
 evitare errori di arrotondamento; a video sono in euro con virgola (`49,00 €`).
 

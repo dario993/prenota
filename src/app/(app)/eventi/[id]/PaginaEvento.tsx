@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { ChevronLeft, CloudOff, Plus, Printer, UtensilsCrossed } from "lucide-react";
 import { getJson, SERVE_RETE, useInAttesa, useOnline, chiaveEvento } from "@/lib/query";
 import { partiData, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
+import { vociLiveticket } from "@/lib/liveticket";
 import { Stato } from "@/components/Stato";
 import { DataBiglietto } from "@/components/DataBiglietto";
 import { BarraTelefono } from "@/components/BarraTelefono";
@@ -37,6 +38,7 @@ export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boo
   const prenotazioni = [...data.prenotazioni, ...coda];
   // le non inviate (errore) restano in elenco ma non contano nel riepilogo: sul server non ci sono; le annullate neppure
   const valide = prenotazioni.filter((p) => ("stato" in p ? p.stato === "pending" : p.contrassegno !== "annullato"));
+  const lt = data.liveticket.flatMap((o) => vociLiveticket(o, prezziPacchettoDi(evento)));
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-6 lg:px-6 print:max-w-none print:p-0">
       {/* telefono: in alto marchio, titolo e «Nuova» (come nella proposta grafica) */}
@@ -76,7 +78,7 @@ export function PaginaEvento({ id, solaLettura }: { id: string; solaLettura: boo
         </div>
       </div>
       <div className="space-y-10">
-        <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
+        <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} liveticket={lt} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
         <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
       </div>
     </main>

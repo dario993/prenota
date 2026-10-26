@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import {
   riepilogoEvento, formattaEuro, NOMI_PAGAMENTI, NOMI_RISTORANTI, NOMI_PASTI, PAGAMENTI, RISTORANTI, PASTI,
   type Prenotazione, type PrezziPacchetto, type Tariffa,
@@ -26,10 +27,14 @@ const Riquadro = ({ id, titolo, destra, children, className = "" }:
 
 // Tre riquadri: la sala (persone, barra della capienza, stati), i biglietti per tariffa con l'incasso del teatro, i ristoranti.
 // `prenotazioni`: quelle che contano (niente annullate né invii falliti); `tutte` per contare annullate e senza stato.
-export function Riepilogo({ prenotazioni, tutte, capienza, tariffe, prezzi }: {
-  prenotazioni: Prenotazione[]; tutte: Prenotazione[]; capienza: number; tariffe: Tariffa[]; prezzi: PrezziPacchetto;
+// `liveticket`: le voci degli ordini LiveTicket, contano in sala, per tariffa e nei coperti ma non negli incassi previsti.
+export function Riepilogo({ prenotazioni, tutte, liveticket, capienza, tariffe, prezzi }: {
+  prenotazioni: Prenotazione[]; tutte: Prenotazione[]; liveticket: Prenotazione[]; capienza: number; tariffe: Tariffa[]; prezzi: PrezziPacchetto;
 }) {
-  const r = riepilogoEvento(prenotazioni, capienza, tariffe);
+  const r = riepilogoEvento([...prenotazioni, ...liveticket], capienza, tariffe); // unione
+  const rp = riepilogoEvento(prenotazioni, capienza, tariffe); // solo lista Prenota
+  const rl = riepilogoEvento(liveticket, capienza, tariffe); // solo LiveTicket
+  const ordini = new Set(liveticket.map((v) => v.liveticket)).size;
   const oltre = r.postiLiberi < 0;
   const prezzo = (id: string) => tariffe.find((t) => t.id === id)?.prezzo;
   const coperti = RISTORANTI.flatMap((k) => PASTI.filter((p) => r.ristoranti[k][p] > 0).map((p) => ({ k, p })));
@@ -51,6 +56,7 @@ export function Riepilogo({ prenotazioni, tutte, capienza, tariffe, prezzi }: {
           <Riga testo="Senza stato" valore={senzaStato} />
           {inAttesa > 0 && <Riga testo="In attesa di invio" valore={inAttesa} />}
           <Riga testo="Annullate" valore={annullate} />
+          {ordini > 0 && <Riga testo="LiveTicket" valore={`${rl.persone} ${rl.persone === 1 ? "persona" : "persone"} · ${ordini} ${ordini === 1 ? "ordine" : "ordini"}`} testId="liveticket-persone" />}
         </dl>
       </Riquadro>
       <Riquadro id="r-biglietti" titolo="Biglietti" destra="persone">
@@ -64,15 +70,16 @@ export function Riepilogo({ prenotazioni, tutte, capienza, tariffe, prezzi }: {
             <Riga valore={r.pacchetti} testo={<>Pacchetti <span className="text-ink-muted tabular-nums">
               {formattaEuro(prezzi.prezzo_pacchetto_teatro + prezzi.prezzo_pacchetto_ristorante)}</span></>} />
           )}
-          <Riga totale testo="Incasso teatro previsto" valore={formattaEuro(r.incassoTeatro)} testId="teatro" />
+          <Riga totale testo="Incasso teatro previsto" valore={formattaEuro(rp.incassoTeatro)} testId="teatro" />
+          {ordini > 0 && <Riga totale testo="Incasso LiveTicket" valore={formattaEuro(rl.incassoTeatro)} testId="liveticket" />}
         </dl>
         {/* solo i pagamenti scelti in almeno una prenotazione; importo = teatro + ristorante */}
-        {PAGAMENTI.some((k) => r.pagamenti[k].prenotazioni > 0) && (
+        {PAGAMENTI.some((k) => rp.pagamenti[k].prenotazioni > 0) && (
           <dl className="mt-3 text-label font-normal">
-            {PAGAMENTI.filter((k) => r.pagamenti[k].prenotazioni > 0).map((k) => (
-              <Riga key={k} testId={`pagamento-${k}`} valore={formattaEuro(r.pagamenti[k].importo)}
+            {PAGAMENTI.filter((k) => rp.pagamenti[k].prenotazioni > 0).map((k) => (
+              <Riga key={k} testId={`pagamento-${k}`} valore={formattaEuro(rp.pagamenti[k].importo)}
                 testo={<>{NOMI_PAGAMENTI[k]} <span className="text-ink-muted tabular-nums">
-                  {r.pagamenti[k].prenotazioni} {r.pagamenti[k].prenotazioni === 1 ? "prenotazione" : "prenotazioni"}</span></>} />
+                  {rp.pagamenti[k].prenotazioni} {rp.pagamenti[k].prenotazioni === 1 ? "prenotazione" : "prenotazioni"}</span></>} />
             ))}
           </dl>
         )}
@@ -81,12 +88,18 @@ export function Riepilogo({ prenotazioni, tutte, capienza, tariffe, prezzi }: {
         <dl className="text-label font-normal">
           {coperti.length === 0 && <p className="border-t border-line py-1.5 text-ink-muted">Nessun pacchetto ristorante</p>}
           {coperti.map(({ k, p }) => (
-            <Riga key={k + p} testo={`${NOMI_RISTORANTI[k]} ${NOMI_PASTI[p].toLowerCase()}`} valore={r.ristoranti[k][p]} />
+            <Fragment key={k + p}>
+              <Riga testo={`${NOMI_RISTORANTI[k]} ${NOMI_PASTI[p].toLowerCase()}`} valore={r.ristoranti[k][p]} />
+              {rl.ristoranti[k][p] > 0 && <>
+                <Riga sotto testo="Prenotati" valore={rp.ristoranti[k][p]} />
+                <Riga sotto testo="LiveTicket" valore={rl.ristoranti[k][p]} />
+              </>}
+            </Fragment>
           ))}
-          {coperti.length > 0 && RISTORANTI.filter((k) => r.ristoranti[k].incasso > 0).map((k) => (
-            <Riga key={k} sotto testo={NOMI_RISTORANTI[k]} valore={formattaEuro(r.ristoranti[k].incasso)} />
+          {coperti.length > 0 && RISTORANTI.filter((k) => rp.ristoranti[k].incasso > 0).map((k) => (
+            <Riga key={k} sotto testo={NOMI_RISTORANTI[k]} valore={formattaEuro(rp.ristoranti[k].incasso)} />
           ))}
-          <Riga totale testo="Incasso pacchetti previsto" valore={formattaEuro(r.incassoRistorante)} testId="ristorante" />
+          <Riga totale testo="Incasso pacchetti previsto" valore={formattaEuro(rp.incassoRistorante)} testId="ristorante" />
         </dl>
         <p className="mt-2 text-caption text-ink-muted">Importi previsti, non incassati.</p>
       </Riquadro>

@@ -4,6 +4,7 @@ import {
   incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante,
   TARIFFA_ELIMINATA, type Prenotazione, type Tariffa,
 } from "./calcoli";
+import { vociLiveticket, type OrdineLiveticket } from "./liveticket";
 
 const A = "00000000-0000-4000-8000-00000000000a", R = "00000000-0000-4000-8000-00000000000b",
   O = "00000000-0000-4000-8000-00000000000c", S = "00000000-0000-4000-8000-00000000000d",
@@ -137,5 +138,22 @@ describe("calcoli", () => {
     expect(indiceDestinazione(centri, 0, 55)).toBe(2); // oltre il terzo
     expect(indiceDestinazione(centri, 3, 5)).toBe(0); // in cima
     expect(indiceDestinazione(centri, 1, 999)).toBe(3); // in fondo
+  });
+
+  test("riepilogo con LiveTicket: l'unione somma persone e posti, l'incasso teatro della lista non cambia", () => {
+    const b = (tariffa_id: string, prezzo: number) => ({ posto: "A1", tariffa: "", tariffa_id, ristorante: null, pasto: null, prezzo });
+    const ordine: OrdineLiveticket = { codice: "lvtckt-1", cognome_nome: "ROSSI", telefono: "", spettacolo: "", data_ora: null,
+      evento_id: "e", biglietti_dichiarati: 5, importo_pagato: null, anomalie: [], ricevuto_il: "",
+      biglietti: [b(A, 1500), b(A, 1500), b(R, 1200), { ...b("", 0), ristorante: "CASALE", pasto: "CENA", prezzo: 4900 }, b(R, 1200)] };
+    const lista = [pren({ righe: [riga(A, 2, 1500)], pacchetti: 1, ristorante: "CASALE", pasto: "CENA" })];
+    const lt = vociLiveticket(ordine, { prezzo_pacchetto_teatro: 2200, prezzo_pacchetto_ristorante: 2700 });
+    const rp = riepilogoEvento(lista, 20, tariffe), rl = riepilogoEvento(lt, 20, tariffe), r = riepilogoEvento([...lista, ...lt], 20, tariffe);
+    expect(rl.persone).toBe(5);
+    expect(r.persone).toBe(rp.persone + rl.persone); expect(r.postiLiberi).toBe(20 - 8);
+    expect(rp.incassoTeatro).toBe(3000 + 2200);
+    expect(rl.incassoTeatro).toBe(3000 + 2400 + 2200);
+    expect(new Set(lt.map((v) => v.liveticket)).size).toBe(1);
+    expect(r.ristoranti.CASALE.CENA).toBe(rp.ristoranti.CASALE.CENA + rl.ristoranti.CASALE.CENA);
+    expect(r.perTariffa).toEqual([{ tariffa_id: A, nome: "Adulti", quantita: 4 }, { tariffa_id: R, nome: "Ridotti gruppi", quantita: 2 }]);
   });
 });
