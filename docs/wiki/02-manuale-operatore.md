@@ -33,6 +33,7 @@ le stesse righe. Tocca una scheda per rivedere riepilogo e prenotazioni di un ev
   con il numero di prenotazioni e il loro totale teatro + ristorante, annullate escluse) e **Ristoranti**
   (coperti per ristorante e pasto, incasso pacchetti per ristorante e totale).
 - **Due tab** sopra l'elenco: «Prenotazioni (N)» e «LiveTicket (N persone)» (la scelta resta nel link, `?tab=liveticket`). Il tab LiveTicket è in sola lettura, per tutti i ruoli: per ogni ordine nome, telefono, biglietti, posti, incasso teatro e codice; gli ordini con anomalie hanno un riquadro giallo con il motivo.
+- **Possibile doppione**: due voci dello stesso evento con lo stesso nome (maiuscole, accenti e ordine delle parole non contano) o lo stesso telefono (senza prefisso 39/0039) sono segnalate con «Possibile doppione: nome» (+ «· LiveTicket») in entrambi i tab, con «Possibili doppioni» nel riquadro Sala e con un avviso sotto nome/telefono nel modulo. Si confrontano prenotazioni con prenotazioni e prenotazioni con ordini LiveTicket (non due ordini tra loro); le annullate sono escluse; anche le prenotazioni in coda sul telefono. Si segnala soltanto: decide chi legge (logica in `src/lib/doppioni.ts`).
 - **Elenco prenotazioni** nell'ordine in cui sono state inserite (le nuove in fondo), con campo di **ricerca** per nome o numero di telefono.
   Ogni riga ha un **numero progressivo** (resta lo stesso anche filtrando con la ricerca).
   **Riordina**: su ogni prenotazione compare la maniglia ⋮⋮, in testa subito dopo il numero: tienila premuta (dito o

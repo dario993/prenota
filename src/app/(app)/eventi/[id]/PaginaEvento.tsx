@@ -6,6 +6,7 @@ import { ChevronLeft, CloudOff, Plus, Printer, UtensilsCrossed } from "lucide-re
 import { getJson, SERVE_RETE, useInAttesa, useOnline, chiaveEvento } from "@/lib/query";
 import { partiData, persone, prezziPacchettoDi, righeConPrezzi, type DettaglioEvento } from "@/lib/calcoli";
 import { vociLiveticket } from "@/lib/liveticket";
+import { possibiliDoppioni } from "@/lib/doppioni";
 import { Stato } from "@/components/Stato";
 import { DataBiglietto } from "@/components/DataBiglietto";
 import { BarraTelefono } from "@/components/BarraTelefono";
@@ -44,6 +45,7 @@ export function PaginaEvento({ id, solaLettura, tabIniziale }: { id: string; sol
   const valide = prenotazioni.filter((p) => ("stato" in p ? p.stato === "pending" : p.contrassegno !== "annullato"));
   const ordini = data.liveticket ?? []; // la cache offline di prima di LiveTicket non ha il campo
   const lt = ordini.flatMap((o) => vociLiveticket(o, prezziPacchettoDi(evento)));
+  const doppioni = possibiliDoppioni([...valide, ...lt]); // le in coda sul telefono partecipano, le annullate no
   const scegli = (t: Tab) => {
     setTab(t);
     history.replaceState(null, "", t === "liveticket" ? "?tab=liveticket" : location.pathname); // link condivisibile
@@ -88,7 +90,7 @@ export function PaginaEvento({ id, solaLettura, tabIniziale }: { id: string; sol
         </div>
       </div>
       <div className="space-y-10">
-        <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} liveticket={lt} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
+        <div className="print:hidden"><Riepilogo prenotazioni={valide} tutte={prenotazioni} liveticket={lt} doppioni={doppioni.size} capienza={evento.capienza} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} /></div>
         <div>
           <div role="tablist" aria-label="Elenco" className="-mb-px flex gap-6 border-b border-line print:hidden">
             {schede.map(([t, testo]) => (
@@ -98,8 +100,8 @@ export function PaginaEvento({ id, solaLettura, tabIniziale }: { id: string; sol
           </div>
           <div role="tabpanel" id={`pannello-${tab}`} aria-labelledby={`tab-${tab}`} className="pt-5">
             {tab === "prenotazioni"
-              ? <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
-              : <ElencoLiveticket ordini={ordini} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} />}
+              ? <ElencoPrenotazioni eventoId={id} prenotazioni={prenotazioni} doppioni={doppioni} tariffe={evento.tariffe} solaLettura={solaLettura} />
+              : <ElencoLiveticket ordini={ordini} doppioni={doppioni} tariffe={evento.tariffe} prezzi={prezziPacchettoDi(evento)} />}
           </div>
         </div>
       </div>

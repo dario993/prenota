@@ -28,8 +28,8 @@ const Riquadro = ({ id, titolo, destra, children, className = "" }:
 // Tre riquadri: la sala (persone, barra della capienza, stati), i biglietti per tariffa con l'incasso del teatro, i ristoranti.
 // `prenotazioni`: quelle che contano (niente annullate né invii falliti); `tutte` per contare annullate e senza stato.
 // `liveticket`: le voci degli ordini LiveTicket, contano in sala, per tariffa e nei coperti ma non negli incassi previsti.
-export function Riepilogo({ prenotazioni, tutte, liveticket, capienza, tariffe, prezzi }: {
-  prenotazioni: Prenotazione[]; tutte: Prenotazione[]; liveticket: Prenotazione[]; capienza: number; tariffe: Tariffa[]; prezzi: PrezziPacchetto;
+export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza, tariffe, prezzi }: {
+  prenotazioni: Prenotazione[]; tutte: Prenotazione[]; liveticket: Prenotazione[]; doppioni: number; capienza: number; tariffe: Tariffa[]; prezzi: PrezziPacchetto;
 }) {
   const r = riepilogoEvento([...prenotazioni, ...liveticket], capienza, tariffe); // unione
   const rp = riepilogoEvento(prenotazioni, capienza, tariffe); // solo lista Prenota
@@ -57,6 +57,7 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, capienza, tariffe, 
           {inAttesa > 0 && <Riga testo="In attesa di invio" valore={inAttesa} />}
           <Riga testo="Annullate" valore={annullate} />
           {ordini > 0 && <Riga testo="LiveTicket" valore={`${rl.persone} ${rl.persone === 1 ? "persona" : "persone"} · ${ordini} ${ordini === 1 ? "ordine" : "ordini"}`} testId="liveticket-persone" />}
+          {doppioni > 0 && <Riga testo="Possibili doppioni" valore={doppioni} testId="doppioni" />}
         </dl>
       </Riquadro>
       <Riquadro id="r-biglietti" titolo="Biglietti" destra="persone">

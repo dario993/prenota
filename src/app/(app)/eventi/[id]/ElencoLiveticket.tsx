@@ -1,10 +1,12 @@
 import { descriviBiglietti, formattaEuro, incassoTeatro, persone, type Tariffa, type PrezziPacchetto } from "@/lib/calcoli";
+import type { Doppione } from "@/lib/doppioni";
+import { EtichettaDoppioni } from "./EtichettaDoppioni";
 import { vociLiveticket, type OrdineLiveticket } from "@/lib/liveticket";
 
 const tel = (t: string) => `tel:${t.replace(/[^\d+]/g, "")}`;
 
 // Sola lettura: un ordine = una riga (le voci per i calcoli sono una per ristorante/pasto, qui si riuniscono).
-export function ElencoLiveticket({ ordini, tariffe, prezzi }: { ordini: OrdineLiveticket[]; tariffe: Tariffa[]; prezzi: PrezziPacchetto }) {
+export function ElencoLiveticket({ ordini, doppioni, tariffe, prezzi }: { ordini: OrdineLiveticket[]; doppioni: Map<string, Doppione[]>; tariffe: Tariffa[]; prezzi: PrezziPacchetto }) {
   if (ordini.length === 0) return <p className="py-8 text-center text-ink-muted">Nessun biglietto LiveTicket per questo evento</p>;
   const righe = ordini.map((o) => {
     const voci = vociLiveticket(o, prezzi);
@@ -37,6 +39,7 @@ export function ElencoLiveticket({ ordini, tariffe, prezzi }: { ordini: OrdineLi
               </div>
               <div className="text-[17px] font-semibold tabular-nums">{n}</div>
             </div>
+            <EtichettaDoppioni doppioni={doppioni.get(o.codice)} />
             {anomalie(o)}
           </li>
         ))}
@@ -51,7 +54,7 @@ export function ElencoLiveticket({ ordini, tariffe, prezzi }: { ordini: OrdineLi
           <tbody>
             {righe.map(({ o, persone: n, incasso, biglietti, posti }) => (
               <tr key={o.codice} className="border-t border-line bg-surface align-top">
-                <td className="px-3 py-3 font-semibold">{o.cognome_nome}{anomalie(o)}</td>
+                <td className="px-3 py-3 font-semibold">{o.cognome_nome}<EtichettaDoppioni doppioni={doppioni.get(o.codice)} />{anomalie(o)}</td>
                 <td className="whitespace-nowrap px-3 py-3">{o.telefono && <a href={tel(o.telefono)} className="tabular-nums underline decoration-line-control underline-offset-4 hover:decoration-current">{o.telefono}</a>}</td>
                 <td className="px-3 py-3 tabular-nums">{biglietti}</td>
                 <td className="whitespace-nowrap px-3 py-3 tabular-nums">{posti}</td>

@@ -13,6 +13,8 @@ import {
   CONTRASSEGNI, NOMI_CONTRASSEGNI, descriviBiglietti, indiceDestinazione, persone, spostaElemento,
   type Contrassegno, type DettaglioEvento, type Prenotazione, type Tariffa,
 } from "@/lib/calcoli";
+import type { Doppione } from "@/lib/doppioni";
+import { EtichettaDoppioni } from "./EtichettaDoppioni";
 import { contrassegnaPrenotazione, riordinaPrenotazioni } from "./azioni";
 
 const tel = (t: string) => `tel:${t.replace(/[^\d+]/g, "")}`;
@@ -30,7 +32,7 @@ const tacca = (p: Voce, sopra: string) => p.contrassegno &&
 // trascinamento in corso: posizioni in coordinate di pagina (l'elenco può scorrere mentre si trascina)
 type Trascina = { id: string; da: number; a: number; dy: number; alt: number; y0: number; centri: number[] };
 
-export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe, solaLettura }: { eventoId: string; prenotazioni: Voce[]; tariffe: Tariffa[]; solaLettura: boolean }) {
+export function ElencoPrenotazioni({ eventoId, prenotazioni, doppioni, tariffe, solaLettura }: { eventoId: string; prenotazioni: Voce[]; doppioni: Map<string, Doppione[]>; tariffe: Tariffa[]; solaLettura: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
   const online = useOnline();
@@ -142,6 +144,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe, solaLettur
           {p.posti && <div><span className="text-ink-muted">Posti </span>{p.posti}</div>}
           {p.note && <div className="text-ink-muted">{p.note}</div>}
           {statoDi(p)}
+          <EtichettaDoppioni doppioni={doppioni.get(p.id)} />
         </div>
       </div>
       <div className="text-[17px] font-semibold tabular-nums">{persone(p)}</div>
@@ -217,6 +220,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, tariffe, solaLettur
                 <td className={`px-3 py-3 font-semibold ${p.contrassegno === "annullato" ? "[&_a]:line-through" : ""}`}>
                   {p.in_attesa ? <div className="space-y-1">{p.cognome_nome}<div>{statoDi(p)}</div></div>
                     : <Link href={href(p)} onClick={apri} className="hover:underline">{p.cognome_nome}</Link>}
+                  <EtichettaDoppioni doppioni={doppioni.get(p.id)} />
                 </td>
                 <td className="whitespace-nowrap px-3 py-3">{p.telefono && <a href={tel(p.telefono)} className="tabular-nums underline decoration-line-control underline-offset-4 hover:decoration-current print:no-underline">{p.telefono}</a>}</td>
                 <td className="px-3 py-3 tabular-nums">{descriviBiglietti(p, tariffe)}</td>

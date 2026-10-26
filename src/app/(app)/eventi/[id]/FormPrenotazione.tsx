@@ -23,6 +23,9 @@ import {
   formattaEuro, partiData, RISTORANTI, PASTI, PAGAMENTI, NOMI_CONTRASSEGNI, NOMI_PAGAMENTI, NOMI_RISTORANTI, NOMI_PASTI,
   type DettaglioEvento, type Prenotazione,
 } from "@/lib/calcoli";
+import { vociLiveticket } from "@/lib/liveticket";
+import { possibiliDoppioni } from "@/lib/doppioni";
+import { EtichettaDoppioni } from "./EtichettaDoppioni";
 import { modificaPrenotazione, eliminaPrenotazione } from "./azioni";
 import { Cronologia } from "./Cronologia";
 
@@ -153,6 +156,10 @@ function Modulo({ eventoId, iniziale, data, solaLettura }: { eventoId: string; i
   const inCoda = inAttesa.filter((p) => p.stato === "pending" && !sulServer.has(p.id))
     .map((p) => ({ ...p, righe: righeConPrezzi(p.righe, evento.tariffe), ...prezziPacchettoDi(evento) }));
   const altre = riepilogoEvento([...data.prenotazioni, ...inCoda].filter((p) => p.id !== id), evento.capienza, evento.tariffe);
+  // avviso (non blocca) se nome o telefono scritti coincidono con un'altra voce dell'evento, LiveTicket compresi
+  const altreVoci = [...data.prenotazioni, ...inCoda, ...(data.liveticket ?? []).flatMap((o) => vociLiveticket(o, prezzi))].filter((p) => p.id !== id);
+  const doppioni = possibiliDoppioni([...altreVoci, { ...q, id, evento_id: eventoId, cognome_nome: valori.cognome_nome ?? "", telefono: valori.telefono ?? "",
+    ristorante: null, pasto: null, posti: "", provenienza: "", note: "", ...prezzi }]).get(id);
   const oltre = altre.persone + persone(q) - evento.capienza;
   const occupato = isSubmitting || nuova.isPending || eliminando;
   const bloccata = !!iniziale && !online; // modifica ed eliminazione richiedono la rete
@@ -198,11 +205,13 @@ function Modulo({ eventoId, iniziale, data, solaLettura }: { eventoId: string; i
                 Cognome Nome
                 <input autoComplete="off" className={campo} {...register("cognome_nome")} {...aria("cognome_nome")} />
                 <Errore id="cognome_nome" msg={errors.cognome_nome?.message} />
+                <EtichettaDoppioni doppioni={doppioni?.filter((d) => d.motivo === "nome")} />
               </label>
               <label className={etichetta}>
                 Telefono
                 <input type="tel" autoComplete="off" className={campo} {...register("telefono")} {...aria("telefono")} />
                 <Errore id="telefono" msg={errors.telefono?.message} />
+                <EtichettaDoppioni doppioni={doppioni?.filter((d) => d.motivo === "telefono")} />
               </label>
             </div>
           </section>
