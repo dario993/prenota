@@ -98,6 +98,21 @@ Quantità per tariffa di ogni prenotazione. PK (`prenotazione_id`, `tariffa_id`)
 | quantita | integer | `> 0` (le righe a 0 non si salvano) |
 | prezzo | integer | congelato: prezzo della tariffa al primo salvataggio della riga |
 
+### `liveticket_ordini`
+Ordini LiveTicket ricevuti da n8n (un'email = un ordine). PK `codice` (`lvtckt-…`), indice su `evento_id`.
+| Colonna | Tipo | Note |
+|---|---|---|
+| codice | text PK | |
+| cognome_nome, telefono, spettacolo | text | |
+| data_ora | timestamptz | null se non letta |
+| evento_id | uuid → eventi | on delete set null; null = senza evento |
+| biglietti_dichiarati | integer | |
+| biglietti | jsonb | una riga per biglietto: `posto`, `tariffa` (LiveTicket), `tariffa_id`, `ristorante`, `pasto`, `prezzo` (centesimi congelati, senza commissione); assegnate da `assegnaBiglietti` in `src/lib/liveticket.ts` |
+| importo_pagato | integer | «€ X per i biglietti» di LiveTicket, solo per controllo (Σ prezzi + 1,50 € a biglietto) |
+| anomalie | text[] | |
+| email_id, email_data | text | |
+| ricevuto_il, aggiornato_il | timestamptz | |
+
 ## Vincoli
 
 - `check ((pacchetti > 0) = (ristorante is not null and pasto is not null))` e ristorante/pasto entrambi null se
@@ -124,6 +139,7 @@ applicata).
 - `004-storico.sql`: aggiunge `prenotazioni_storico.dati` se manca; per le prenotazioni senza cronologia crea la voce «creata» da `creata_il` / `creata_da` (senza copia).
 - `005-pagamento.sql`: aggiunge `prenotazioni.pagamento` (facoltativo, senza default).
 - `006-visualizzatore.sql`: aggiunge il ruolo `visualizzatore` al vincolo su `utenti.ruolo`.
+- `007-liveticket.sql`: crea `liveticket_ordini` e l'indice su `evento_id` (`if not exists`).
 
 ## Backup
 

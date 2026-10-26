@@ -57,3 +57,4 @@
 | 2026-10-26 | Riepilogo evento, riquadro Biglietti: righe «Da pagare» e «Bonifico» (prenotazioni e totale teatro + ristorante) solo se il pagamento è scelto in almeno una prenotazione non annullata | 2 |
 | 2026-10-26 | Nuovo ruolo utente «visualizzatore»: vede eventi, prenotazioni, ristoranti e cronologia come l'operatore ma non crea, modifica, elimina, riordina né cambia stato (controllo anche lato server; migrazione `006-visualizzatore.sql`) | 1, 3, 8, 9 |
 | 2026-10-26 | Admin → Utenti: pulsante «Elimina» (solo admin, con conferma, non su sé stessi); un utente con prenotazioni o voci in cronologia non si elimina, si disattiva | 3 |
+| 2026-10-26 | LiveTicket, base dati e logica: tabella `liveticket_ordini` (migrazione `007-liveticket.sql`) e `src/lib/liveticket.ts` che assegna i biglietti alle tariffe dell'opera (pacchetti `PRANZO/CENA + SPETTACOLO CM/GG`, prefisso più lungo, controllo importo con commissione 1,50 €, anomalie di lettura = nessuna tariffa) | 8 |
