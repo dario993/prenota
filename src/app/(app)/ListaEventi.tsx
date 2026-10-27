@@ -111,7 +111,6 @@ export function ListaEventi({ passati = false }: { passati?: boolean }) {
     <ul>
       {data.map((e) => {
         const oltre = !passati && e.persone > e.capienza;
-        const liberi = e.capienza - e.persone;
         return (
           <li key={e.id} className="border-b border-line">
             <Link href={`/eventi/${e.id}`}
@@ -132,9 +131,9 @@ export function ListaEventi({ passati = false }: { passati?: boolean }) {
               </span>
               <span className="col-start-3 row-start-1 text-right leading-tight tabular-nums sm:col-start-4">
                 <span className={`block text-[20px] font-medium sm:text-[22px] ${oltre ? "text-warning" : ""}`}>
-                  {passati ? e.persone : oltre ? `−${-liberi}` : liberi}
+                  {e.persone}
                 </span>
-                <span className="text-caption text-ink-muted">{passati ? "persone" : oltre ? "oltre" : liberi === 1 ? "libero" : "liberi"}</span>
+                <span className="text-caption text-ink-muted">{passati ? "persone" : e.persone === 1 ? "occupato" : "occupati"}</span>
               </span>
             </Link>
           </li>

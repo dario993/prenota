@@ -17,7 +17,7 @@ o finché scade (vedi [Autenticazione e ruoli](09-autenticazione-e-ruoli.md)).
 
 La pagina iniziale si apre con una frase sul prossimo evento (giorno, ora, persone, posti rimasti) e mostra, nella
 scheda **In programma**, gli eventi da oggi in poi, dal più vicino. Ogni riga indica la data come un biglietto (giorno,
-mese, ora), opera, locale, numero di prenotazioni, `persone / capienza` con la barra e i posti liberi (le annullate non
+mese, ora), opera, locale, numero di prenotazioni, `persone / capienza` con la barra e, a destra in grande, i posti occupati (le annullate non
 contano). Su desktop a destra c'è il riquadro del prossimo evento, con la barra della capienza e le persone per tariffa. Tocca una riga per aprire l'evento. Se non ci sono eventi futuri compare "Nessun evento in programma". Senza rete
 resta visibile l'ultimo elenco caricato; se il telefono non ha mai caricato i dati compare "Serve la rete per caricare
 i dati la prima volta" (lo stesso nella pagina evento).
