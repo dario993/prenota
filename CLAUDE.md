@@ -47,6 +47,11 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 
 - **Prima in locale, poi in produzione**: ogni modifica richiesta (dati, eventi, tariffe, prenotazioni, codice) si fa
   solo in locale (`.env.local`) se non è indicato altro; in produzione solo su richiesta esplicita, dopo la verifica in locale.
+- **I dati di produzione sono la cosa più importante: nessun dato va mai perso.** Mai aggiungere, modificare o
+  cancellare dati in produzione (`/api/sql`, psql, script, migrazioni) senza prima un riepilogo che dica
+  esplicitamente «sto per modificare dati IN PRODUZIONE», con tabelle, righe coinvolte e query, e senza l'ok
+  dell'utente. Prima di ogni scrittura: esportare le righe toccate (backup), usare una transazione e verificare dopo.
+  Le sole letture (`select`) sono libere.
 - Interfaccia, testi, nomi di variabili e commit in **italiano** (`feat: …`, `fix: …`, `docs: …`).
 - Logica in moduli TS puri e testati (`src/lib/`); i componenti li collegano soltanto.
 - Nessuna nuova dipendenza senza motivo forte.
