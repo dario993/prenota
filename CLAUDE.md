@@ -42,6 +42,7 @@ Prima di ogni commit: `npm test && npm run lint && npm run build`.
 - Ogni creazione, modifica o cambio di stato di una prenotazione chiama `registraStorico` nella stessa transazione.
 - Ordini LiveTicket (`liveticket_ordini`) non sono prenotazioni: fuori da incassi e cronologia Prenota («Incasso teatro/pacchetti previsto» = solo lista); la commissione (`COMMISSIONE_LIVETICKET`) non si conteggia mai negli incassi.
 - Cookie `Secure` in produzione: serve HTTPS.
+- Backup: `scripts/backup.sh` ogni ora nell'LXC 106, copia cifrata su Google Drive (rclone), avviso n8n alle 9 (wiki 13).
 
 ## Regole del progetto
 

@@ -85,8 +85,7 @@ inoltrare l'header `Host` originale (le Server Action di Next confrontano `Origi
 
 La prima visita crea il primo admin da `/primo-accesso`: farla subito dopo il deploy.
 
-Backup, da cron sull'host:
-`docker exec prenota-db pg_dump -U prenota prenota | gzip > /percorso/prenota-$(date +%F).sql.gz`.
+Backup: vedi [Backup](#backup).
 
 ## HTTPS
 
@@ -99,17 +98,50 @@ il proxy deve puntare a `prenota-app:3000` (se condivide la rete Docker) o a `12
 
 ## Backup
 
-`scripts/backup.sh` (da lanciare sull'homelab nella cartella del compose) esegue
-`docker compose exec -T db pg_dump -U prenota prenota | gzip` e salva il risultato in `backups/prenota-AAAA-MM-GG.sql.gz`.
-Scrive prima in un file temporaneo, lo verifica (gzip valido e non vuoto) e solo allora lo rinomina; i file più vecchi di 30 giorni si cancellano solo dopo un
-backup riuscito. Se il dump fallisce lo script esce con errore (visibile nel log di cron) e non tocca i backup esistenti. Cron d'esempio, ogni notte alle 03:00:
+`scripts/backup.sh` gira **ogni ora** da cron nell'LXC 106 ed esegue `pg_dump | gzip` (solo lettura del database).
+Scrive prima in un file temporaneo, lo verifica (gzip valido e non vuoto) e solo allora lo rinomina; se il dump fallisce
+esce con errore e non tocca i backup esistenti.
+
+Rotazione (in `backups/` e uguale su Google Drive):
+
+- alle 00 (ora italiana) `prenota-giorno-AAAA-MM-GG.sql.gz`: si tengono gli ultimi 7 giorni;
+- nelle altre ore `prenota-ora-AAAA-MM-GG-HH.sql.gz`: si tengono le ultime 24 ore.
+
+I vecchi file si cancellano solo dopo un backup riuscito. Variabili facoltative:
+
+- `DUMP_CMD`: con Portainer non c'è la cartella del compose, quindi `docker exec prenota-db pg_dump -U prenota prenota`;
+- `BACKUP_REMOTE`: remote rclone su cui copiare ogni backup (`prenota-crypt:`), con la stessa rotazione
+  (`rclone copy` + `rclone delete`, mai `rclone sync`, che svuoterebbe il Drive se `backups/` andasse persa);
+- `BACKUP_PING_URL`: webhook n8n chiamato con `esito=ok` o `esito=errore`.
+
+### Google Drive cifrato (rclone)
+
+Nell'LXC 106: `apt install rclone curl`, poi `rclone config`:
+
+1. remote `gdrive` di tipo Google Drive (il token si ottiene sul Mac con `rclone authorize "drive"` e si incolla);
+2. remote `prenota-crypt` di tipo **crypt** su `gdrive:prenota-backup` (i dati contengono nomi e telefoni).
+   **Password e salt del crypt vanno nel password manager: senza, i backup sono illeggibili.**
+
+Cron (`crontab -e` nell'LXC):
 
 ```
-0 3 * * * /srv/prenota/scripts/backup.sh >> /srv/prenota/backups/backup.log 2>&1
+0 * * * * DUMP_CMD="docker exec prenota-db pg_dump -U prenota prenota" BACKUP_REMOTE=prenota-crypt: BACKUP_PING_URL=https://n8n.hsdscp.duckdns.org/webhook/prenota-backup-7f3c9a2e5d /srv/prenota/scripts/backup.sh >> /srv/prenota/backups/backup.log 2>&1
 ```
 
-Ripristino su un database vuoto:
-`gunzip -c backups/prenota-AAAA-MM-GG.sql.gz | docker compose exec -T db psql -U prenota prenota`.
+### Avviso (n8n)
+
+Workflow n8n «Prenota — controllo backup»: il webhook registra ogni esito; **ogni giorno alle 9:00** manda un solo
+messaggio Telegram (bot teatro) se nelle 24 ore precedenti ci sono stati errori o se l'ultimo backup riuscito ha più
+di 2 ore. Se va tutto bene non scrive nulla.
+
+### Ripristino
+
+Da un backup locale su un database vuoto:
+`gunzip -c backups/prenota-giorno-AAAA-MM-GG.sql.gz | docker exec -i prenota-db psql -U prenota prenota`.
+
+Da Google Drive (sul Mac, con lo stesso remote `prenota-crypt` configurato): `rclone copy prenota-crypt:<file> .`,
+poi `createdb prenota_prova && gunzip -c <file> | psql prenota_prova` e confronto dei conteggi con la produzione
+(solo `select` via `/api/sql`). Conviene provarlo una volta al mese.
 
 ## Aggiornare
 
