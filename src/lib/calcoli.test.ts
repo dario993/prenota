@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   confrontaVersioni, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, partiData, incassoRistorante,
-  incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante,
+  incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante, vociPacchetti,
   TARIFFA_ELIMINATA, type Prenotazione, type Tariffa,
 } from "./calcoli";
 import { vociLiveticket, type OrdineLiveticket } from "./liveticket";
@@ -52,7 +52,7 @@ describe("calcoli", () => {
     const r = riepilogoEvento([pren({ righe: [riga(R, 35, 1200)] }),
       pren({ righe: [riga(O, 1)], pacchetti: 2, ristorante: "CASALE", pasto: "CENA" })], 36, tariffe);
     expect(r.persone).toBe(38); expect(r.postiLiberi).toBe(-2); expect(r.oltreCapienza).toBe(true);
-    expect(r.ristoranti.CASALE).toEqual({ PRANZO: 0, CENA: 2, incasso: 5400 });
+    expect(r.ristoranti.CASALE).toEqual({ PRANZO: 0, CENA: 3, incasso: 5400 });
     expect(r.ristoranti.GIAMAICA).toEqual({ PRANZO: 0, CENA: 0, incasso: 0 });
   });
   test("riepilogo: prenotazioni e totale per pagamento scelto", () => {
@@ -97,7 +97,26 @@ describe("calcoli", () => {
         pren({ cognome_nome: "ROSSI MARIO", pacchetti: 2, ristorante: "CASALE", pasto: "CENA",
           telefono: "333 1234567", note: "1 celiaco" }),
         pren({ cognome_nome: "Gruppo Sicilia", pacchetti: 10, ristorante: "CASALE", pasto: "CENA" })] }))
-      .toBe("CASALE – CENA – sab 10 ottobre 2026\nOpera: DOCUFILM\nCoperti: 12\n\n- Gruppo Sicilia (10)\n- ROSSI MARIO (2) – 333 1234567 – 1 celiaco");
+      .toBe("CASALE – CENA – sab 10 ottobre 2026\nOpera: DOCUFILM\nCoperti: 12\n\n- 10x Gruppo Sicilia\n- 2x ROSSI MARIO – 333 1234567 – 1 celiaco");
+  });
+  test("a tavola tutta la prenotazione: 2 pacchetti + 1 intero + 1 bambino = 4 coperti, incasso solo pacchetti", () => {
+    const p = pren({ cognome_nome: "ROSSI MARIO", pacchetti: 2, righe: [riga(A, 1, 1500), riga(R, 1, 1200)],
+      ristorante: "CASALE", pasto: "PRANZO", note: "1 celiaco" });
+    const r = riepilogoEvento([p], 100, tariffe);
+    expect(r.ristoranti.CASALE).toEqual({ PRANZO: 4, CENA: 0, incasso: 2 * 2700 });
+    expect(testoElencoRistorante({ ristorante: "CASALE", pasto: "PRANZO", dataOra: new Date("2026-11-01T11:00:00Z"),
+      titolo: "X", prenotazioni: [p] })).toContain("Coperti: 4\n\n- 4x ROSSI MARIO (2x pacchetti + 2x alla carta) – 1 celiaco");
+  });
+  test("vociPacchetti: solo con pacchetto, annullate segnate, fonte LiveTicket", () => {
+    const v = vociPacchetti([
+      pren({ id: "a", cognome_nome: "ROSSI", pacchetti: 2, righe: [riga(A, 2)], ristorante: "GIAMAICA", pasto: "CENA" }),
+      pren({ id: "b", cognome_nome: "BIANCHI", pacchetti: 1, ristorante: "CASALE", pasto: "PRANZO", contrassegno: "annullato" }),
+      pren({ id: "c", cognome_nome: "VERDI", righe: [riga(A, 3)] }),
+      pren({ id: "lvtckt-1", cognome_nome: "NERI", pacchetti: 1, ristorante: "CASALE", pasto: "PRANZO", liveticket: "lvtckt-1" }),
+    ]);
+    expect(v.map((x) => [x.id, x.fonte, x.persone, x.dettaglio, x.annullata])).toEqual([
+      ["b", "PRENOTATI", 1, "", true], ["lvtckt-1", "LIVETICKET", 1, "", false],
+      ["a", "PRENOTATI", 4, "2x pacchetti + 2x alla carta", false]]);
   });
   test("euroInCentesimi", () => {
     expect(euroInCentesimi("22,50")).toBe(2250); expect(euroInCentesimi("22.5")).toBe(2250);

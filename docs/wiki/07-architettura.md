@@ -59,6 +59,8 @@ prenota/
   `schemaOrdineLiveticket`. `salvaOrdine` (`src/lib/liveticket-db.ts`) converte `data` + `ora` (Europe/Rome) in `timestamptz`,
   abbina l'evento a quella data e ora (zero o più di uno → `evento_id` null), assegna i biglietti alle tariffe dell'opera
   e fa upsert su `codice` (un rinvio aggiorna, `ricevuto_il` resta). Risposta `{ ok: true, evento_id }`; 401 / 400 `{ errore }`.
+- `GET /api/pacchetti?data=AAAA-MM-GG` (ruolo `admin` o `api`, Bearer): pacchetti del giorno (Europe/Rome) per il
+  riepilogo Telegram di n8n, `{ data, eventi[], voci[], anomalie[] }` (vedi [Ristoranti](06-ristoranti-e-pacchetti.md)); 400 data non valida.
 - Dopo ogni scrittura: `invalidateQueries` per aggiornare le liste.
 - Il server **valida sempre** con zod e controlla sessione e ruolo: il client non è fidato.
 - Errori di salvataggio → toast (sonner), il form resta compilato.

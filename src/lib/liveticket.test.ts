@@ -115,13 +115,17 @@ describe("vociLiveticket", () => {
       righe: [{ tariffa_id: "int", quantita: 2, prezzo: 2800 }] });
     expect(persone(v[0])).toBe(2);
   });
-  test("pacchetti: una voce per ristorante e pasto, righe solo nella prima", () => {
+  test("pacchetti: una voce per ristorante e pasto, righe nella prima (a tavola con il pacchetto)", () => {
     const v = vociLiveticket(ordine(["PRANZO + SPETTACOLO CM", "CENA + SPETTACOLO GG", "CENA + SPETTACOLO GG", "Intero"]), prezzi);
-    expect(v).toHaveLength(3);
-    expect(v.map((x) => x.id)).toEqual(Array(3).fill("lvtckt-30534501"));
-    expect(v[0].righe).toHaveLength(1);
-    expect(v.slice(1).map((x) => [x.ristorante, x.pasto, x.pacchetti, x.righe.length, x.prezzo_pacchetto_teatro]))
-      .toEqual([["CASALE", "PRANZO", 1, 0, 2200], ["GIAMAICA", "CENA", 2, 0, 2200]]);
+    expect(v).toHaveLength(2);
+    expect(v.map((x) => x.id)).toEqual(Array(2).fill("lvtckt-30534501"));
+    expect(v.map((x) => [x.ristorante, x.pasto, x.pacchetti, x.righe.length, x.prezzo_pacchetto_teatro]))
+      .toEqual([["CASALE", "PRANZO", 1, 1, 2200], ["GIAMAICA", "CENA", 2, 0, 2200]]);
+  });
+  test("pacchetti + Intero: tutti a tavola, 3 coperti", () => {
+    const v = vociLiveticket(ordine(["CENA + SPETTACOLO GG", "CENA + SPETTACOLO GG", "Intero"]), prezzi);
+    expect(v).toHaveLength(1);
+    expect(riepilogoEvento(v, 100, tariffe).ristoranti.GIAMAICA.CENA).toBe(3);
   });
   test("solo pacchetti: righe sulla prima voce pacchetto", () => {
     const v = vociLiveticket(ordine(["CENA + SPETTACOLO GG"]), prezzi);
@@ -146,6 +150,6 @@ describe("vociLiveticket", () => {
     expect(riepilogoEvento(v, 100, tariffe).perTariffa).toContainEqual({ tariffa_id: "", nome: TARIFFA_NON_ABBINATA, quantita: 1 });
     expect(elencoRistorante(v, "GIAMAICA", "CENA")).toHaveLength(1);
     expect(testoElencoRistorante({ ristorante: "GIAMAICA", pasto: "CENA", dataOra: new Date("2026-10-10T19:00:00Z"),
-      titolo: "X", prenotazioni: v })).toContain("- FERRO CHIARA (2) – +393472300236 – LiveTicket");
+      titolo: "X", prenotazioni: v })).toContain("- 3x FERRO CHIARA (2x pacchetti + 1x alla carta) – +393472300236 – LiveTicket");
   });
 });

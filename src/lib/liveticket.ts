@@ -100,7 +100,9 @@ export function vociLiveticket(o: OrdineLiveticket, prezzi: PrezziPacchetto): Pr
   };
   const voci = [...pacchetti.values()].map((p): Prenotazione =>
     ({ ...base, righe: [], pacchetti: p.n, ristorante: p.ristorante, pasto: p.pasto }));
-  if (righe.length || voci.length === 0) voci.unshift({ ...base, righe, pacchetti: 0, ristorante: null, pasto: null });
+  // chi ha biglietti senza pacchetto siede a tavola con il pacchetto dello stesso ordine
+  // ponytail: con pacchetti in più ristoranti/pasti vanno nel primo; caso mai visto
+  if (voci.length === 0) voci.push({ ...base, righe, pacchetti: 0, ristorante: null, pasto: null });
   else voci[0].righe = righe;
   return voci;
 }

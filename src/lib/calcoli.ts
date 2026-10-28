@@ -97,7 +97,7 @@ export function riepilogoEvento(prenotazioni: Prenotazione[], capienza: number, 
     const inc = incassoRistorante(p);
     ristorante += inc;
     if (p.pacchetti > 0 && p.ristorante && p.pasto) {
-      ristoranti[p.ristorante][p.pasto] += p.pacchetti;
+      ristoranti[p.ristorante][p.pasto] += persone(p); // a tavola tutta la prenotazione, non solo i pacchetti
       ristoranti[p.ristorante].incasso += inc;
     }
     if (p.pagamento) {
@@ -140,9 +140,25 @@ export function descriviBiglietti(
 export const ordinaPerNome = <T extends { cognome_nome: string }>(lista: T[]): T[] =>
   [...lista].sort((a, b) => a.cognome_nome.localeCompare(b.cognome_nome, "it", { sensitivity: "base" }));
 
+// A tavola si siede tutta la prenotazione: «2x pacchetti + 2x alla carta» (le altre tariffe mangiano alla carta) ("" se sono tutti pacchetti).
+export function dettaglioTavola(p: { righe: { quantita: number }[]; pacchetti: number }): string {
+  const altri = persone(p) - p.pacchetti;
+  return altri ? `${p.pacchetti}x pacchetti + ${altri}x alla carta` : "";
+}
+
 // le annullate non vanno ai ristoranti
 export const elencoRistorante = (prenotazioni: Prenotazione[], r: Ristorante, p: Pasto): Prenotazione[] =>
   ordinaPerNome(prenotazioni.filter((x) => x.pacchetti > 0 && x.ristorante === r && x.pasto === p && x.contrassegno !== "annullato"));
+
+// Voci con pacchetto di un giorno per il riepilogo Telegram (n8n): annullate comprese, segnate come tali.
+export interface VocePacchetti {
+  id: string; fonte: "PRENOTATI" | "LIVETICKET"; nome: string; ristorante: Ristorante; pasto: Pasto;
+  persone: number; pacchetti: number; dettaglio: string; note: string; telefono: string; annullata: boolean }
+export const vociPacchetti = (prenotazioni: Prenotazione[]): VocePacchetti[] =>
+  ordinaPerNome(prenotazioni.filter((x) => x.pacchetti > 0 && x.ristorante && x.pasto)).map((x) => ({
+    id: x.id, fonte: x.liveticket ? "LIVETICKET" : "PRENOTATI", nome: x.cognome_nome, ristorante: x.ristorante!, pasto: x.pasto!,
+    persone: persone(x), pacchetti: x.pacchetti, dettaglio: dettaglioTavola(x), note: x.note, telefono: x.telefono,
+    annullata: x.contrassegno === "annullato" }));
 
 export function testoElencoRistorante(a: {
   ristorante: Ristorante; pasto: Pasto; dataOra: Date; titolo: string; prenotazioni: Prenotazione[];
@@ -151,9 +167,9 @@ export function testoElencoRistorante(a: {
   const data = new Intl.DateTimeFormat("it-IT", {
     weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome",
   }).format(a.dataOra);
-  const coperti = lista.reduce((s, x) => s + x.pacchetti, 0);
+  const coperti = lista.reduce((s, x) => s + persone(x), 0);
   const righe = lista.map((x) =>
-    `- ${x.cognome_nome} (${x.pacchetti})` + (x.telefono ? ` – ${x.telefono}` : "") + (x.note ? ` – ${x.note}` : "") +
+    `- ${persone(x)}x ${x.cognome_nome}${dettaglioTavola(x) ? ` (${dettaglioTavola(x)})` : ""}` + (x.telefono ? ` – ${x.telefono}` : "") + (x.note ? ` – ${x.note}` : "") +
     (x.liveticket ? " – LiveTicket" : ""));
   return `${a.ristorante} – ${a.pasto} – ${data}\nOpera: ${a.titolo}\nCoperti: ${coperti}\n\n${righe.join("\n")}`;
 }

@@ -69,3 +69,4 @@
 | 2026-10-27 | LiveTicket: la tariffa si abbina anche se il suo nome sta dentro quello LiveTicket a parole intere («Ridotto over 65» → Over 65), non solo all'inizio | 4 |
 | 2026-10-27 | Elenco eventi: il numero grande a destra mostra i posti occupati invece dei posti liberi | 2 |
 | 2026-10-27 | Backup ogni ora con rotazione (24 ore + mezzanotte degli ultimi 7 giorni), copia cifrata su Google Drive con rclone, avviso Telegram alle 9 via n8n se un backup non riesce | 13 |
+| 2026-10-28 | Ristoranti: coperti = tutte le persone di una prenotazione con pacchetti (anche le tariffe senza pacchetto), righe «4x ROSSI MARIO (2x pacchetti + 2x alla carta)» nel testo condiviso, dettaglio sotto il nome nella pagina; biglietti LiveTicket senza pacchetto nella voce del pacchetto; nuova route `GET /api/pacchetti` per il riepilogo Telegram di n8n | 6, 7 |

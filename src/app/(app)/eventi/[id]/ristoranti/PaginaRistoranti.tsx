@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Printer, Share2 } from "lucide-react";
 import { getJson, SERVE_RETE, chiaveEvento } from "@/lib/query";
 import {
-  elencoRistorante, formattaDataOra, partiData, prezziPacchettoDi, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
+  dettaglioTavola, elencoRistorante, formattaDataOra, persone, partiData, prezziPacchettoDi, testoElencoRistorante, NOMI_PASTI, NOMI_RISTORANTI, PASTI, RISTORANTI,
   type DettaglioEvento, type Pasto, type Ristorante,
 } from "@/lib/calcoli";
 import { vociLiveticket } from "@/lib/liveticket";
@@ -68,7 +68,7 @@ export function PaginaRistoranti({ id }: { id: string }) {
                 <div>
                   <h2 className="text-body font-semibold">{NOMI_RISTORANTI[r]} – {NOMI_PASTI[p]}</h2>
                   <p className="text-caption text-ink-muted print:text-black">{formattaDataOra(dataOra)} · {evento.titolo}</p>
-                  <p className="mt-2 flex items-baseline gap-2"><span className="text-[34px] font-medium leading-[38px] tracking-tight text-accent tabular-nums print:text-black">{lista.reduce((s, x) => s + x.pacchetti, 0)}</span><span className="text-ink-muted">coperti</span></p>
+                  <p className="mt-2 flex items-baseline gap-2"><span className="text-[34px] font-medium leading-[38px] tracking-tight text-accent tabular-nums print:text-black">{lista.reduce((s, x) => s + persone(x), 0)}</span><span className="text-ink-muted">coperti</span></p>
                 </div>
                 <button type="button" className={`${btnSecondario} print:hidden`} aria-label={`Condividi ${NOMI_RISTORANTI[r]} ${NOMI_PASTI[p]}`} onClick={() => condividi(r, p)}>
                   <Share2 size={16} aria-hidden />Condividi
@@ -80,9 +80,10 @@ export function PaginaRistoranti({ id }: { id: string }) {
                     <div className="min-w-0">
                       <p className="font-semibold">{x.cognome_nome}{x.liveticket && <span className="ml-2 text-caption font-normal text-ink-muted print:text-black">LiveTicket</span>}</p>
                       {x.telefono && <p className="text-caption text-ink-muted print:text-black">{x.telefono}</p>}
+                      {dettaglioTavola(x) && <p className="text-caption text-ink-muted print:text-black">{dettaglioTavola(x)}</p>}
                       {x.note && <p className="text-caption text-ink-muted print:text-black">{x.note}</p>}
                     </div>
-                    <span className="font-semibold tabular-nums">{x.pacchetti}</span>
+                    <span className="font-semibold tabular-nums">{persone(x)}</span>
                   </li>
                 ))}
               </ul>
