@@ -57,4 +57,6 @@ Risposta `{ data, eventi[], voci[], anomalie[] }`: `voci` da `vociPacchetti` (`s
 o ordine LiveTicket con pacchetti (`fonte` PRENOTATI / LIVETICKET, `persone`, `pacchetti`, `dettaglio`, `note`,
 `annullata`); `anomalie` = ordini LiveTicket del giorno con anomalie. Una prenotazione **annullata** va in ❌ DISDETTE;
 una prenotazione **eliminata** semplicemente non compare.
+Righe del messaggio: `3x FERRO CHIARA (2x pacchetti + 1x alla carta) – note` (numero = persone a tavola); ordini
+LiveTicket con anomalie nel messaggio di controllo «DA VERIFICARE». La scheda PACCHETTI DISDETTE del foglio non è più usata.
 
