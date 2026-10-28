@@ -55,6 +55,19 @@ export function assegnaBiglietti(a: {
   return { biglietti, anomalie: [...anomalie] };
 }
 
+/** «Platea, Fila O, Posto n. 3», «… n. 4», «Platea, Fila P, Posto n. 10» → «Fila O 3, 4 · Fila P 10». Formati diversi restano in coda. */
+export function postiCompatti(posti: string[]): string {
+  const file = new Map<string, Set<string>>(), altri: string[] = [];
+  for (const p of posti) {
+    const m = /Fila\s+(\S+),\s*Posto n\.\s*(\S+)/i.exec(p);
+    if (m) file.set(m[1], (file.get(m[1]) ?? new Set()).add(m[2]));
+    else if (p.trim()) altri.push(p.replace(/^\s*Platea,\s*/i, "").trim());
+  }
+  const numerico = (a: string, b: string) => a.localeCompare(b, "it", { numeric: true });
+  return [...[...file].sort(([a], [b]) => numerico(a, b)).map(([f, n]) => `Fila ${f} ${[...n].sort(numerico).join(", ")}`), ...altri]
+    .join(" · ");
+}
+
 /** Persone di un ordine: il maggiore tra biglietti dichiarati e letti (per la capienza meglio contare in più). */
 export const personeOrdine = (o: { biglietti_dichiarati: number | null; biglietti: unknown[] }): number =>
   Math.max(o.biglietti_dichiarati ?? 0, o.biglietti.length);
@@ -95,7 +108,7 @@ export function vociLiveticket(o: OrdineLiveticket, prezzi: PrezziPacchetto): Pr
   }
   const base = {
     id: o.codice, evento_id: o.evento_id ?? "", cognome_nome: o.cognome_nome, telefono: o.telefono,
-    posti: o.biglietti.map((b) => b.posto).join(", "), provenienza: "LiveTicket", note: "",
+    posti: postiCompatti(o.biglietti.map((b) => b.posto)), provenienza: "LiveTicket", note: "",
     contrassegno: null, pagamento: null, liveticket: o.codice, ...prezzi,
   };
   const voci = [...pacchetti.values()].map((p): Prenotazione =>

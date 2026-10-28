@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { elencoRistorante, persone, riepilogoEvento, TARIFFA_NON_ABBINATA, testoElencoRistorante, type Tariffa } from "./calcoli";
-import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa, personeOrdine, vociLiveticket, type OrdineLiveticket } from "./liveticket";
+import { abbinaEvento, ANOMALIA_IMPORTO, ANOMALIA_TARIFFA, assegnaBiglietti, cognomeNome, pacchettoDaTariffa, personeOrdine, postiCompatti, vociLiveticket, type OrdineLiveticket } from "./liveticket";
 
 const t = (id: string, nome: string, prezzo: number, nascosta = false): Tariffa => ({ id, nome, prezzo, nascosta, ordine: 0 });
 const tariffe = [t("int", "Intero", 2800), t("o65", "Over 65", 2200), t("gru", "Gruppi", 2200),
@@ -151,5 +151,15 @@ describe("vociLiveticket", () => {
     expect(elencoRistorante(v, "GIAMAICA", "CENA")).toHaveLength(1);
     expect(testoElencoRistorante({ ristorante: "GIAMAICA", pasto: "CENA", dataOra: new Date("2026-10-10T19:00:00Z"),
       titolo: "X", prenotazioni: v })).toContain("- 3x FERRO CHIARA (2x pacchetti + 1x alla carta) – +393472300236 – LiveTicket");
+  });
+});
+
+describe("postiCompatti", () => {
+  test("raggruppa per fila, senza Platea, posti in ordine numerico", () =>
+    expect(postiCompatti(["Platea, Fila P, Posto n. 10", "Platea, Fila O, Posto n. 11", "Platea, Fila O, Posto n. 3",
+      "Platea, Fila O, Posto n. 4", "Platea, Fila O, Posto n. 3"])).toBe("Fila O 3, 4, 11 · Fila P 10"));
+  test("formato diverso in coda, lista vuota", () => {
+    expect(postiCompatti(["Platea, Ingresso libero", "Platea, Fila F, Posto n. 1"])).toBe("Fila F 1 · Ingresso libero");
+    expect(postiCompatti([])).toBe("");
   });
 });
