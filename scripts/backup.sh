@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Backup orario di Postgres (da cron, ogni ora). Tiene i backup delle ultime 24 ore e solo quello di mezzanotte
-# degli ultimi 7 giorni, in backups/ e, se BACKUP_REMOTE è impostato, anche su quel remote rclone (Google Drive cifrato).
+# degli ultimi 7 giorni, in backups/ e, se BACKUP_REMOTE è impostato, anche su quel remote rclone (Google Drive).
 # Il file finale compare solo se il dump è riuscito; i vecchi backup si cancellano solo dopo.
 # BACKUP_PING_URL (facoltativo): webhook n8n chiamato con esito=ok o esito=errore.
 set -euo pipefail

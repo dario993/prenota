@@ -110,22 +110,21 @@ Rotazione (in `backups/` e uguale su Google Drive):
 I vecchi file si cancellano solo dopo un backup riuscito. Variabili facoltative:
 
 - `DUMP_CMD`: con Portainer non c'è la cartella del compose, quindi `docker exec prenota-db pg_dump -U prenota prenota`;
-- `BACKUP_REMOTE`: remote rclone su cui copiare ogni backup (`prenota-crypt:`), con la stessa rotazione
+- `BACKUP_REMOTE`: remote rclone su cui copiare ogni backup (`gdrive:prenota-backup`), con la stessa rotazione
   (`rclone copy` + `rclone delete`, mai `rclone sync`, che svuoterebbe il Drive se `backups/` andasse persa);
 - `BACKUP_PING_URL`: webhook n8n chiamato con `esito=ok` o `esito=errore`.
 
-### Google Drive cifrato (rclone)
+### Google Drive (rclone)
 
-Nell'LXC 106: `apt install rclone curl`, poi `rclone config`:
-
-1. remote `gdrive` di tipo Google Drive (il token si ottiene sul Mac con `rclone authorize "drive"` e si incolla);
-2. remote `prenota-crypt` di tipo **crypt** su `gdrive:prenota-backup` (i dati contengono nomi e telefoni).
-   **Password e salt del crypt vanno nel password manager: senza, i backup sono illeggibili.**
+Nell'LXC 106: rclone recente (`curl https://rclone.org/install.sh | bash`) e `curl`, poi `rclone config`:
+remote `gdrive` di tipo Google Drive (client OAuth del progetto Google «backup», scope `drive.file`; il token si
+ottiene sul Mac con `rclone authorize "drive"` e si incolla). I backup vanno in chiaro nella cartella `prenota-backup`
+del Drive (scelta dell'utente: niente cifratura), quindi l'accesso al Drive va protetto (2FA).
 
 Cron (`crontab -e` nell'LXC):
 
 ```
-0 * * * * DUMP_CMD="docker exec prenota-db pg_dump -U prenota prenota" BACKUP_REMOTE=prenota-crypt: BACKUP_PING_URL=https://n8n.hsdscp.duckdns.org/webhook/prenota-backup-7f3c9a2e5d /srv/prenota/scripts/backup.sh >> /srv/prenota/backups/backup.log 2>&1
+0 * * * * DUMP_CMD="docker exec prenota-db pg_dump -U prenota prenota" BACKUP_REMOTE=gdrive:prenota-backup BACKUP_PING_URL=https://n8n.hsdscp.duckdns.org/webhook/prenota-backup-7f3c9a2e5d /srv/prenota/scripts/backup.sh >> /srv/prenota/backups/backup.log 2>&1
 ```
 
 ### Avviso (n8n)
@@ -139,7 +138,7 @@ di 2 ore. Se va tutto bene non scrive nulla.
 Da un backup locale su un database vuoto:
 `gunzip -c backups/prenota-giorno-AAAA-MM-GG.sql.gz | docker exec -i prenota-db psql -U prenota prenota`.
 
-Da Google Drive (sul Mac, con lo stesso remote `prenota-crypt` configurato): `rclone copy prenota-crypt:<file> .`,
+Da Google Drive: scaricare il file dalla cartella `prenota-backup` (o `rclone copy gdrive:prenota-backup/<file> .`),
 poi `createdb prenota_prova && gunzip -c <file> | psql prenota_prova` e confronto dei conteggi con la produzione
 (solo `select` via `/api/sql`). Conviene provarlo una volta al mese.
 
