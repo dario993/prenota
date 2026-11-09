@@ -1,4 +1,6 @@
-import { Fragment } from "react";
+"use client";
+import { Fragment, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   riepilogoEvento, formattaEuro, NOMI_PAGAMENTI, NOMI_RISTORANTI, NOMI_PASTI, PAGAMENTI, RISTORANTI, PASTI,
   type Prenotazione, type PrezziPacchetto, type Tariffa,
@@ -41,8 +43,20 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza,
   const senzaStato = prenotazioni.filter((p) => !p.contrassegno && !p.in_attesa).length;
   const inAttesa = prenotazioni.filter((p) => p.in_attesa).length;
   const annullate = tutte.filter((p) => p.contrassegno === "annullato").length;
+  const [aperto, setAperto] = useState(false);
   return (
-    <div className="grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div>
+    {/* telefono: chiuso, una riga con le persone; i riquadri si aprono al tocco (desktop sempre aperti) */}
+    <button type="button" aria-expanded={aperto} aria-controls="riepilogo-riquadri" onClick={() => setAperto(!aperto)}
+      className={`flex min-h-12 w-full items-center gap-2 rounded-lg border border-line px-4 py-2 text-left text-label font-normal lg:hidden ${aperto ? "mb-6" : ""}`}>
+      <span className="font-semibold">Riepilogo</span>
+      <span className="min-w-0 flex-1 tabular-nums text-ink-muted">
+        {r.persone} persone su {r.capienza} · {oltre ? <span className="font-medium text-warning">−{-r.postiLiberi} oltre capienza</span>
+          : `${r.postiLiberi} ${r.postiLiberi === 1 ? "libero" : "liberi"}`}
+      </span>
+      <ChevronDown size={16} aria-hidden className={`shrink-0 transition-transform ${aperto ? "rotate-180" : ""}`} />
+    </button>
+    <div id="riepilogo-riquadri" className={`grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3 ${aperto ? "" : "max-lg:hidden"}`}>
       <Riquadro id="r-sala" titolo="Sala" className="md:col-span-2 xl:col-span-1" destra={oltre
         ? <span className="font-medium text-warning"><span data-testid="liberi">−{-r.postiLiberi}</span> oltre capienza</span>
         : <><span data-testid="liberi" className="tabular-nums">{r.postiLiberi}</span> {r.postiLiberi === 1 ? "posto libero" : "posti liberi"}</>}>
@@ -104,6 +118,7 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza,
         </dl>
         <p className="mt-2 text-caption text-ink-muted">Importi previsti, non incassati.</p>
       </Riquadro>
+    </div>
     </div>
   );
 }

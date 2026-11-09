@@ -72,3 +72,4 @@
 | 2026-10-28 | Ristoranti: coperti = tutte le persone di una prenotazione con pacchetti (anche le tariffe senza pacchetto), righe «4x ROSSI MARIO (2x pacchetti + 2x alla carta)» nel testo condiviso, dettaglio sotto il nome nella pagina; biglietti LiveTicket senza pacchetto nella voce del pacchetto; nuova route `GET /api/pacchetti` per il riepilogo Telegram di n8n | 6, 7 |
 | 2026-10-28 | LiveTicket: posti compatti per fila senza «Platea» («Fila O 3, 4, 5 · Fila P 10»), solo in visualizzazione: i biglietti salvati non cambiano | 2 |
 | 2026-10-28 | Backup su Google Drive senza cifratura: remote `gdrive:prenota-backup` al posto di `prenota-crypt:` | 13 |
+| 2026-11-09 | Pagina evento: su telefono il riepilogo è chiuso in una riga e si apre al tocco; tornando dal dettaglio di una prenotazione la pagina si riporta su quella prenotazione | 2, 11 |

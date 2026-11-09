@@ -48,7 +48,7 @@ pagine admin. Componenti di pagina: `TestaPagina` (indietro, titolo, frase, azio
 
 | Larghezza | Navigazione | Elenco prenotazioni | Riepilogo evento | Modulo prenotazione |
 |---|---|---|---|---|
-| Telefono (< 960px) | barra in basso 64px + area sicura sulla cornice, `shadow-bar` | righe con tacca dello stato | tre riquadri uno sotto l'altro (tablet: Sala sopra, due affiancati) | totali e **Salva** in una barra fissa sopra la navigazione |
+| Telefono (< 960px) | barra in basso 64px + area sicura sulla cornice, `shadow-bar` | righe con tacca dello stato | chiuso in una riga (persone su capienza, liberi); aperto: tre riquadri uno sotto l'altro (tablet: Sala sopra, due affiancati) | totali e **Salva** in una barra fissa sopra la navigazione |
 | Desktop (≥ 960px) | colonna laterale 228px sulla cornice, contenuto su un foglio bianco staccato 8px, angoli 16px | tabella con tacca dello stato | tre riquadri affiancati (Sala, Biglietti, Ristoranti) sopra l'elenco | totali e Salva in fondo al modulo |
 
 Contenuto largo al massimo 1200px, moduli al massimo 640px. Su telefono la home e la pagina evento hanno in alto una barra fissa

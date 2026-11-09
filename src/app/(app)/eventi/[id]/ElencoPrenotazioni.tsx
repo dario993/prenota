@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import {
 import type { Doppione } from "@/lib/doppioni";
 import { EtichettaDoppioni } from "./EtichettaDoppioni";
 import { contrassegnaPrenotazione, riordinaPrenotazioni } from "./azioni";
+
+const ULTIMA = "prenota:ultima"; // id dell'ultima prenotazione aperta (sessionStorage)
 
 const tel = (t: string) => `tel:${t.replace(/[^\d+]/g, "")}`;
 
@@ -47,12 +49,23 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, doppioni, tariffe, 
   const frecce = riordina && !q;
   const href = (p: Prenotazione) => `/eventi/${eventoId}/prenotazioni/${p.id}`;
   // senza rete la modifica non è possibile: non si apre nemmeno la pagina
-  const apri = (e: React.MouseEvent) => {
-    if (online) return true;
+  const apri = (e: React.MouseEvent, p: Prenotazione) => {
+    if (online) {
+      try { sessionStorage.setItem(ULTIMA, p.id); } catch {}
+      return true;
+    }
     e.preventDefault();
     toast.info("Serve la rete per modificare una prenotazione");
     return false;
   };
+  // tornando dal dettaglio la pagina riparte dall'inizio: si riporta in vista la prenotazione aperta (telefono o tabella)
+  useEffect(() => {
+    let id: string | null = null;
+    try { id = sessionStorage.getItem(ULTIMA); sessionStorage.removeItem(ULTIMA); } catch {}
+    if (!id) return;
+    const righe = [...document.querySelectorAll<HTMLElement>(`[data-riga="${CSS.escape(id)}"]`)];
+    righe.find((r) => r.offsetParent)?.scrollIntoView({ block: "center" });
+  }, []);
   // aggiorna subito l'elenco in cache, poi salva e ricarica dal server
   const salva = async (nuove: Prenotazione[], azione: () => Promise<Esito>) => {
     if (!online) return void toast.info("Serve la rete per modificare una prenotazione");
@@ -192,7 +205,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, doppioni, tariffe, 
               <>
                 {/* riordinando la scheda non si apre: la maniglia sta dentro e un tocco non deve portare altrove */}
                 {frecce ? <div className="pb-2 pt-3">{contenutoScheda(p)}</div>
-                  : <Link href={href(p)} onClick={apri} className="block pb-2 pt-3">{contenutoScheda(p)}</Link>}
+                  : <Link href={href(p)} onClick={(e) => apri(e, p)} className="block pb-2 pt-3">{contenutoScheda(p)}</Link>}
                 <div className="flex items-center justify-between gap-2 pb-3 pl-8.5">{sceltaContrassegno(p)}{pulsantiSposta(p)}</div>
               </>
             )}
@@ -210,7 +223,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, doppioni, tariffe, 
           <tbody data-elenco>
             {lista.map((p) => (
               <tr key={p.id} data-riga={p.in_attesa ? undefined : p.id} style={scostamento(p)} onClick={(e) => {
-                if (p.in_attesa || (e.target as HTMLElement).closest("a, button, select") || !apri(e)) return;
+                if (p.in_attesa || (e.target as HTMLElement).closest("a, button, select") || !apri(e, p)) return;
                 router.push(href(p));
               }} className={`border-t border-line bg-surface align-top transition-colors duration-150 print:break-inside-avoid [&>td]:print:px-2 [&>td]:print:py-1 ${trascinata(p)} ${p.in_attesa ? "" : "cursor-pointer hover:bg-surface-sunken/60"} ${p.contrassegno === "annullato" ? "text-ink-muted" : ""}`}>
                 <td className="relative py-3 pl-4 pr-3 tabular-nums text-ink-muted">
@@ -219,7 +232,7 @@ export function ElencoPrenotazioni({ eventoId, prenotazioni, doppioni, tariffe, 
                 </td>
                 <td className={`px-3 py-3 font-semibold ${p.contrassegno === "annullato" ? "[&_a]:line-through" : ""}`}>
                   {p.in_attesa ? <div className="space-y-1">{p.cognome_nome}<div>{statoDi(p)}</div></div>
-                    : <Link href={href(p)} onClick={apri} className="hover:underline">{p.cognome_nome}</Link>}
+                    : <Link href={href(p)} onClick={(e) => apri(e, p)} className="hover:underline">{p.cognome_nome}</Link>}
                   <EtichettaDoppioni doppioni={doppioni.get(p.id)} />
                 </td>
                 <td className="whitespace-nowrap px-3 py-3">{p.telefono && <a href={tel(p.telefono)} className="tabular-nums underline decoration-line-control underline-offset-4 hover:decoration-current print:no-underline">{p.telefono}</a>}</td>
