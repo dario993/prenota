@@ -73,3 +73,4 @@
 | 2026-10-28 | LiveTicket: posti compatti per fila senza «Platea» («Fila O 3, 4, 5 · Fila P 10»), solo in visualizzazione: i biglietti salvati non cambiano | 2 |
 | 2026-10-28 | Backup su Google Drive senza cifratura: remote `gdrive:prenota-backup` al posto di `prenota-crypt:` | 13 |
 | 2026-11-09 | Pagina evento: su telefono il riepilogo è chiuso in una riga e si apre al tocco; tornando dal dettaglio di una prenotazione la pagina si riporta su quella prenotazione | 2, 11 |
+| 2026-11-14 | Pagina evento su telefono: riepilogo chiuso come scheda con i posti occupati in grande, barra e posti liberi; linguetta «Tutto il riepilogo» per aprire i riquadri e «Chiudi riepilogo» per richiuderli | 2, 11 |

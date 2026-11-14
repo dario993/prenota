@@ -46,16 +46,20 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza,
   const [aperto, setAperto] = useState(false);
   return (
     <div>
-    {/* telefono: chiuso, una riga con le persone; i riquadri si aprono al tocco (desktop sempre aperti) */}
-    <button type="button" aria-expanded={aperto} aria-controls="riepilogo-riquadri" onClick={() => setAperto(!aperto)}
-      className={`flex min-h-12 w-full items-center gap-2 rounded-lg border border-line px-4 py-2 text-left text-label font-normal lg:hidden ${aperto ? "mb-6" : ""}`}>
-      <span className="font-semibold">Riepilogo</span>
-      <span className="min-w-0 flex-1 tabular-nums text-ink-muted">
-        {r.persone} persone su {r.capienza} · {oltre ? <span className="font-medium text-warning">−{-r.postiLiberi} oltre capienza</span>
-          : `${r.postiLiberi} ${r.postiLiberi === 1 ? "libero" : "liberi"}`}
-      </span>
-      <ChevronDown size={16} aria-hidden className={`shrink-0 transition-transform ${aperto ? "rotate-180" : ""}`} />
-    </button>
+    {/* telefono: da chiuso la scheda posti occupati, i riquadri si aprono dalla linguetta (desktop sempre aperti) */}
+    {!aperto && (
+      <section aria-label="Posti occupati" className="rounded-lg border border-line p-4 lg:hidden">
+        <div className="mb-2 flex items-baseline gap-2">
+          <span className={`text-[34px] font-medium leading-[38px] tracking-tight tabular-nums ${oltre ? "text-warning" : "text-accent"}`}>{r.persone}</span>
+          <span className="text-ink-muted tabular-nums">posti occupati su {r.capienza}</span>
+        </div>
+        <BarraCapienza persone={r.persone} capienza={r.capienza} />
+        <p className="mt-2 text-label font-normal tabular-nums">
+          {oltre ? <span className="font-medium text-warning">−{-r.postiLiberi} oltre capienza</span>
+            : `${r.postiLiberi} ${r.postiLiberi === 1 ? "posto libero" : "posti liberi"}`}
+        </p>
+      </section>
+    )}
     <div id="riepilogo-riquadri" className={`grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3 ${aperto ? "" : "max-lg:hidden"}`}>
       <Riquadro id="r-sala" titolo="Sala" className="md:col-span-2 xl:col-span-1" destra={oltre
         ? <span className="font-medium text-warning"><span data-testid="liberi">−{-r.postiLiberi}</span> oltre capienza</span>
@@ -119,6 +123,11 @@ export function Riepilogo({ prenotazioni, tutte, liveticket, doppioni, capienza,
         <p className="mt-2 text-caption text-ink-muted">Importi previsti, non incassati.</p>
       </Riquadro>
     </div>
+    <button type="button" aria-expanded={aperto} aria-controls="riepilogo-riquadri" onClick={() => setAperto(!aperto)}
+      className="mx-auto -mt-px flex min-h-10 items-center gap-1.5 rounded-b-lg border border-t-0 border-line bg-surface px-4 text-label font-medium lg:hidden">
+      {aperto ? "Chiudi riepilogo" : "Tutto il riepilogo"}
+      <ChevronDown size={16} aria-hidden className={`transition-transform ${aperto ? "rotate-180" : ""}`} />
+    </button>
     </div>
   );
 }

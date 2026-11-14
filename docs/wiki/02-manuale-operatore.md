@@ -27,7 +27,7 @@ le stesse righe. Tocca una scheda per rivedere riepilogo e prenotazioni di un ev
 
 ## Pagina evento
 
-- **Riepilogo** in alto, sopra l'elenco (su telefono chiuso: una riga «Riepilogo · 84 persone su 296 · 212 liberi», toccala per aprire o chiudere i riquadri), in tre riquadri: **Sala** (persone su capienza, posti liberi, la barra
+- **Riepilogo** in alto, sopra l'elenco (su telefono chiuso: una scheda con i posti occupati in grande, «84 posti occupati su 296», la barra della capienza e i posti liberi; la linguetta **Tutto il riepilogo** sotto la scheda apre i riquadri, **Chiudi riepilogo** in fondo li richiude), in tre riquadri: **Sala** (persone su capienza, posti liberi, la barra
   della capienza, prenotazioni attive, senza stato, annullate), **Biglietti** (quantità per tariffa
   con il prezzo, solo quelle usate anche se nel frattempo nascoste, pacchetti, incasso teatro previsto; sotto, solo se scelti in almeno una prenotazione, **Da pagare** e **Bonifico**
   con il numero di prenotazioni e il loro totale teatro + ristorante, annullate escluse) e **Ristoranti**
