@@ -89,7 +89,7 @@ create table if not exists prenotazioni_storico (
   prenotazione_id uuid not null references prenotazioni (id) on delete cascade,
   utente_id uuid references utenti (id),
   il timestamptz not null default now(),
-  azione text not null check (azione in ('creata', 'modificata', 'stato')),
+  azione text not null check (azione in ('creata', 'modificata', 'stato', 'spostata')),
   contrassegno text,
   dati jsonb -- copia della prenotazione dopo l'azione; null per le voci ricostruite da 004
 );

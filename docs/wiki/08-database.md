@@ -77,17 +77,17 @@ Tariffario libero di ogni opera (il pacchetto resta sull'opera).
 | creata_il, aggiornata_il | timestamptz | |
 
 ### `prenotazioni_storico`
-Cronologia di ogni prenotazione (on delete cascade). Una riga a ogni creazione (`POST /api/prenotazioni`), modifica e
-cambio di stato.
+Cronologia di ogni prenotazione (on delete cascade). Una riga a ogni creazione (`POST /api/prenotazioni`), modifica,
+cambio di stato e spostamento in un'altra data.
 | Colonna | Tipo | Note |
 |---|---|---|
 | id | bigint identity PK | |
 | prenotazione_id | uuid → prenotazioni | indicizzata |
 | utente_id | uuid → utenti | chi ha fatto l'azione |
 | il | timestamptz | `now()` |
-| azione | text | `creata` \| `modificata` \| `stato` |
+| azione | text | `creata` \| `modificata` \| `stato` \| `spostata` |
 | contrassegno | text | stato della prenotazione dopo l'azione (null = nessuno) |
-| dati | jsonb | copia della prenotazione dopo l'azione (campi, quote pacchetto, righe tariffa con prezzi), scritta da `src/lib/storico.ts`; null per le voci ricostruite da 004 |
+| dati | jsonb | copia della prenotazione dopo l'azione (campi, quote pacchetto, righe tariffa con prezzi, `evento` = data e ora dell'evento), scritta da `src/lib/storico.ts`; null per le voci ricostruite da 004 |
 
 ### `prenotazioni_tariffe`
 Quantità per tariffa di ogni prenotazione. PK (`prenotazione_id`, `tariffa_id`).
@@ -140,6 +140,7 @@ applicata).
 - `005-pagamento.sql`: aggiunge `prenotazioni.pagamento` (facoltativo, senza default).
 - `006-visualizzatore.sql`: aggiunge il ruolo `visualizzatore` al vincolo su `utenti.ruolo`.
 - `007-liveticket.sql`: crea `liveticket_ordini` e l'indice su `evento_id` (`if not exists`).
+- `008-spostata.sql`: aggiunge l'azione `spostata` al vincolo su `prenotazioni_storico.azione`.
 
 ## Backup
 

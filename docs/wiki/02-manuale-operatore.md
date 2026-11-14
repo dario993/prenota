@@ -99,12 +99,16 @@ persona, ristorante o pasto non scelti) il messaggio compare sotto il campo e nu
 
 Un gruppo che va in due ristoranti diversi, o in parte a pranzo e in parte a cena, si inserisce come **due prenotazioni**.
 
-## Modificare o eliminare
+## Modificare, spostare o eliminare
 
 Tocca una prenotazione per aprirla, cambia i campi e salva. Gli importi restano quelli delle tariffe in vigore quando
 la prenotazione è stata creata, anche se nel frattempo l'admin ha cambiato il tariffario. Se porti i pacchetti a 0,
 ristorante e pasto vengono tolti. **Elimina** chiede conferma ("Eliminare la prenotazione di …?") ed è definitivo.
-Modifica ed eliminazione richiedono la rete. Se la prenotazione non esiste più compare "Prenotazione non trovata".
+**Sposta prenotazione** (in fondo, accanto a Elimina) apre un popup con le altre date future della **stessa opera**,
+con posti occupati e liberi (oltre capienza avvisa, non blocca): tocca una data, conferma («Spostare la prenotazione di
+… a domenica 29 novembre, 16:30?») e si apre il nuovo evento con la prenotazione. Tariffe, prezzi, stato e pagamento
+restano uguali; nella cronologia compare «Spostata a …». Con modifiche non salvate il tasto è spento: prima salva.
+Modifica, spostamento ed eliminazione richiedono la rete. Se la prenotazione non esiste più compare "Prenotazione non trovata".
 
 ## Elenco ristoranti
 

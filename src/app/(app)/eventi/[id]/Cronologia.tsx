@@ -5,7 +5,7 @@ import { getJson } from "@/lib/query";
 import { confrontaVersioni, formattaDataOra, NOMI_CONTRASSEGNI, type Tariffa, type VoceStorico } from "@/lib/calcoli";
 import { pallinoContrassegno } from "@/components/stili";
 
-const AZIONI: Record<VoceStorico["azione"], string> = { creata: "Creata", modificata: "Modificata", stato: "Stato cambiato" };
+const AZIONI: Record<VoceStorico["azione"], string> = { creata: "Creata", modificata: "Modificata", stato: "Stato cambiato", spostata: "Spostata" };
 
 // Chi, quando e cosa, dalla più recente; aprendo una voce si vede la prenotazione com'era dopo quell'azione,
 // con il valore precedente dei campi cambiati. Sempre ricaricata all'apertura (la cambiano anche gli altri utenti).
@@ -28,7 +28,9 @@ export function Cronologia({ pid, tariffe }: { pid: string; tariffe: Tariffa[] }
                 <details className="group">
                   <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 [&::-webkit-details-marker]:hidden">
                     <div className="min-w-0">
-                      <div className="font-semibold">{AZIONI[v.azione]}</div>
+                      <div className="font-semibold">
+                        {AZIONI[v.azione]}{v.azione === "spostata" && v.dati?.evento && ` a ${formattaDataOra(new Date(v.dati.evento))}`}
+                      </div>
                       <div className="text-caption text-ink-muted">{formattaDataOra(new Date(v.il))} · {v.utente ?? "—"}</div>
                       {cambiati.length > 0 && <div className="text-caption text-ink-muted">Cambiato: {cambiati.join(", ")}</div>}
                     </div>

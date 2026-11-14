@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  confrontaVersioni, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, partiData, incassoRistorante,
+  confrontaVersioni, dateSpostamento, descriviBiglietti, indiceDestinazione, spostaElemento, elencoRistorante, euroInCentesimi, formattaDataOra, formattaEuro, partiData, incassoRistorante,
   incassoTeatro, persone, righeConPrezzi, riepilogoEvento, tariffeDelModulo, testoElencoRistorante, vociPacchetti,
   TARIFFA_ELIMINATA, type Prenotazione, type Tariffa,
 } from "./calcoli";
@@ -176,5 +176,13 @@ describe("calcoli", () => {
     expect(new Set(lt.map((v) => v.liveticket)).size).toBe(1);
     expect(r.ristoranti.CASALE.CENA).toBe(rp.ristoranti.CASALE.CENA + rl.ristoranti.CASALE.CENA);
     expect(r.perTariffa).toEqual([{ tariffa_id: A, nome: "Adulti", quantita: 4 }, { tariffa_id: R, nome: "Ridotti gruppi", quantita: 2 }]);
+  });
+
+  test("dateSpostamento: solo le altre date della stessa opera, nell'ordine dato", () => {
+    const ev = (id: string, opera_id: string) =>
+      ({ id, opera_id, data_ora: "", titolo: "", locale: "", capienza: 296, persone: 0, prenotazioni: 0 });
+    const eventi = [ev("e1", "chiara"), ev("e2", "natale"), ev("e3", "chiara"), ev("e4", "chiara")];
+    expect(dateSpostamento(eventi, { id: "e3", opera_id: "chiara" }).map((e) => e.id)).toEqual(["e1", "e4"]);
+    expect(dateSpostamento(eventi, { id: "e2", opera_id: "natale" })).toEqual([]);
   });
 });

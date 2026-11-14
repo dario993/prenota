@@ -28,7 +28,7 @@ export interface Prenotazione extends PrezziPacchetto {
   in_attesa?: boolean; // solo lato client
   liveticket?: string; // codice ordine; solo voci LiveTicket
 }
-export interface EventoLista { id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number; prenotazioni: number }
+export interface EventoLista { id: string; opera_id: string; data_ora: string; titolo: string; locale: string; capienza: number; persone: number; prenotazioni: number }
 export interface DettaglioEvento {
   evento: Omit<EventoLista, "persone" | "prenotazioni"> & PrezziPacchetto & { pacchetto_nascosto: boolean; tariffe: Tariffa[] };
   prenotazioni: Prenotazione[];
@@ -36,9 +36,10 @@ export interface DettaglioEvento {
 }
 // Copia della prenotazione salvata a ogni voce di cronologia (null per le voci ricostruite, senza copia).
 export type DatiStorico = Pick<Prenotazione, "cognome_nome" | "telefono" | "pacchetti" | "ristorante" | "pasto" | "posti"
-  | "provenienza" | "note" | "contrassegno" | "pagamento" | "righe" | "prezzo_pacchetto_teatro" | "prezzo_pacchetto_ristorante">;
+  | "provenienza" | "note" | "contrassegno" | "pagamento" | "righe" | "prezzo_pacchetto_teatro" | "prezzo_pacchetto_ristorante">
+  & { evento?: string }; // data e ora dell'evento (dalle voci nate con lo spostamento in poi)
 export interface VoceStorico {
-  il: string; utente: string | null; azione: "creata" | "modificata" | "stato"; contrassegno: Contrassegno | null;
+  il: string; utente: string | null; azione: "creata" | "modificata" | "stato" | "spostata"; contrassegno: Contrassegno | null;
   dati: DatiStorico | null;
 }
 export interface VoceTariffa { tariffa_id: string; nome: string; quantita: number }
@@ -136,6 +137,10 @@ export function descriviBiglietti(
     (p.ristorante && p.pasto ? ` ${NOMI_RISTORANTI[p.ristorante]} ${NOMI_PASTI[p.pasto].toLowerCase()}` : ""));
   return parti.join(" · ");
 }
+
+// Date in cui spostare una prenotazione: le altre della stessa opera (stesse tariffe), nell'ordine dato (/api/eventi: da oggi, per data).
+export const dateSpostamento = (eventi: EventoLista[], corrente: { id: string; opera_id: string }): EventoLista[] =>
+  eventi.filter((e) => e.opera_id === corrente.opera_id && e.id !== corrente.id);
 
 export const ordinaPerNome = <T extends { cognome_nome: string }>(lista: T[]): T[] =>
   [...lista].sort((a, b) => a.cognome_nome.localeCompare(b.cognome_nome, "it", { sensitivity: "base" }));

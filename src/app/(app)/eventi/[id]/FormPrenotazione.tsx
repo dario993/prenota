@@ -28,6 +28,7 @@ import { possibiliDoppioni } from "@/lib/doppioni";
 import { EtichettaDoppioni } from "./EtichettaDoppioni";
 import { modificaPrenotazione, eliminaPrenotazione } from "./azioni";
 import { Cronologia } from "./Cronologia";
+import { SpostaPrenotazione } from "./SpostaPrenotazione";
 
 type Campi = z.input<typeof schemaPrenotazione>;
 const textarea = campo.replace("h-12", "min-h-24 py-3").replace("lg:h-11", "");
@@ -76,7 +77,7 @@ function Modulo({ eventoId, iniziale, data, solaLettura }: { eventoId: string; i
   const [id] = useState(() => iniziale?.id ?? crypto.randomUUID());
   const [eliminando, setEliminando] = useState(false);
 
-  const { register, handleSubmit, setValue, control, formState: { errors, isSubmitting, isSubmitted } } =
+  const { register, handleSubmit, setValue, control, formState: { errors, isSubmitting, isSubmitted, isDirty } } =
     useForm<Campi, unknown, DatiPrenotazione>({
       resolver: zodResolver(schemaPrenotazione),
       defaultValues: {
@@ -305,10 +306,14 @@ function Modulo({ eventoId, iniziale, data, solaLettura }: { eventoId: string; i
           {iniziale && <Cronologia pid={iniziale.id} tariffe={evento.tariffe} />}
           {iniziale && !solaLettura && (
             <div className="flex flex-wrap items-center gap-3">
+              <SpostaPrenotazione evento={evento} disabled={occupato || bloccata || isDirty}
+                prenotazione={{ id: iniziale.id, cognome_nome: iniziale.cognome_nome, persone: persone(iniziale) }} />
               <button type="button" onClick={elimina} disabled={occupato || bloccata} className={btnDistruttivo}>
                 <Trash2 size={16} aria-hidden />Elimina prenotazione
               </button>
-              <span className="text-caption text-ink-muted">{bloccata ? "Serve la rete" : "Chiede conferma prima di eliminare."}</span>
+              <span className="text-caption text-ink-muted">
+                {bloccata ? "Serve la rete" : isDirty ? "Salva prima le modifiche per spostarla." : "Chiedono conferma prima di spostare o eliminare."}
+              </span>
             </div>
           )}
         </fieldset>

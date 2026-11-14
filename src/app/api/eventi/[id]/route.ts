@@ -10,7 +10,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!id.success) return Response.json({ errore: "Evento non trovato" }, { status: 404 });
   try {
     const [evento] = await sql`
-      select e.id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
+      select e.id, e.opera_id, e.data_ora, o.titolo, l.nome as locale, l.capienza,
              o.prezzo_pacchetto_teatro, o.prezzo_pacchetto_ristorante, o.pacchetto_nascosto,
              coalesce((select json_agg(json_build_object('id', t.id, 'nome', t.nome, 'prezzo', t.prezzo,
                          'nascosta', t.nascosta, 'ordine', t.ordine) order by t.ordine)

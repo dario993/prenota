@@ -54,6 +54,35 @@ export async function eliminaPrenotazione(id: string): Promise<Esito> {
   return { ok: true };
 }
 
+// Sposta in un'altra data futura della stessa opera: tariffe, prezzi congelati, stato e pagamento restano;
+// l'ordine manuale si azzera (in fondo nel nuovo evento).
+const schemaSposta = z.object({ id: z.uuid(), evento_id: z.uuid() });
+export async function spostaPrenotazione(id: string, evento_id: string): Promise<Esito> {
+  const utente = await utenteCorrente();
+  if (!utente) return { errore: "Sessione scaduta" };
+  if (utente.ruolo === "visualizzatore") return { errore: "Non autorizzato" };
+  const v = schemaSposta.safeParse({ id, evento_id });
+  if (!v.success) return { errore: "Dati non validi" };
+  try {
+    const spostata = await sql.begin(async (tx) => {
+      const r = await tx`
+        update prenotazioni p set evento_id = n.id, ordine = null, aggiornata_il = now()
+        from eventi v, eventi n
+        where p.id = ${v.data.id} and v.id = p.evento_id and n.id = ${v.data.evento_id}
+          and n.id <> v.id and n.opera_id = v.opera_id
+          and n.data_ora >= date_trunc('day', now() at time zone 'Europe/Rome') at time zone 'Europe/Rome'`;
+      if (r.count === 0) return false;
+      await registraStorico(tx, v.data.id, utente.id, "spostata");
+      return true;
+    });
+    if (!spostata) return { errore: "Data non disponibile" };
+  } catch (e) {
+    console.error(e);
+    return { errore: ERRORE_IMPREVISTO };
+  }
+  return { ok: true };
+}
+
 // Ordine scelto a mano: gli id dell'evento nell'ordine voluto (quelle non elencate restano in fondo).
 const schemaRiordino = z.object({ evento_id: z.uuid(), ids: z.array(z.uuid()).max(5000) });
 export async function riordinaPrenotazioni(evento_id: string, ids: string[]): Promise<Esito> {

@@ -74,3 +74,4 @@
 | 2026-10-28 | Backup su Google Drive senza cifratura: remote `gdrive:prenota-backup` al posto di `prenota-crypt:` | 13 |
 | 2026-11-09 | Pagina evento: su telefono il riepilogo è chiuso in una riga e si apre al tocco; tornando dal dettaglio di una prenotazione la pagina si riporta su quella prenotazione | 2, 11 |
 | 2026-11-14 | Pagina evento su telefono: riepilogo chiuso come scheda con i posti occupati in grande, barra e posti liberi; linguetta «Tutto il riepilogo» per aprire i riquadri e «Chiudi riepilogo» per richiuderli | 2, 11 |
+| 2026-11-14 | Sposta prenotazione: tasto accanto a Elimina, popup con le altre date future della stessa opera (posti occupati e liberi), conferma nel popup; tariffe e prezzi invariati, cronologia «Spostata a …» (azione `spostata`, migrazione 008, data evento nella copia); `opera_id` in `/api/eventi` | 2, 7, 8 |
